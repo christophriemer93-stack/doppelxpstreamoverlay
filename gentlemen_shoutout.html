@@ -191,19 +191,49 @@
     .so-video-theater {
       position: relative;
       width: 100%;
-      height: 380px;
-      background: #000;
+      height: 400px;
+      background: #050a06;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      border-top: 1px solid rgba(200, 168, 75, 0.2);
+      border-bottom: 1px solid rgba(200, 168, 75, 0.2);
     }
 
-    .so-video-player {
+    .so-clip-frame {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      border: none;
       background: #000;
+    }
+
+    .so-no-clip-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+      gap: 12px;
+      background: radial-gradient(circle, rgba(20, 36, 22, 0.9) 0%, rgba(8, 14, 9, 0.95) 100%);
+      width: 100%;
+      height: 100%;
+    }
+
+    .so-no-clip-icon {
+      font-size: 42px;
+      color: #c8a84b;
+      filter: drop-shadow(0 0 10px rgba(200,168,75,0.4));
+    }
+
+    .so-no-clip-text {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: #e5c96a;
+      max-width: 450px;
+      line-height: 1.4;
     }
 
     /* Clip Titel Overlay am unteren Rand des Videos */
@@ -342,8 +372,8 @@
     </div>
 
     <!-- VIDEO THEATER -->
-    <div class="so-video-theater">
-      <video class="so-video-player" id="soVideo" playsinline preload="auto"></video>
+    <div class="so-video-theater" id="soTheater">
+      <div id="soMediaSlot" style="width:100%;height:100%;"></div>
       <div class="so-clip-caption">
         <div class="so-clip-title" id="soClipTitle">Bester Clip des Kanals</div>
         <div class="so-clip-duration" id="soClipDuration">0:15</div>
@@ -414,7 +444,7 @@
     const soName = document.getElementById('soName');
     const soGame = document.getElementById('soGame');
     const soTwitchUrl = document.getElementById('soTwitchUrl');
-    const soVideo = document.getElementById('soVideo');
+    const soMediaSlot = document.getElementById('soMediaSlot');
     const soClipTitle = document.getElementById('soClipTitle');
     const soClipDuration = document.getElementById('soClipDuration');
     const soProgress = document.getElementById('soProgress');
@@ -423,28 +453,13 @@
     let closeTimeout = null;
     let progressInterval = null;
 
-    // Lautstärke angenehm einstellen (0.6 = 60%)
-    soVideo.volume = 0.6;
-
-    // Fortschrittsbalken aktualisieren
-    soVideo.addEventListener('timeupdate', () => {
-      if (soVideo.duration) {
-        const pct = (soVideo.currentTime / soVideo.duration) * 100;
-        soProgress.style.width = pct + '%';
-      }
-    });
-
-    // Wenn der Clip zu Ende ist, sanft schließen
-    soVideo.addEventListener('ended', () => {
-      closeShoutout(1500);
-    });
-
     function closeShoutout(delayMs = 0) {
       if (closeTimeout) clearTimeout(closeTimeout);
       closeTimeout = setTimeout(() => {
         soContainer.classList.remove('show');
-        soVideo.pause();
-        soVideo.src = '';
+        if (progressInterval) clearInterval(progressInterval);
+        soMediaSlot.innerHTML = '';
+        soProgress.style.width = '0%';
         isPlaying = false;
       }, delayMs);
     }
@@ -524,48 +539,67 @@
       soGame.textContent = gameName;
       soTwitchUrl.textContent = `twitch.tv/${cleanName}`;
 
-      // Clip auswählen (bevorzugt 720p / beste Qualität)
+      // Clip auswählen und offiziellen Twitch-Player einbetten
       const clips = (data.clips && data.clips.edges) ? data.clips.edges : [];
-      let clipUrl = '';
       let clipTitle = `Bester Clip von ${data.displayName}`;
       let clipDuration = '0:15';
 
       if (clips.length > 0) {
-        // Zufälligen aus den Top 3 Clips wählen für mehr Abwechslung!
+        // Zufälligen Clip aus den Top-Clips wählen
         const randomClipNode = clips[Math.floor(Math.random() * clips.length)].node;
         clipTitle = randomClipNode.title || clipTitle;
-        const dur = Math.round(randomClipNode.durationSeconds || 15);
-        clipDuration = `0:${dur < 10 ? '0' : ''}${dur}`;
+        const durSecs = Math.max(8, Math.min(60, Math.round(randomClipNode.durationSeconds || 15)));
+        clipDuration = `0:${durSecs < 10 ? '0' : ''}${durSecs}`;
 
-        if (randomClipNode.videoQualities && randomClipNode.videoQualities.length > 0) {
-          // Bevorzuge 720 oder höchste verfügbare Qualität
-          const q720 = randomClipNode.videoQualities.find(q => q.quality === '720') || randomClipNode.videoQualities[0];
-          clipUrl = q720.sourceURL;
-        }
+        const host = window.location.hostname || 'christophriemer93-stack.github.io';
+        const embedUrl = `https://clips.twitch.tv/embed?clip=${randomClipNode.slug}&parent=${host}&parent=christophriemer93-stack.github.io&parent=localhost&parent=127.0.0.1&autoplay=true&muted=false`;
+
+        soMediaSlot.innerHTML = `
+          <iframe 
+            src="${embedUrl}" 
+            class="so-clip-frame" 
+            allow="autoplay; fullscreen" 
+            allowfullscreen="true" 
+            scrolling="no">
+          </iframe>
+        `;
+
+        // Fortschrittsbalken über Clip-Dauer animieren
+        const startTime = Date.now();
+        const totalMs = durSecs * 1000;
+        if (progressInterval) clearInterval(progressInterval);
+        progressInterval = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const pct = Math.min(100, (elapsed / totalMs) * 100);
+          soProgress.style.width = pct + '%';
+          if (pct >= 100) clearInterval(progressInterval);
+        }, 100);
+
+        // Sanft schließen nach Clip-Ende (+ 2 Sekunden Puffer)
+        if (closeTimeout) clearTimeout(closeTimeout);
+        closeTimeout = setTimeout(() => {
+          closeShoutout(1000);
+        }, totalMs + 2000);
+
+      } else {
+        // Falls der Kanal noch keine Clips hat
+        soMediaSlot.innerHTML = `
+          <div class="so-no-clip-card">
+            <div class="so-no-clip-icon">✦ ❖ ✦</div>
+            <div class="so-no-clip-text">Dieser ehrenwerte Streamer hat noch keine öffentlichen Clips hinterlegt. Besucht seinen Salon live auf twitch.tv/${cleanName}!</div>
+          </div>
+        `;
+        if (closeTimeout) clearTimeout(closeTimeout);
+        closeTimeout = setTimeout(() => {
+          closeShoutout(1000);
+        }, 8000);
       }
 
       soClipTitle.textContent = clipTitle;
       soClipDuration.textContent = clipDuration;
-      soProgress.style.width = '0%';
-
-      // Video setzen und abspielen
-      if (clipUrl) {
-        soVideo.src = clipUrl;
-        soVideo.play().catch(e => {
-          console.warn("[Shoutout] Autoplay mit Ton blockiert, schalte Ton stumm:", e);
-          soVideo.muted = true;
-          soVideo.play();
-        });
-      }
 
       // Einblenden
       soContainer.classList.add('show');
-
-      // Sicherheits-Timeout (maximal 35 Sekunden)
-      if (closeTimeout) clearTimeout(closeTimeout);
-      closeTimeout = setTimeout(() => {
-        closeShoutout(0);
-      }, 35000);
     }
 
     // =========================================================
