@@ -395,9 +395,9 @@
 
   <!-- TESTLEISTE FÜR BROWSER -->
   <div class="test-station-bar">
-    <button class="test-btn" onclick="triggerShoutout('d0ppelxp')">!so d0ppelxp</button>
-    <button class="test-btn" onclick="triggerShoutout('papaplatte')">!so Papaplatte</button>
-    <button class="test-btn" onclick="triggerShoutout('gronkh')">!so Gronkh</button>
+    <button class="test-btn" onclick="triggerShoutout('d0ppelxp')">/shoutout d0ppelxp</button>
+    <button class="test-btn" onclick="triggerShoutout('papaplatte')">/shoutout Papaplatte</button>
+    <button class="test-btn" onclick="triggerShoutout('gronkh')">/shoutout Gronkh</button>
     <input type="text" class="test-input" id="customUser" placeholder="Kanalname..." onkeydown="if(event.key==='Enter') triggerShoutout(this.value)">
     <button class="test-btn" onclick="triggerShoutout(document.getElementById('customUser').value)">Testen</button>
   </div>
@@ -655,11 +655,17 @@
         soVideo.style.display = 'block';
         soVideo.src = directMp4Url;
         soVideo.load();
-        soVideo.play().catch(e => {
-          console.warn("[Shoutout] Autoplay blockiert, schalte Ton stumm:", e);
-          soVideo.muted = true;
-          soVideo.play();
-        });
+        soVideo.volume = 0.6;
+        const playPromise = soVideo.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(e => {
+            console.warn("[Shoutout] Autoplay blockiert, starte stumm und unmute nach 150ms:", e);
+            soVideo.muted = true;
+            soVideo.play().then(() => {
+              setTimeout(() => { soVideo.muted = false; }, 150);
+            });
+          });
+        }
 
         // Maximaler Sicherheits-Timeout (Dauer + 4 Sekunden)
         const dur = parseInt(clipDuration.split(':')[1], 10) || 15;
@@ -682,7 +688,7 @@
     }
 
     // =========================================================
-    // 5. TWITCH IRC CHAT-LISTENER (!so & /shoutout Event)
+    // 5. TWITCH IRC CHAT-LISTENER (/shoutout)
     // =========================================================
     const urlParams = new URLSearchParams(window.location.search);
     const channelParam = urlParams.get('channel') || 'd0ppelxp';
@@ -712,26 +718,26 @@
             continue;
           }
 
-          // 1. Twitch nativer /shoutout Befehl (USERNOTICE)
-          if (line.includes('USERNOTICE') && line.includes('msg-id=shoutout_receive')) {
-            const matchTarget = line.match(/target-user-name=([^;]+)/);
+          // 1. Twitch nativer /shoutout Befehl (USERNOTICE oder NOTICE)
+          if (line.includes('msg-id=shoutout_receive') || (line.includes('NOTICE') && line.toLowerCase().includes('shoutout'))) {
+            const matchTarget = line.match(/(?:target-user-name=|target-user-display-name=|shoutout to |shoutout für )([a-zA-Z0-9_]+)/i);
             if (matchTarget && matchTarget[1]) {
               triggerShoutout(matchTarget[1]);
               continue;
             }
           }
 
-          // 2. Chat-Befehl !so oder !shoutout
+          // 2. Chat-Befehl /shoutout oder !shoutout (kein !so mehr!)
           if (line.includes('PRIVMSG')) {
             const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
             if (textIdx !== -1) {
               const chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
               const lower = chatText.toLowerCase();
 
-              if (lower.startsWith('!so ') || lower.startsWith('!shoutout ')) {
+              if (lower.startsWith('/shoutout ') || lower.startsWith('!shoutout ')) {
                 const parts = chatText.split(' ');
                 if (parts.length > 1 && parts[1].trim()) {
-                  const target = parts[1].trim();
+                  const target = parts[1].replace('@', '').trim();
                   triggerShoutout(target);
                 }
               }
