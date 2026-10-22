@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen - Spotify Music Widget (Max)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: transparent;
+            overflow: hidden;
+            font-family: 'Playfair Display', serif;
+            color: #fff;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            height: 100vh;
+            padding: 0 0 28px 28px;
+        }
+
+        .widget-container {
+            position: relative;
+            width: 480px;
+            height: 190px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            overflow: visible;
+        }
+
+        #particle-canvas {
+            position: absolute;
+            left: -30px;
+            bottom: -20px;
+            width: 540px;
+            height: 230px;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+        }
+
+        #particle-canvas.show {
+            opacity: 1;
+        }
+
+        .music-card {
+            display: flex;
+            align-items: center;
+            width: 420px;
+            background: linear-gradient(135deg, rgba(20, 32, 21, 0.96) 0%, rgba(30, 46, 26, 0.96) 100%);
+            border: 1px solid rgba(180, 140, 60, 0.45);
+            box-shadow:
+                0 0 0 1px rgba(0,0,0,0.5),
+                0 8px 35px rgba(0,0,0,0.8),
+                inset 0 1px 0 rgba(200,168,75,0.2);
+            position: relative;
+            z-index: 2;
+            transform: translateY(140%) scale(0.97);
+            opacity: 0;
+            transition: 
+                transform 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 1.0s cubic-bezier(0.2, 0, 0, 1);
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+
+        .music-card.show {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        /* Goldener Manor-Seitenbalken */
+        .music-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3.5px;
+            background: linear-gradient(180deg, transparent, #c8a84b 20%, #f3ebd6 50%, #c8a84b 80%, transparent);
+        }
+
+        /* Schimmerkante oben */
+        .music-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(200,168,75,0.6) 30%, rgba(200,168,75,0.95) 50%, rgba(200,168,75,0.6) 70%, transparent);
+        }
+
+        .cover-wrapper {
+            position: relative;
+            width: 74px; height: 74px;
+            flex-shrink: 0;
+            margin: 14px 16px 14px 18px;
+            border: 1px solid rgba(180,140,60,0.45);
+            background: #080d09;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.6);
+        }
+
+        .cover-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .cover-placeholder {
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c8a84b;
+            font-size: 26px;
+            background: radial-gradient(circle, #19271a 0%, #080d09 100%);
+        }
+
+        .track-info {
+            flex: 1;
+            overflow: hidden;
+            padding-right: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .category-eyebrow {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 9.5px;
+            letter-spacing: 3.5px;
+            text-transform: uppercase;
+            color: rgba(200, 168, 75, 0.75);
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .category-eyebrow span.spot-icon {
+            color: #1db954;
+            font-size: 11px;
+        }
+
+        .title-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .track-title {
+            font-size: 17px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+        }
+
+        .track-artist {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 13.5px;
+            color: rgba(243, 235, 214, 0.75);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        /* Ecken-Ornamente */
+        .corner-ornament {
+            position: absolute;
+            font-size: 10px;
+            color: #c8a84b;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .corner-tr { top: 4px; right: 6px; }
+        .corner-br { bottom: 4px; right: 6px; }
+    </style>
+</head>
+<body>
+
+    <div class="widget-container">
+        <!-- Partikel-Canvas für goldene Funken -->
+        <canvas id="particle-canvas"></canvas>
+
+        <div class="music-card" id="musicCard">
+            <div class="corner-ornament corner-tr">❖</div>
+            <div class="corner-ornament corner-br">❖</div>
+
+            <!-- Album Cover -->
+            <div class="cover-wrapper">
+                <img id="trackCover" class="cover-img" src="" alt="" style="display: none;">
+                <div id="trackPlaceholder" class="cover-placeholder">🎵</div>
+            </div>
+
+            <!-- Titel & Artist -->
+            <div class="track-info">
+                <div class="category-eyebrow">
+                    <span class="spot-icon">●</span> THE SALON GRAMOPHONE &bull; SPOTIFY
+                </div>
+                <div class="title-container">
+                    <span class="track-title" id="trackTitle">Warte auf Musik...</span>
+                </div>
+                <div class="track-artist" id="trackArtist">Spotify Player</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const card = document.getElementById('musicCard');
+        const pCanvas = document.getElementById('particle-canvas');
+        const titleEl = document.getElementById('trackTitle');
+        const artistEl = document.getElementById('trackArtist');
+        const coverEl = document.getElementById('trackCover');
+        const placeholderEl = document.getElementById('trackPlaceholder');
+
+        let lastSongSignature = "";
+        let hideTimeout = null;
+
+        // -------------------------------------------------------------
+        // GOLD-FUNKEN ANIMATION
+        // -------------------------------------------------------------
+        const ctx = pCanvas.getContext('2d');
+        pCanvas.width = 540;
+        pCanvas.height = 230;
+
+        const particles = Array.from({ length: 32 }, () => ({
+            x: Math.random() * 440 + 20,
+            y: Math.random() * 160 + 40,
+            r: Math.random() * 1.6 + 0.4,
+            speedY: Math.random() * 0.4 + 0.1,
+            speedX: (Math.random() - 0.5) * 0.25,
+            alpha: Math.random() * 0.7 + 0.2
+        }));
+
+        function drawSparks() {
+            ctx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(231, 202, 109, ${p.alpha})`;
+                ctx.shadowColor = '#e7ca6d';
+                ctx.shadowBlur = 4;
+                ctx.fill();
+
+                p.y -= p.speedY;
+                p.x += p.speedX;
+                if (p.y < 0) { p.y = 210; p.x = Math.random() * 440 + 20; }
+            });
+            requestAnimationFrame(drawSparks);
+        }
+        drawSparks();
+
+        // -------------------------------------------------------------
+        // SONG ANZEIGEN & SANFT AUSBLENDEN
+        // -------------------------------------------------------------
+        function displaySong(title, artist, coverUrl) {
+            const sig = `${title} - ${artist}`;
+            if (sig === lastSongSignature && card.classList.contains('show')) {
+                return; // Läuft bereits
+            }
+            lastSongSignature = sig;
+
+            titleEl.innerText = title;
+            artistEl.innerText = artist;
+
+            if (coverUrl && coverUrl.trim() !== '') {
+                coverEl.src = coverUrl;
+                coverEl.style.display = 'block';
+                placeholderEl.style.display = 'none';
+            } else {
+                coverEl.style.display = 'none';
+                placeholderEl.style.display = 'flex';
+            }
+
+            // Einblenden
+            card.classList.add('show');
+            pCanvas.classList.add('show');
+
+            // Nach 9 Sekunden sanft wieder ausblenden
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(() => {
+                card.classList.remove('show');
+                pCanvas.classList.remove('show');
+            }, 9000);
+        }
+
+        // -------------------------------------------------------------
+        // SPOTIFY SCHNITTSTELLEN (Unterstützt Snip, PixelChat, TuneMyStream & WebSocket)
+        // -------------------------------------------------------------
+        
+        // 1. Lokale Textdateien (Snip / Spotify-to-Text via Fetch)
+        async function checkLocalSnip() {
+            try {
+                const res = await fetch('Snip_Track.txt', { cache: 'no-store' });
+                if (res.ok) {
+                    const text = await res.text();
+                    if (text && text.trim().length > 0) {
+                        const parts = text.split(' - ');
+                        if (parts.length >= 2) {
+                            displaySong(parts[1].trim(), parts[0].trim(), '');
+                        } else {
+                            displaySong(text.trim(), 'Spotify', '');
+                        }
+                    }
+                }
+            } catch (e) {}
+        }
+        setInterval(checkLocalSnip, 3000);
+
+        // 2. BroadcastChannel & URL-Parameter (für PixelChat / StreamElements Weiterleitung)
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'spotify_track') {
+                displaySong(event.data.title, event.data.artist, event.data.cover);
+            }
+        });
+
+        // 3. Test-Modus per URL (?test=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('test') === '1') {
+            setTimeout(() => {
+                displaySong("Feeling Good", "Michael Bublé", "https://i.scdn.co/image/ab67616d0000b27341ad9d481b47370846c4f0f6");
+            }, 800);
+        }
+    </script>
+</body>
+</html>
