@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
@@ -508,53 +508,57 @@
     function parseStreamElementsBotMessage(botText) {
       try {
         if (!botText) return;
+        console.log("[Ledger] Bot-Nachricht:", botText);
 
-        // 1. Stunden und Minuten aus dem Text extrahieren
-        const hoursMatch = botText.match(/(\d+)\s*(?:std|stunde|stunden|h|hours|hour)/i);
-        const minsMatch = botText.match(/(\d+)\s*(?:min|minute|minuten|m|minutes)/i);
+        // 1. Tage, Stunden und Minuten aus dem Text extrahieren (z.B. "28 days 14 hours" oder "142 Stunden 15 Minuten")
+        const daysMatch = botText.match(/(\d+)\s*(?:days?|tage?|tag|d)\b/i);
+        const hoursMatch = botText.match(/(\d+)\s*(?:std|stunde|stunden|h|hours?)\b/i);
+        const minsMatch = botText.match(/(\d+)\s*(?:min|minute|minuten|m|minutes?)\b/i);
 
+        const days = daysMatch ? parseInt(daysMatch[1], 10) : 0;
         const hrs = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
         const mins = minsMatch ? parseInt(minsMatch[1], 10) : 0;
-        const totalMin = (hrs * 60) + mins;
+        const totalMin = (days * 24 * 60) + (hrs * 60) + mins;
         if (totalMin <= 0) return;
 
-        // 2. Ziel-Username finden (Niemals Füllwörter wie "Ein" oder den Bot/Streamer matchen!)
+        // 2. Ziel-Username finden
         let targetUser = null;
         let targetDisplay = null;
 
-        // Fall A: Explizite @Erwähnung (@Username)
+        // Fall A: Explizite @ErwÃ¤hnung (@Username)
         const atMatch = botText.match(/@([a-zA-Z0-9_]{3,25})/);
-        if (atMatch && !isStreamerOrBot(atMatch[1])) {
+        if (atMatch) {
           targetUser = atMatch[1].toLowerCase();
           targetDisplay = atMatch[1];
         }
 
-        // Fall B: Name direkt vor einem Verb ("Username hat ...", "Username schaut ...")
+        // Fall B: Name direkt vor Verb ("Username hat ...", "Username schaut ...")
         if (!targetUser) {
           const verbMatch = botText.match(/(?:^|[\s,;:])([a-zA-Z0-9_]{3,25})\s+(?:hat|schaut|ist|has|spent|is)\b/i);
-          if (verbMatch && !isStreamerOrBot(verbMatch[1])) {
+          if (verbMatch) {
             targetUser = verbMatch[1].toLowerCase();
             targetDisplay = verbMatch[1];
           }
         }
 
-        // Fall C: Erstes Wort, sofern es ein echter Username und kein Füllwort ist
+        // Fall C: Erstes Wort
         if (!targetUser) {
           const firstWordMatch = botText.match(/^([a-zA-Z0-9_]{3,25})\b/);
-          if (firstWordMatch && !isStreamerOrBot(firstWordMatch[1])) {
+          if (firstWordMatch) {
             targetUser = firstWordMatch[1].toLowerCase();
             targetDisplay = firstWordMatch[1];
           }
         }
 
-        // 3. Wenn gültiger Zuschauer gefunden:
-        if (targetUser && !isStreamerOrBot(targetUser)) {
+        // Bot-Accounts wie StreamElements selbst ignorieren
+        if (targetUser && !['streamelements', 'nightbot', 'moobot', 'fossabot'].includes(targetUser)) {
           if (!ledgerData.watchtime[targetUser]) {
             ledgerData.watchtime[targetUser] = { displayName: targetDisplay, minutes: 0 };
           }
           ledgerData.watchtime[targetUser].minutes = Math.max(ledgerData.watchtime[targetUser].minutes, totalMin);
           ledgerData.watchtime[targetUser].displayName = targetDisplay;
           saveLedgerData();
+          console.log(`[Ledger] Watchtime erfolgreich gespeichert: ${targetDisplay} -> ${totalMin} Min (${days}d ${hrs}h ${mins}m)`);
         }
       } catch (e) {
         console.error("Fehler beim Parsen der Watchtime-Nachricht:", e);
