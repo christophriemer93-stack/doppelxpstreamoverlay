@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doppel XP - The Gentlemen Stream Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #060a07;
+            --panel-bg: #0d1710;
+            --gold-bright: #f0d57e;
+            --gold-metallic: #c8a84b;
+            --text-light: #f7f2e4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hub-container {
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 38px;
+            font-weight: 900;
+            color: var(--gold-bright);
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: rgba(247, 242, 228, 0.7);
+            font-size: 14px;
+        }
+
+        .team-pill {
+            display: inline-block;
+            background: rgba(200, 168, 75, 0.15);
+            border: 1px solid var(--gold-metallic);
+            color: var(--gold-bright);
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-top: 12px;
+        }
+
+        .section-category {
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(200, 168, 75, 0.3);
+            padding-bottom: 8px;
+            margin: 30px 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+        }
+
+        .hub-card {
+            background: linear-gradient(180deg, #0e1911 0%, #060a07 100%);
+            border: 1.5px solid rgba(200, 168, 75, 0.4);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+
+        .hub-card:hover {
+            border-color: var(--gold-bright);
+            box-shadow: 0 10px 30px rgba(200, 168, 75, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .hub-card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hub-card-desc {
+            font-size: 12px;
+            color: rgba(247, 242, 228, 0.65);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .btn-link {
+            display: block;
+            text-align: center;
+            background: linear-gradient(180deg, #c8a84b 0%, #9e7f2b 100%);
+            border: 1px solid #ffd875;
+            color: #060a07;
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 9px;
+            border-radius: 4px;
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .btn-link:hover {
+            background: linear-gradient(180deg, #e7ca6d 0%, #b89332 100%);
+            box-shadow: 0 0 12px rgba(231, 202, 109, 0.5);
+        }
+
+        .btn-secondary {
+            background: #111e14;
+            border: 1px solid rgba(200, 168, 75, 0.35);
+            color: var(--gold-bright);
+            margin-top: 6px;
+        }
+        .btn-secondary:hover {
+            background: #1a3020;
+            border-color: var(--gold-bright);
+            color: #fff;
+        }
+
+        .guide-box {
+            background: #09120b;
+            border: 1px solid rgba(200, 168, 75, 0.3);
+            border-radius: 8px;
+            padding: 22px;
+            margin-top: 40px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .guide-box h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold-bright);
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hub-container">
+        <div class="header">
+            <h1>❖ DOPPEL XP • STREAM SUITE ❖</h1>
+            <p>Das komplette Gentlemen-Toolkit für Chris & Max an jedem Setup</p>
+            <div class="team-pill">CHRIS & MAX • GEMEINSAMES SYSTEM</div>
+        </div>
+
+        <!-- 1. DART & COMMUNITY-MINISPIELE -->
+        <div class="section-category">🎯 Interaktive Spiele & Chat-Games</div>
+        <div class="cards-grid">
+            <!-- Darts Club -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">🎯 Darts Club (IRL)</div>
+                    <div class="hub-card-desc">
+                        Full-HD Darts-Overlay mit transparenten Cam-Ausschnitten, Funken-Hintergrund, 501/301 Double Out & 180er Alert.
+                    </div>
+                </div>
+                <div>
+                    <a href="darts_overlay.html" target="_blank" class="btn-link">OBS Browser-Quelle</a>
+                    <a href="darts_controller.html" target="_blank" class="btn-link btn-secondary">📱 Handy-Controller</a>
+                </div>
+            </div>
+
+            <!-- Fasanenjagd -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">🦆 Fasanenjagd</div>
+                    <div class="hub-card-desc">
+                        Adeliges Jagd-Spiel im Alert-Stil. Zuschauer schießen per <code>!schuss</code> auf Fasane und prüfen Beute per <code>!stash</code>.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_chat_game.html" target="_blank" class="btn-link">OBS Browser-Quelle</a>
+                </div>
+            </div>
+
+            <!-- Uhren-Ziehspiel & Vitrine -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">⌚ Uhren-Ziehspiel & Tresor</div>
+                    <div class="hub-card-desc">
+                        3D-Edelvitrine für seltene Uhren der Zuschauer, gekoppelt mit dem Chat-Befehl <code>!uhr</code> und <code>!tresor</code>.
+                    </div>
+                </div>
+                <div>
+                    <a href="tresor_showcase.html" target="_blank" class="btn-link">OBS Browser-Quelle (Vitrine)</a>
+                    <a href="gentlemen_watches.html" target="_blank" class="btn-link btn-secondary">Uhren Alert-Overlay</a>
+                </div>
+            </div>
+
+            <!-- Salon Wordle -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">🖋️ Salon-Worträtsel (Wordle)</div>
+                    <div class="hub-card-desc">
+                        Interaktives 5-Buchstaben-Worträtsel im Chat. Zuschauer raten Wörter im Gentlemen-Look.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_wordle.html" target="_blank" class="btn-link">OBS Browser-Quelle</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. STREAM-WIDGETS & COMMUNITY-ALERTS -->
+        <div class="section-category">👑 Chat, Alerts & Interaktion</div>
+        <div class="cards-grid">
+            <!-- First Chat Widget -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">🥇 First Chat Widget</div>
+                    <div class="hub-card-desc">
+                        Würdigt den allerersten Chatter des Streams mit einem exklusiven, goldenen Ehren-Badge im Salon.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_first_chat.html" target="_blank" class="btn-link">OBS Browser-Quelle</a>
+                </div>
+            </div>
+
+            <!-- Gentlemen Chat Overlay -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">💬 Gentlemen Chatbox</div>
+                    <div class="hub-card-desc">
+                        Transparenter, edler In-Stream Chat mit Cinzel-Goldakzenten und sanfter Ausblendung.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_chat.html" target="_blank" class="btn-link">OBS Browser-Quelle</a>
+                </div>
+            </div>
+
+            <!-- Hype Train Goldregen -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">🚂 Hype Train Goldregen</div>
+                    <div class="hub-card-desc">
+                        Spektakulärer Goldmünzen- und Funkenregen bei Hype-Trains und Raids.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_hypetrain_rain.html" target="_blank" class="btn-link">OBS Browser-Quelle</a>
+                </div>
+            </div>
+
+            <!-- Community-Ledger (Gästebuch) -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">📜 Salon-Ledger (Gästebuch)</div>
+                    <div class="hub-card-desc">
+                        Verzeichnet Subs, Raids und Donator wie handgeschriebene Einträge auf edlem Pergament.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_ledger.html" target="_blank" class="btn-link">OBS Browser-Quelle</a>
+                </div>
+            </div>
+
+            <!-- Salon Musik-Widget -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">🎵 Musik / Now Playing</div>
+                    <div class="hub-card-desc">
+                        Dezente Einblendung für den aktuellen Soundtrack / Lo-Fi / Jazz im edlen Schallplatten-Stil.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_music.html" target="_blank" class="btn-link">OBS Browser-Quelle</a>
+                </div>
+            </div>
+
+            <!-- Kamera-Abstimmung (Cam Poll) -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">🗳️ Kamera-Voting (Cam Poll)</div>
+                    <div class="hub-card-desc">
+                        Lässt den Chat interaktiv abstimmen, welche Kameraperspektive aktiv geschaltet werden soll.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_cam_poll.html" target="_blank" class="btn-link">OBS Browser-Quelle</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. VOLLBILD-SZENEN & OVERLAYS -->
+        <div class="section-category">🎬 Szenen, Banner & Stream-Planer</div>
+        <div class="cards-grid">
+            <!-- Starting Soon -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">⏳ Starting Soon Szene</div>
+                    <div class="hub-card-desc">
+                        Intro-Screen mit Countdown-Uhr, animiertem Kamin-Goldstaub und dezentem Chat-Einlauf.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_starting_soon.html" target="_blank" class="btn-link">OBS Szene (1080p)</a>
+                </div>
+            </div>
+
+            <!-- Pause / BRB -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">☕ Pause / BRB Szene</div>
+                    <div class="hub-card-desc">
+                        Pausenszene mit animierter Sanduhr, Goldfunken und dezenter Zigarrenclub-Atmosphäre.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_brb.html" target="_blank" class="btn-link">OBS Szene (1080p)</a>
+                </div>
+            </div>
+
+            <!-- Outro / End Screen -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">🏰 Outro / End Screen</div>
+                    <div class="hub-card-desc">
+                        Würdevoller Abschluss-Screen mit Danksagung an die edlen Spender und Abonnenten.
+                    </div>
+                </div>
+                <div>
+                    <a href="gentlemen_end_screen.html" target="_blank" class="btn-link">OBS Szene (1080p)</a>
+                </div>
+            </div>
+
+            <!-- Wochenprogramm Generator -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">📅 Wochenprogramm-Editor</div>
+                    <div class="hub-card-desc">
+                        Interaktiver Kalender für Instagram, Discord und Twitter. 1-Klick HD-Bild Export.
+                    </div>
+                </div>
+                <div>
+                    <a href="schedule_generator.html" target="_blank" class="btn-link">Programmheft öffnen</a>
+                </div>
+            </div>
+
+            <!-- Discord Suite -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">💬 Discord Server Assets</div>
+                    <div class="hub-card-desc">
+                        Willkommens-Banner, Kategorie-Trenner und Rollen-Icons (Lord, Patron, Sommelier).
+                    </div>
+                </div>
+                <div>
+                    <a href="discord_assets/discord_assets_gallery.html" target="_blank" class="btn-link">Galerie öffnen</a>
+                </div>
+            </div>
+
+            <!-- Stream Deck Icons -->
+            <div class="hub-card">
+                <div>
+                    <div class="hub-card-title">🎛️ Stream Deck Regiepult</div>
+                    <div class="hub-card-desc">
+                        21 maßgeschneiderte Retina-Icons (288×288) für Szenen, Kameras, Timer & Games.
+                    </div>
+                </div>
+                <div>
+                    <a href="streamdeck_gallery.html" target="_blank" class="btn-link">Icon-Regiepult</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-box">
+            <h3>🤝 Perfekt für Chris & Max:</h3>
+            <p>
+                Alle diese Widgets laufen eigenständig im Browser und synchronisieren sich ohne externe Server. 
+                Sobald dieses Paket auf eurem GitHub Pages liegt, tragt ihr beide in OBS Studio einfach genau die gleichen Links ein – egal wo ihr euch befindet!
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gentlemen - Discord Assets Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Playfair+Display:ital,wght@0,600;0,800;1,400&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #070c08;
+            --panel-bg: #0c150e;
+            --gold-bright: #e7ca6d;
+            --gold-metallic: #c8a84b;
+            --text-light: #f3ebd6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .header {
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 32px;
+            color: var(--gold-bright);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: rgba(243, 235, 214, 0.7);
+            font-size: 14px;
+        }
+
+        .section-box {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(200, 168, 75, 0.35);
+            border-radius: 8px;
+            padding: 28px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gold-bright);
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid rgba(200, 168, 75, 0.25);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Welcome Banner Display */
+        .banner-preview {
+            width: 100%;
+            border-radius: 6px;
+            border: 1px solid rgba(200, 168, 75, 0.4);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        /* Rollen Grid */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .role-card {
+            background: rgba(20, 34, 23, 0.5);
+            border: 1px solid rgba(200, 168, 75, 0.25);
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+        }
+
+        .role-img {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .role-name {
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gold-bright);
+        }
+
+        .role-desc {
+            font-size: 11px;
+            color: rgba(243, 235, 214, 0.6);
+        }
+
+        /* Dividers List */
+        .dividers-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .divider-preview-item {
+            width: 100%;
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>❖ The Gentlemen Discord Suite ❖</h1>
+        <p>Maßgeschneiderte Willkommens-Banner, Rollen-Icons & Kanal-Trenner für deinen Server.</p>
+    </div>
+
+    <!-- Willkommens-Banner -->
+    <div class="section-box">
+        <div class="section-title">👑 Willkommens-Banner (Für Willkommens-Kanal & Server-Banner)</div>
+        <img class="banner-preview" src="discord_welcome_banner.png" alt="Discord Welcome Banner">
+        <p style="font-size: 11px; color: rgba(243,235,214,0.5); margin-top: 10px;">
+            Größe: 960 × 540 px HD • Perfekt als erstes Bild im Kanal <code>#willkommen-im-salon</code> oder als Server-Banner.
+        </p>
+    </div>
+
+    <!-- Rollen-Icons -->
+    <div class="section-box">
+        <div class="section-title">🎩 Rollen-Icons (128 × 128 px)</div>
+        <div class="roles-grid">
+            <div class="role-card">
+                <img class="role-img" src="role_lord_owner.png" alt="Lord">
+                <div class="role-name">👑 Lord / Owner</div>
+                <div class="role-desc">Deine Server-Leitung & Host-Rolle (D0ppelXP).</div>
+            </div>
+            <div class="role-card">
+                <img class="role-img" src="role_sommelier_mod.png" alt="Sommelier">
+                <div class="role-name">🍸 Sommelier</div>
+                <div class="role-desc">Moderatoren & Hüter der Salon-Etikette.</div>
+            </div>
+            <div class="role-card">
+                <img class="role-img" src="role_patron_sub.png" alt="Patron">
+                <div class="role-name">⚜️ Patron</div>
+                <div class="role-desc">Twitch-Abonnenten / Unterstützer des Hauses.</div>
+            </div>
+            <div class="role-card">
+                <img class="role-img" src="role_vip_donor.png" alt="VIP">
+                <div class="role-name">💎 VIP</div>
+                <div class="role-desc">Ehrengäste, Top-Donator & Spitzen-Sammler.</div>
+            </div>
+            <div class="role-card">
+                <img class="role-img" src="role_gentleman_member.png" alt="Gentleman">
+                <div class="role-name">🎩 Gentleman / Lady</div>
+                <div class="role-desc">Reguläre Community-Mitglieder.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kanal-Trenner -->
+    <div class="section-box">
+        <div class="section-title">📜 Kanal-Kategorie-Trenner / Header (900 × 90 px)</div>
+        <div class="dividers-list">
+            <img class="divider-preview-item" src="divider_announcements.png" alt="Announcements">
+            <img class="divider-preview-item" src="divider_info_rules.png" alt="Rules">
+            <img class="divider-preview-item" src="divider_salon_talk.png" alt="Salon Talk">
+            <img class="divider-preview-item" src="divider_gaming_lounge.png" alt="Gaming Lounge">
+            <img class="divider-preview-item" src="divider_tresor_bot.png" alt="Tresor Bot">
+        </div>
+        <p style="font-size: 11px; color: rgba(243,235,214,0.5); margin-top: 14px;">
+            Lade diese Trenner einfach als erstes Bild in den jeweiligen Ankündigungs- oder Chat-Kanal hoch.
+        </p>
+    </div>
+
+</body>
+</html>

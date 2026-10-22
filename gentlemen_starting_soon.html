@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen – Starting Soon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background: #0d160d;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* === BACKGROUND === */
+        #bg-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1920px; height: 1080px;
+            z-index: 0;
+        }
+
+        .vignette {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 35% 50%, transparent 30%, rgba(0,0,0,0.75) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* === FRAME LINES === */
+        .frame-top, .frame-bottom {
+            position: absolute;
+            left: 0; right: 0;
+            height: 3px;
+            z-index: 20;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(200,168,75,0.4) 10%,
+                #c8a84b 30%,
+                #d4a843 50%,
+                #c8a84b 70%,
+                rgba(200,168,75,0.4) 90%,
+                transparent 100%
+            );
+        }
+        .frame-top { top: 0; }
+        .frame-bottom { bottom: 0; }
+
+        /* === CORNER ORNAMENTS === */
+        .corner { position: absolute; width: 70px; height: 70px; z-index: 21; }
+        .corner svg { width: 100%; height: 100%; }
+        .corner-tl { top: 3px; left: 0; }
+        .corner-tr { top: 3px; right: 0; transform: scaleX(-1); }
+        .corner-bl { bottom: 3px; left: 0; transform: scaleY(-1); }
+        .corner-br { bottom: 3px; right: 0; transform: scale(-1,-1); }
+
+        /* === LAYOUT === */
+        .layout {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1920px; height: 1080px;
+            display: flex;
+            z-index: 10;
+        }
+
+        /* ---- LEFT PANEL ---- */
+        .left-panel {
+            width: 1140px;
+            height: 1080px;
+            padding: 70px 90px 60px 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .estate-tag {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 11px;
+            letter-spacing: 7px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.45);
+            margin-bottom: 0;
+        }
+        .estate-tag::before {
+            content: '';
+            width: 50px; height: 1px;
+            background: rgba(200,168,75,0.3);
+        }
+
+        .main-block {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 10px;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 108px;
+            line-height: 1.0;
+            color: #e8dcc0;
+            letter-spacing: 1px;
+            text-shadow: 0 4px 40px rgba(0,0,0,0.9), 0 0 80px rgba(200,168,75,0.08);
+            margin-bottom: 20px;
+        }
+
+        .main-subtitle {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 24px;
+            color: rgba(200,168,75,0.6);
+            margin-bottom: 50px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Status card */
+        .status-card {
+            background: linear-gradient(135deg, rgba(20,35,20,0.7) 0%, rgba(30,48,22,0.7) 100%);
+            border: 1px solid rgba(180,140,60,0.25);
+            border-left: 4px solid rgba(200,168,75,0.8);
+            padding: 18px 26px;
+            margin-bottom: 40px;
+            position: relative;
+            width: 680px;
+        }
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 4px; right: 0; height: 1px;
+            background: linear-gradient(90deg, rgba(200,168,75,0.5), transparent);
+        }
+
+        .status-eyebrow {
+            font-size: 9px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.45);
+            margin-bottom: 8px;
+        }
+
+        .status-text {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 22px;
+            color: #e0d4b8;
+            transition: opacity 0.6s ease;
+            min-height: 32px;
+        }
+        .status-text.fading { opacity: 0; }
+
+        /* Timer */
+        .timer-block { width: 680px; }
+
+        .timer-eyebrow {
+            font-size: 9px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.45);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .timer-eyebrow::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(200,168,75,0.15);
+        }
+
+        .timer-display {
+            font-weight: 900;
+            font-size: 78px;
+            color: #c8a84b;
+            letter-spacing: 6px;
+            text-shadow: 0 0 40px rgba(200,168,75,0.35);
+            line-height: 1;
+            margin-bottom: 14px;
+        }
+
+        .timer-track {
+            height: 4px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(180,140,60,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, rgba(150,110,40,0.5), #c8a84b 60%, #e0c060);
+            box-shadow: 0 0 10px rgba(200,168,75,0.5);
+            transition: width 1s linear;
+            position: relative;
+        }
+        .timer-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 30px; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35));
+        }
+
+        /* Bottom motto */
+        .motto {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 15px;
+            color: rgba(200,168,75,0.25);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .motto::before, .motto::after {
+            content: '';
+            width: 40px; height: 1px;
+            background: rgba(200,168,75,0.15);
+        }
+
+        /* ---- VERTICAL DIVIDER ---- */
+        .v-divider {
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(200,168,75,0.5) 10%,
+                rgba(200,168,75,0.7) 50%,
+                rgba(200,168,75,0.5) 90%,
+                transparent 100%
+            );
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        /* Diamond ornament on divider */
+        .v-divider::before {
+            content: '✦';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #c8a84b;
+            font-size: 14px;
+            background: #121e12;
+            padding: 6px 0;
+        }
+
+        /* ---- RIGHT PANEL (CHAT) ---- */
+        .right-panel {
+            flex: 1;
+            height: 1080px;
+            padding: 70px 70px 60px 60px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 10px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.5);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(200,168,75,0.15);
+        }
+        .chat-header-row .ornament { color: rgba(200,168,75,0.6); }
+
+        #chat-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: flex-end;
+            overflow: hidden;
+            color: #e8dcc0 !important;
+            font-family: 'IM Fell English', serif !important;
+        }
+
+        .chat-msg {
+            background: linear-gradient(135deg, rgba(22,36,22,0.92) 0%, rgba(32,48,24,0.92) 100%);
+            border: 1px solid rgba(180,140,60,0.25);
+            border-left: 3px solid #c8a84b;
+            padding: 10px 16px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(200,168,75,0.1);
+            opacity: 0;
+            transform: translateX(18px);
+            animation: slide-from-right 0.45s cubic-bezier(0.2,1,0.3,1) forwards;
+            color: #e8dcc0 !important;
+        }
+
+        @keyframes slide-from-right {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .chat-msg.fade-out {
+            transition: opacity 0.8s ease, transform 0.6s ease;
+            opacity: 0;
+            transform: translateX(18px);
+        }
+
+        .chat-msg-name {
+            font-family: 'Playfair Display', serif !important;
+            font-weight: 900 !important;
+            font-size: 13px !important;
+            color: #c8a84b !important;
+            text-shadow: 0 0 8px rgba(200,168,75,0.3) !important;
+            margin-bottom: 4px !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        .chat-msg-text, 
+        .chat-msg-text * {
+            font-family: 'IM Fell English', serif !important;
+            font-size: 18px !important;
+            color: #e8dcc0 !important; /* Kein Schwarz mehr – immer warmes Pergament-Creme */
+            line-height: 1.45 !important;
+            word-break: break-word !important;
+        }
+
+        /* 7TV, BTTV & Twitch Emotes */
+        .chat-emote,
+        .chat-msg-text img {
+            height: 28px !important;
+            width: auto !important;
+            vertical-align: middle !important;
+            margin: -3px 3px 0 3px !important;
+            display: inline-block !important;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Frame lines -->
+    <div class="frame-top"></div>
+    <div class="frame-bottom"></div>
+
+    <!-- Corner ornaments -->
+    <div class="corner corner-tl">
+        <svg viewBox="0 0 70 70" fill="none">
+            <path d="M5 65 L5 5 L65 5" stroke="rgba(200,168,75,0.75)" stroke-width="2" fill="none"/>
+            <path d="M5 5 L14 14" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="5" cy="5" r="3" fill="rgba(200,168,75,0.75)"/>
+        </svg>
+    </div>
+    <div class="corner corner-tr">
+        <svg viewBox="0 0 70 70" fill="none">
+            <path d="M5 65 L5 5 L65 5" stroke="rgba(200,168,75,0.75)" stroke-width="2" fill="none"/>
+            <path d="M5 5 L14 14" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="5" cy="5" r="3" fill="rgba(200,168,75,0.75)"/>
+        </svg>
+    </div>
+    <div class="corner corner-bl">
+        <svg viewBox="0 0 70 70" fill="none">
+            <path d="M5 65 L5 5 L65 5" stroke="rgba(200,168,75,0.75)" stroke-width="2" fill="none"/>
+            <path d="M5 5 L14 14" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="5" cy="5" r="3" fill="rgba(200,168,75,0.75)"/>
+        </svg>
+    </div>
+    <div class="corner corner-br">
+        <svg viewBox="0 0 70 70" fill="none">
+            <path d="M5 65 L5 5 L65 5" stroke="rgba(200,168,75,0.75)" stroke-width="2" fill="none"/>
+            <path d="M5 5 L14 14" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="5" cy="5" r="3" fill="rgba(200,168,75,0.75)"/>
+        </svg>
+    </div>
+
+    <!-- Animated background -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+
+    <!-- Main layout -->
+    <div class="layout">
+
+        <!-- LEFT -->
+        <div class="left-panel">
+            <div class="estate-tag">Halstead Estate präsentiert</div>
+
+            <div class="main-block">
+                <div class="main-title">Stream<br>startet<br>gleich.</div>
+                <div class="main-subtitle">Nehmen Sie Platz. Der Herr erscheint in Kürze.</div>
+
+                <div class="status-card">
+                    <div class="status-eyebrow">✦ &nbsp; Aktueller Status</div>
+                    <div class="status-text" id="status-text">Der Herr bereitet sich vor...</div>
+                </div>
+
+                <div class="timer-block">
+                    <div class="timer-eyebrow">✦ &nbsp; Ankunft des Herrn in</div>
+                    <div class="timer-display" id="timer-display">10:00</div>
+                    <div class="timer-track">
+                        <div class="timer-fill" id="timer-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="motto">Guter Geschmack kennt keine Kompromisse</div>
+        </div>
+
+        <!-- DIVIDER -->
+        <div class="v-divider"></div>
+
+        <!-- RIGHT (Chat) -->
+        <div class="right-panel">
+            <div class="chat-header-row">
+                <span class="ornament">✦</span>
+                Nachrichteneingang
+            </div>
+            <div id="chat-box"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        // EINSTELLUNGEN — hier anpassen
+        // ============================================================
+        const COUNTDOWN_MINUTES = 10; // Countdown in Minuten
+        // ============================================================
+
+        // --- Hintergrund-Partikel ---
+        const canvas = document.getElementById('bg-canvas');
+        canvas.width = 1920;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
+
+        const bgGrad = ctx.createRadialGradient(700, 540, 80, 700, 540, 900);
+        bgGrad.addColorStop(0, '#1e2e1a');
+        bgGrad.addColorStop(0.5, '#151f12');
+        bgGrad.addColorStop(1, '#0d160d');
+
+        const particles = Array.from({ length: 80 }, () => ({
+            x: Math.random() * 1920,
+            y: Math.random() * 1080,
+            r: Math.random() * 1.8 + 0.2,
+            speed: Math.random() * 0.25 + 0.04,
+            drift: (Math.random() - 0.5) * 0.15,
+            phase: Math.random() * Math.PI * 2,
+        }));
+
+        function drawBg() {
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 1920, 1080);
+
+            const now = Date.now() * 0.001;
+            particles.forEach(p => {
+                const alpha = 0.08 + Math.abs(Math.sin(now * 0.6 + p.phase)) * 0.25;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(200,168,75,${alpha.toFixed(2)})`;
+                ctx.fill();
+
+                p.y -= p.speed;
+                p.x += p.drift;
+                if (p.y < -4) { p.y = 1084; p.x = Math.random() * 1920; }
+                if (p.x < 0) p.x = 1920;
+                if (p.x > 1920) p.x = 0;
+            });
+            requestAnimationFrame(drawBg);
+        }
+        drawBg();
+
+        // --- Countdown & Status ---
+        let totalSeconds = COUNTDOWN_MINUTES * 60;
+        const startSeconds = totalSeconds;
+
+        const statusStages = [
+            { from: 1.0,  text: 'Der Herr bereitet sich vor...' },
+            { from: 0.75, text: 'Der Anzug wird mit Sorgfalt angelegt...' },
+            { from: 0.45, text: 'Der Wagen wird vorgefahren...' },
+            { from: 0.15, text: 'Ankunft ist unmittelbar bevorstehend.' },
+            { from: 0,    text: 'Der Herr betritt das Anwesen.' },
+        ];
+
+        function getCurrentStatus(seconds) {
+            const ratio = seconds / startSeconds;
+            for (let i = statusStages.length - 1; i >= 0; i--) {
+                if (ratio <= statusStages[i].from) return statusStages[i].text;
+            }
+            return statusStages[0].text;
+        }
+
+        let lastStatusText = '';
+        const statusEl = document.getElementById('status-text');
+        const timerEl  = document.getElementById('timer-display');
+        const fillEl   = document.getElementById('timer-fill');
+
+        function tick() {
+            // Display
+            const m = Math.floor(totalSeconds / 60);
+            const s = totalSeconds % 60;
+            timerEl.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+            // Bar depletes left to right
+            fillEl.style.width = Math.max(0, (totalSeconds / startSeconds) * 100) + '%';
+
+            // Status change with fade
+            const newStatus = getCurrentStatus(totalSeconds);
+            if (newStatus !== lastStatusText) {
+                statusEl.classList.add('fading');
+                setTimeout(() => {
+                    statusEl.innerText = newStatus;
+                    statusEl.classList.remove('fading');
+                    lastStatusText = newStatus;
+                }, 600);
+            }
+
+            if (totalSeconds > 0) totalSeconds--;
+        }
+
+        tick();
+        setInterval(tick, 1000);
+
+        // ============================================================
+        // CHAT (STREAMELEMENTS NATIV)
+        // ============================================================
+        const chatBox = document.getElementById('chat-box');
+        const MAX_MSGS = 9;
+        const MSG_LIFETIME = 90000; // 90 Sekunden
+
+        window.addEventListener('onEventReceived', function (obj) {
+            if (!obj.detail || !obj.detail.event) return;
+            if (obj.detail.listener !== 'message') return;
+
+            const d = obj.detail.event.data;
+            if (!d) return;
+
+            // StreamElements liefert die Emotes (7TV, BTTV, Twitch) bereits fertig als HTML in renderedText:
+            const content = d.renderedText || d.text || '';
+            const name = d.displayName || d.nick || '?';
+
+            addChat(name, content);
+        });
+
+        function addChat(name, messageHtml) {
+            while (chatBox.children.length >= MAX_MSGS) {
+                chatBox.removeChild(chatBox.firstChild);
+            }
+            const el = document.createElement('div');
+            el.className = 'chat-msg';
+            el.innerHTML = `
+                <div class="chat-msg-name">${esc(name)}</div>
+                <div class="chat-msg-text">${messageHtml}</div>
+            `;
+            chatBox.appendChild(el);
+
+            setTimeout(() => {
+                el.classList.add('fade-out');
+                setTimeout(() => el.parentNode && el.parentNode.removeChild(el), 800);
+            }, MSG_LIFETIME);
+        }
+
+        function esc(s) {
+            return String(s)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // Vorschau-Test
+        function testChat(n, t) {
+            window.dispatchEvent(new CustomEvent('onEventReceived', {
+                detail: { listener: 'message', event: { data: { displayName: n, text: t } } }
+            }));
+        }
+    </script>
+</body>
+</html>

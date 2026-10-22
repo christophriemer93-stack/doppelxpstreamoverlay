@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen – Live Cam Poll (!poll)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       THE GENTLEMEN – CAM POLL WIDGET
+       Fährt nahtlos aus der Oberkante des Camrahmens nach oben!
+       ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Playfair Display', serif;
+      pointer-events: none;
+      position: relative;
+    }
+
+    /* ---------------------------------------------------------
+       POLL CARD: Sitzt am unteren Rand des Fensters (direkt auf
+       der Oberkante deiner Cam) und fährt nach oben aus!
+       --------------------------------------------------------- */
+    .poll-wrapper {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden; /* Verhindert Sichtbarkeit vor dem Ausfahren */
+      padding-bottom: 2px;
+    }
+
+    .poll-card {
+      width: 100%;
+      background: linear-gradient(145deg, rgba(13, 23, 14, 0.98) 0%, rgba(20, 34, 21, 0.98) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.5);
+      border-bottom: 2.5px solid #e5c96a; /* Schließt bündig mit Camrahmen ab */
+      border-radius: 4px 4px 0 0;
+      box-shadow:
+        0 -8px 30px rgba(0, 0, 0, 0.85),
+        0 0 15px rgba(200, 168, 75, 0.15),
+        inset 0 1px 0 rgba(229, 201, 106, 0.3);
+      padding: 10px 16px 8px;
+      position: relative;
+      transform: translateY(105%); /* Versteckt unterhalb */
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+      opacity: 0;
+    }
+
+    .poll-card.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Zierleiste oben */
+    .poll-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c8a84b 30%, #f3ebd6 50%, #c8a84b 70%, transparent);
+    }
+
+    /* Header: Tagline & Frage */
+    .poll-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .poll-tagline {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #c8a84b;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .poll-timer-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: #e5c96a;
+      background: rgba(8, 14, 9, 0.8);
+      border: 1px solid rgba(200, 168, 75, 0.3);
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+
+    .poll-question {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 900;
+      color: #f3ebd6;
+      line-height: 1.25;
+      text-align: center;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+
+    /* ---------------------------------------------------------
+       DUAL-OPTION BALKEN: OPTION 1 (LINKS) vs OPTION 2 (RECHTS)
+       --------------------------------------------------------- */
+    .options-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .opt-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .opt-number {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #c8a84b;
+      color: #0b110b;
+      font-size: 11px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 8px rgba(200, 168, 75, 0.4);
+    }
+
+    .opt-text {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #f3ebd6;
+      letter-spacing: 0.3px;
+    }
+
+    .opt-percent {
+      font-size: 12px;
+      font-weight: 900;
+      color: #e5c96a;
+    }
+
+    /* Battle Progress Bar */
+    .poll-bar-container {
+      width: 100%;
+      height: 10px;
+      background: #080e09;
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      border-radius: 3px;
+      overflow: hidden;
+      display: flex;
+      position: relative;
+      margin-bottom: 6px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    .bar-fill-left {
+      height: 100%;
+      width: 50%;
+      background: linear-gradient(90deg, #c8a84b, #e5c96a);
+      transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 0 10px rgba(229, 201, 106, 0.5);
+    }
+
+    .bar-fill-right {
+      height: 100%;
+      width: 50%;
+      background: linear-gradient(90deg, #1b3d21, #2e6636);
+      border-left: 1px solid rgba(243, 235, 214, 0.4);
+      transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    /* Subtitle / Footer Hint */
+    .poll-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      color: #8a9c8b;
+      padding-top: 2px;
+    }
+
+    .total-votes {
+      color: #e5c96a;
+      font-weight: 700;
+    }
+
+    /* ---------------------------------------------------------
+       TESTBEDIENFELD
+       --------------------------------------------------------- */
+    .preview-bar {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(10, 16, 10, 0.95);
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #f3ebd6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: all;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      max-width: 440px;
+    }
+
+    body.show-preview .preview-bar {
+      display: flex !important;
+    }
+
+    .btn-test {
+      background: #172418;
+      color: #f3ebd6;
+      border: 1px solid #c8a84b;
+      padding: 5px 9px;
+      border-radius: 3px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-test:hover {
+      background: #c8a84b;
+      color: #0b110b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TESTBEDIENFELD -->
+  <div class="preview-bar" id="previewBar">
+    <div style="font-family:'Playfair Display',serif; font-weight:900; color:#e5c96a; font-size:13px;">
+      ✦ LIVE POLL (!poll) • TEST-STATION
+    </div>
+    <div style="font-size:10px; color:#a4b8a5;">
+      Befehl: <strong style="color:#e5c96a;">!poll [Frage]</strong> | Abstimmen mit: <strong style="color:#e5c96a;">1</strong> oder <strong style="color:#e5c96a;">2</strong>
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      <button class="btn-test" onclick="startPoll('Rechts oder Links abbiegen?')">▶ Test-Poll starten</button>
+      <button class="btn-test" onclick="simulateVote('User1', 1)">+ Stimme für [1]</button>
+      <button class="btn-test" onclick="simulateVote('User2', 2)">+ Stimme für [2]</button>
+      <button class="btn-test" onclick="endPollNow()">⚡ Poll beenden</button>
+    </div>
+  </div>
+
+  <!-- POLL CONTAINER (SITZT AUF DER CAM) -->
+  <div class="poll-wrapper">
+    <div class="poll-card" id="pollCard">
+      
+      <div class="poll-header">
+        <div class="poll-tagline">
+          <span>✦</span>
+          <span>ENTSCHEIDUNG DES SALONS</span>
+        </div>
+        <div class="poll-timer-badge" id="timerBadge">02:00</div>
+      </div>
+
+      <div class="poll-question" id="pollQuestion">Wähle Option 1 oder Option 2</div>
+
+      <!-- Labels & Prozente -->
+      <div class="options-row">
+        <div class="opt-badge">
+          <div class="opt-number">1</div>
+          <span class="opt-text" id="labelOpt1">Option 1</span>
+          <span class="opt-percent" id="pctOpt1">50%</span>
+        </div>
+        <div class="opt-badge">
+          <span class="opt-percent" id="pctOpt2">50%</span>
+          <span class="opt-text" id="labelOpt2">Option 2</span>
+          <div class="opt-number" style="background:#2e6636; color:#d6f5db; border:1px solid #4ade80;">2</div>
+        </div>
+      </div>
+
+      <!-- Live Split Progress Bar -->
+      <div class="poll-bar-container">
+        <div class="bar-fill-left" id="barFillLeft"></div>
+        <div class="bar-fill-right" id="barFillRight"></div>
+      </div>
+
+      <div class="poll-footer">
+        <div>Chat-Eingabe: Tippe einfach <strong style="color:#f3ebd6;">1</strong> oder <strong style="color:#f3ebd6;">2</strong></div>
+        <div class="total-votes" id="totalVotesText">0 Stimmen</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // 1. EINSTELLUNGEN & KANAL
+    // =========================================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelParam = urlParams.get('channel') || 'd0ppelxp';
+    const MAX_DURATION_MS = 120000; // Genau 2 Minuten (120 Sekunden)
+
+    if (urlParams.get('preview') === '1' || urlParams.get('test') === '1') {
+      document.body.classList.add('show-preview');
+    }
+
+    const pollCard = document.getElementById('pollCard');
+    const timerBadge = document.getElementById('timerBadge');
+    const pollQuestionEl = document.getElementById('pollQuestion');
+    const pctOpt1El = document.getElementById('pctOpt1');
+    const pctOpt2El = document.getElementById('pctOpt2');
+    const barFillLeft = document.getElementById('barFillLeft');
+    const barFillRight = document.getElementById('barFillRight');
+    const totalVotesText = document.getElementById('totalVotesText');
+
+    let isPollActive = false;
+    let pollStartTime = 0;
+    let pollTimerInterval = null;
+    let pollTimeout = null;
+
+    let votes1 = 0;
+    let votes2 = 0;
+    let votedUsers = new Set(); // Verhindert Mehrfachstimmen: Jeder User nur 1x!
+
+    // =========================================================
+    // 2. UMFRAGE STARTEN
+    // =========================================================
+    function startPoll(questionText = 'Entscheidung des Salons: 1 oder 2?') {
+      if (isPollActive) endPollNow();
+
+      isPollActive = true;
+      pollStartTime = Date.now();
+      votes1 = 0;
+      votes2 = 0;
+      votedUsers.clear();
+
+      pollQuestionEl.textContent = questionText;
+      updatePollUI();
+
+      pollCard.classList.add('show');
+
+      // 2 Minuten Timer
+      if (pollTimerInterval) clearInterval(pollTimerInterval);
+      pollTimerInterval = setInterval(() => {
+        const remaining = (pollStartTime + MAX_DURATION_MS) - Date.now();
+        if (remaining <= 0) {
+          endPollNow();
+        } else {
+          const totalSec = Math.ceil(remaining / 1000);
+          const mins = Math.floor(totalSec / 60);
+          const secs = totalSec % 60;
+          timerBadge.textContent = `0${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+      }, 500);
+
+      pollTimeout = setTimeout(() => {
+        endPollNow();
+      }, MAX_DURATION_MS);
+    }
+
+    // =========================================================
+    // 3. STIMME ZÄHLEN (1 oder 2)
+    // =========================================================
+    function handleVote(username, choice) {
+      if (!isPollActive) return;
+
+      const userKey = username.toLowerCase().trim();
+      if (votedUsers.has(userKey)) return; // Bereits abgestimmt!
+
+      votedUsers.add(userKey);
+
+      if (choice === 1) {
+        votes1++;
+      } else if (choice === 2) {
+        votes2++;
+      }
+
+      updatePollUI();
+    }
+
+    function updatePollUI() {
+      const total = votes1 + votes2;
+      totalVotesText.textContent = `${total} ${total === 1 ? 'Stimme' : 'Stimmen'}`;
+
+      if (total === 0) {
+        pctOpt1El.textContent = '50%';
+        pctOpt2El.textContent = '50%';
+        barFillLeft.style.width = '50%';
+        barFillRight.style.width = '50%';
+      } else {
+        const p1 = Math.round((votes1 / total) * 100);
+        const p2 = 100 - p1;
+        pctOpt1El.textContent = `${p1}%`;
+        pctOpt2El.textContent = `${p2}%`;
+        barFillLeft.style.width = `${p1}%`;
+        barFillRight.style.width = `${p2}%`;
+      }
+    }
+
+    // =========================================================
+    // 4. UMFRAGE BEENDEN & ERGEBNIS ZEIGEN
+    // =========================================================
+    function endPollNow() {
+      if (!isPollActive) return;
+      isPollActive = false;
+      if (pollTimerInterval) clearInterval(pollTimerInterval);
+      if (pollTimeout) clearTimeout(pollTimeout);
+
+      timerBadge.textContent = 'BEENDET';
+
+      // Sieger ermitteln
+      const total = votes1 + votes2;
+      if (total === 0) {
+        pollQuestionEl.innerHTML = 'Keine Stimmen abgegeben';
+      } else if (votes1 > votes2) {
+        pollQuestionEl.innerHTML = `✦ Sieger: <strong style="color:#e5c96a;">Option [ 1 ]</strong> mit ${Math.round((votes1/total)*100)}%!`;
+      } else if (votes2 > votes1) {
+        pollQuestionEl.innerHTML = `✦ Sieger: <strong style="color:#4ade80;">Option [ 2 ]</strong> mit ${Math.round((votes2/total)*100)}%!`;
+      } else {
+        pollQuestionEl.innerHTML = `✦ Unentschieden (50% / 50%)!`;
+      }
+
+      // 8 Sekunden das Endergebnis stehen lassen, dann nach unten in die Cam zurückfahren
+      setTimeout(() => {
+        pollCard.classList.remove('show');
+      }, 8000);
+    }
+
+    // =========================================================
+    // 5. TWITCH IRC CHAT LISTENER
+    // =========================================================
+    function connectTwitchIrc(channelName) {
+      const targetChan = channelName.toLowerCase().replace('#', '');
+      const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+      ws.onopen = function () {
+        ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+        ws.send('PASS SCHMOOPIIE');
+        ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+        ws.send(`JOIN #${targetChan}`);
+        console.log(`[Twitch IRC Poll] Verbunden mit #${targetChan}`);
+      };
+
+      ws.onmessage = function (event) {
+        const lines = event.data.split('\r\n');
+        for (let line of lines) {
+          if (!line) continue;
+          if (line.startsWith('PING')) {
+            ws.send('PONG :tmi.twitch.tv');
+            continue;
+          }
+
+          if (line.includes('PRIVMSG')) {
+            const match = line.match(/@([^ ]+) :([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)/);
+            let displayName = 'Gentleman';
+            let chatText = '';
+
+            if (match) {
+              const rawTags = match[1];
+              const username = match[2];
+              chatText = match[3].trim();
+              const tagMatch = rawTags.match(/display-name=([^;]+)/);
+              displayName = (tagMatch && tagMatch[1]) ? tagMatch[1] : username;
+            } else {
+              const matchUser = line.match(/display-name=([^;]+)/);
+              const matchNick = line.match(/:([^!]+)!/);
+              displayName = matchUser ? matchUser[1] : (matchNick ? matchNick[1] : 'Gentleman');
+              const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
+              if (textIdx !== -1) {
+                chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
+              }
+            }
+
+            if (!chatText) continue;
+            const lower = chatText.toLowerCase();
+
+            // 1. Befehl zum Starten: !poll [Frage] oder einfach !poll
+            if (lower.startsWith('!poll') || lower.startsWith('!umfrage') || lower.startsWith('!vote')) {
+              let question = chatText.substring(chatText.indexOf(' ') + 1).trim();
+              if (lower === '!poll' || lower === '!umfrage' || !question || question === lower) {
+                question = 'Entscheidung des Salons: 1 oder 2?';
+              }
+              startPoll(question);
+              continue;
+            }
+
+            // 2. Abstimmung während Poll aktiv ist: Einfach "1" oder "2"
+            if (isPollActive) {
+              const cleanVote = chatText.trim();
+              if (cleanVote === '1') {
+                handleVote(displayName, 1);
+              } else if (cleanVote === '2') {
+                handleVote(displayName, 2);
+              }
+            }
+          }
+        }
+      };
+
+      ws.onclose = function () {
+        setTimeout(() => connectTwitchIrc(channelName), 4000);
+      };
+    }
+
+    // StreamElements Listener Fallback
+    window.addEventListener('onEventReceived', function (obj) {
+      if (!obj || !obj.detail) return;
+      if (obj.detail.listener === 'message') {
+        const d = obj.detail.event.data;
+        if (!d) return;
+        const text = (d.text || '').trim();
+        const user = d.displayName || d.nick || 'Gentleman';
+        const lower = text.toLowerCase();
+
+        if (lower.startsWith('!poll') || lower.startsWith('!umfrage')) {
+          let question = text.substring(text.indexOf(' ') + 1).trim();
+          if (lower === '!poll' || !question || question === lower) {
+            question = 'Entscheidung des Salons: 1 oder 2?';
+          }
+          startPoll(question);
+        } else if (isPollActive) {
+          if (text === '1') handleVote(user, 1);
+          if (text === '2') handleVote(user, 2);
+        }
+      }
+    });
+
+    connectTwitchIrc(channelParam);
+
+    // =========================================================
+    // 6. TEST FUNKTIONEN
+    // =========================================================
+    function simulateVote(user, opt) {
+      handleVote(user, opt);
+    }
+  </script>
+</body>
+</html>

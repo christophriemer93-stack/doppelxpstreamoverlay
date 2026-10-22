@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen – Die Horologie des Salons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="watches_data.js"></script>
+  <style>
+    /* =========================================================
+       THE GENTLEMEN – DIE HOROLOGIE DES SALONS (WATCHES GAME)
+       ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Playfair Display', serif;
+      pointer-events: none;
+      position: relative;
+      color: #fff;
+    }
+
+    /* ---------------------------------------------------------
+       1. DIE UHRENSCHATULLE (POPUP BEI !watch / !uhr)
+       --------------------------------------------------------- */
+    .watch-box-overlay {
+      position: absolute;
+      top: -650px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 620px;
+      background: linear-gradient(145deg, rgba(13, 23, 14, 0.98) 0%, rgba(20, 34, 21, 0.98) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.5);
+      border-radius: 6px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.9),
+        0 0 0 3px rgba(200, 168, 75, 0.25),
+        0 20px 60px rgba(0, 0, 0, 0.95),
+        inset 0 1px 0 rgba(229, 201, 106, 0.3);
+      opacity: 0;
+      transition: top 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .watch-box-overlay.show {
+      top: 40px;
+      opacity: 1;
+    }
+
+    /* Goldene Zierleisten */
+    .watch-box-overlay::before,
+    .watch-box-overlay::after {
+      content: '';
+      display: block;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #c8a84b 30%, #f3ebd6 50%, #c8a84b 70%, transparent);
+    }
+
+    .watch-inner {
+      padding: 24px 28px;
+      position: relative;
+    }
+
+    /* Wasserzeichen */
+    .watch-inner::before {
+      content: '⏱';
+      position: absolute;
+      font-size: 190px;
+      color: rgba(200, 168, 75, 0.025);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* Kopfzeile */
+    .watch-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .gentleman-brand {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(200, 168, 75, 0.8);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tier-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 2px;
+      border: 1px solid rgba(200,168,75,0.4);
+      background: rgba(0,0,0,0.5);
+    }
+
+    .tier-1 { color: #dcdcdc; border-color: rgba(220,220,220,0.4); } /* Alltags-Klassiker */
+    .tier-2 { color: #72cf85; border-color: rgba(114,207,133,0.5); } /* Gehobenes Handwerk */
+    .tier-3 { color: #e5c96a; border-color: rgba(229,201,106,0.6); } /* Prestige & Ikonen */
+    .tier-4 { color: #d48df5; border-color: rgba(212,141,245,0.6); } /* Haute Horlogerie */
+    .tier-5 { color: #ff5566; border-color: rgba(255,85,102,0.8); box-shadow: 0 0 15px rgba(255,85,102,0.3); } /* Die Kronjuwelen */
+
+    /* Hauptinhalt: Bild links, Daten rechts */
+    .watch-content {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      margin: 14px 0 18px;
+    }
+
+    .watch-image-frame {
+      width: 140px;
+      height: 140px;
+      border: 1px solid rgba(200,168,75,0.4);
+      border-radius: 4px;
+      background: radial-gradient(circle, #1a2a19 0%, #0d160d 100%);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 4px 15px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .watch-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 6px;
+      box-sizing: border-box;
+      filter: contrast(1.04) drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+      transition: transform 0.4s ease;
+    }
+
+    .watch-details {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .watch-brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: #f3ebd6;
+      line-height: 1.15;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+      margin-bottom: 4px;
+    }
+
+    .watch-model-sub {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: rgba(229, 201, 106, 0.9);
+      margin-bottom: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .watch-specs-row {
+      display: flex;
+      gap: 18px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      color: rgba(200,168,75,0.7);
+    }
+
+    .spec-item span {
+      color: #e8dcc0;
+      font-weight: 700;
+      margin-left: 4px;
+    }
+
+    /* Schätzpreis / Marktwert Box */
+    .watch-price-box {
+      margin-top: 14px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      border-top: 1px dashed rgba(200,168,75,0.25);
+      padding-top: 10px;
+    }
+
+    .price-label {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: rgba(200,168,75,0.65);
+    }
+
+    .price-val {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: #e5c96a;
+      text-shadow: 0 2px 10px rgba(229, 201, 106, 0.25);
+    }
+
+    /* Fußzeile: Wer hat gezogen */
+    .watch-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(200, 168, 75, 0.2);
+      padding-top: 12px;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: rgba(232, 220, 192, 0.85);
+    }
+
+    .watch-user-badge {
+      color: #e5c96a;
+      font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      font-style: normal;
+      font-size: 12px;
+    }
+
+    /* ---------------------------------------------------------
+       2. DER TRESOR / DIE VITRINE (!tresor / !sammlung)
+       --------------------------------------------------------- */
+    .tresor-overlay {
+      position: absolute;
+      bottom: -700px;
+      right: 35px;
+      width: 440px;
+      background: linear-gradient(155deg, rgba(12, 22, 13, 0.98) 0%, rgba(18, 30, 19, 0.98) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.45);
+      border-radius: 6px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.9),
+        0 0 0 3px rgba(200, 168, 75, 0.2),
+        0 20px 60px rgba(0, 0, 0, 0.95),
+        inset 0 1px 0 rgba(229, 201, 106, 0.25);
+      opacity: 0;
+      transition: bottom 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      z-index: 95;
+      overflow: hidden;
+    }
+
+    .tresor-overlay.show {
+      bottom: 35px;
+      opacity: 1;
+    }
+
+    .tresor-overlay::before,
+    .tresor-overlay::after {
+      content: '';
+      display: block;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c8a84b 30%, #f3ebd6 50%, #c8a84b 70%, transparent);
+    }
+
+    .tresor-inner {
+      padding: 20px 22px;
+    }
+
+    .tresor-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(200,168,75,0.2);
+      padding-bottom: 10px;
+    }
+
+    .tresor-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid #c8a84b;
+      object-fit: cover;
+      background: #0a110a;
+    }
+
+    .tresor-avatar-fallback {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid #c8a84b;
+      background: #142215;
+      color: #e5c96a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .tresor-user-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tresor-username {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f3ebd6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tresor-rank-title {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 12px;
+      color: rgba(200,168,75,0.8);
+    }
+
+    .tresor-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(200,168,75,0.2);
+      padding: 8px 12px;
+      border-radius: 3px;
+    }
+
+    .stat-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(200,168,75,0.6);
+      margin-bottom: 2px;
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #e5c96a;
+    }
+
+    /* Vitrinen-Slot: Die 3 edelsten Uhren */
+    .vitrine-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(200,168,75,0.7);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .vitrine-slots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .vitrine-slot-item {
+      flex: 1;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(200,168,75,0.25);
+      border-radius: 4px;
+      padding: 6px;
+      text-align: center;
+      position: relative;
+    }
+
+    .slot-img {
+      width: 100%;
+      height: 60px;
+      object-fit: contain;
+      background: rgba(0,0,0,0.4);
+      padding: 2px;
+      box-sizing: border-box;
+      border-radius: 2px;
+      border: 1px solid rgba(200,168,75,0.15);
+      margin-bottom: 4px;
+    }
+
+    .slot-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e8dcc0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .slot-val {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 11px;
+      color: #e5c96a;
+    }
+
+    /* ---------------------------------------------------------
+       3. COOLDOWN HINWEIS-KARTE
+       --------------------------------------------------------- */
+    .cooldown-pill {
+      position: absolute;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 25, 16, 0.95);
+      border: 1px solid rgba(200,168,75,0.5);
+      padding: 10px 24px;
+      border-radius: 30px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 15px;
+      color: #e8dcc0;
+      opacity: 0;
+      transition: top 0.6s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease;
+      z-index: 105;
+      white-space: nowrap;
+    }
+    .cooldown-pill.show {
+      top: 30px;
+      opacity: 1;
+    }
+    .cooldown-user {
+      color: #e5c96a;
+      font-family: 'Montserrat', sans-serif;
+      font-style: normal;
+      font-weight: 700;
+    }
+    .cooldown-time {
+      color: #ffaa55;
+      font-weight: 700;
+    }
+
+    /* ---------------------------------------------------------
+       4. TESTLEISTE FÜR BROWSER (UNAUFFÄLLIG BEI OBS)
+       --------------------------------------------------------- */
+    .test-station-bar {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(10, 16, 10, 0.92);
+      border: 1px solid rgba(200, 168, 75, 0.3);
+      padding: 8px 14px;
+      border-radius: 4px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      z-index: 9999;
+      pointer-events: auto;
+    }
+    body.no-preview .test-station-bar {
+      display: none !important;
+    }
+    .test-btn {
+      background: #182819;
+      border: 1px solid #c8a84b;
+      color: #f3ebd6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .test-btn:hover {
+      background: #c8a84b;
+      color: #0c140c;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COOLDOWN POPUP -->
+  <div class="cooldown-pill" id="cooldown-pill">
+    <span>Geduld, Gentleman <span class="cooldown-user" id="cd-user">User</span>. Der nächste Uhrmacher-Besuch ist erst in <span class="cooldown-time" id="cd-time">45 Min</span> möglich.</span>
+  </div>
+
+  <!-- HAUPTKARTE: GEZOGENE UHR -->
+  <div class="watch-box-overlay" id="watch-card">
+    <div class="watch-inner">
+      <div class="watch-header">
+        <div class="gentleman-brand">✦ Die Horologie des Salons ✦</div>
+        <div class="tier-badge tier-1" id="watch-tier-badge">Tier I – Alltags-Klassiker</div>
+      </div>
+
+      <div class="watch-content">
+        <div class="watch-image-frame">
+          <img src="" alt="Uhr" class="watch-image" id="watch-img">
+        </div>
+        <div class="watch-details">
+          <div class="watch-brand-title" id="watch-brand">Rolex</div>
+          <div class="watch-model-sub" id="watch-model">Submariner Date 41</div>
+          
+          <div class="watch-specs-row">
+            <div class="spec-item">Ref: <span id="watch-ref">126610LN</span></div>
+            <div class="spec-item">Epoche: <span id="watch-year">1953</span></div>
+          </div>
+
+          <div class="watch-price-box">
+            <div class="price-label">Geschätzter Marktwert:</div>
+            <div class="price-val" id="watch-price">£ 10.250</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="watch-footer">
+        <div>Neu in den Samt-Tresor aufgenommen von: <span class="watch-user-badge" id="watch-user">Chris</span></div>
+        <div>✦ Nr. <span id="watch-id">62</span> / 100 ✦</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DER TRESOR / DIE VITRINE -->
+  <div class="tresor-overlay" id="tresor-card">
+    <div class="tresor-inner">
+      <div class="tresor-header">
+        <img src="" alt="Avatar" class="tresor-avatar" id="tresor-avatar" style="display: none;">
+        <div class="tresor-avatar-fallback" id="tresor-avatar-fallback">C</div>
+        <div class="tresor-user-info">
+          <div class="tresor-username" id="tresor-user">Chris</div>
+          <div class="tresor-rank-title" id="tresor-rank">Großmeister der Horologie</div>
+        </div>
+      </div>
+
+      <div class="tresor-stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Gesammelte Uhren</div>
+          <div class="stat-value" id="tresor-count">12 / 100</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Gesamtwert</div>
+          <div class="stat-value" id="tresor-total-value">£ 48.650</div>
+        </div>
+      </div>
+
+      <div class="vitrine-label">✦ Die wertvollsten Zeitmesser ✦</div>
+      <div class="vitrine-slots" id="vitrine-slots">
+        <!-- Werden dynamisch mit bis zu 3 Prunkstücken befüllt -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TEST-LEISTE FÜR BROWSER -->
+  <div class="test-station-bar">
+    <button class="test-btn" onclick="testDrawWatch(1)">Tier 1 (Casio)</button>
+    <button class="test-btn" onclick="testDrawWatch(36)">Tier 2 (Tudor)</button>
+    <button class="test-btn" onclick="testDrawWatch(62)">Tier 3 (Rolex)</button>
+    <button class="test-btn" onclick="testDrawWatch(82)">Tier 4 (Patek)</button>
+    <button class="test-btn" onclick="testDrawWatch(100)">Tier 5 (Graves)</button>
+    <button class="test-btn" onclick="testTresor()">!tresor Chris</button>
+  </div>
+
+  <script>
+    // =========================================================
+    // 1. GLOBALE EINSTELLUNGEN & SPEICHER-SYSTEM
+    // =========================================================
+    const COOLDOWN_MINUTES = 60; // Exakt 60 Minuten Cooldown pro Viewer
+    const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
+    const STORAGE_KEY = 'gentlemen_watches_vault_v1';
+
+    // Viewer Vault Data: { [username]: { lastDraw: timestamp, watches: [ watchId, ... ] } }
+    let vaultData = {};
+    function loadVault() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) vaultData = JSON.parse(raw);
+      } catch (e) {
+        vaultData = {};
+      }
+    }
+
+    function saveVault() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(vaultData));
+      } catch (e) {}
+    }
+
+    loadVault();
+
+    // =========================================================
+    // 2. SELTENHEITS-WAHRSCHEINLICHKEITEN (DROP RATES)
+    // =========================================================
+    // Tier 1: 50%, Tier 2: 30%, Tier 3: 14%, Tier 4: 5%, Tier 5: 1%
+    const WATCHES_DB = window.WATCHES_DB || window.WATCHES_DATA || [];
+
+    function rollRandomWatch() {
+      if (!WATCHES_DB || WATCHES_DB.length === 0) return null;
+      
+      const rand = Math.random() * 100;
+      let targetTier = 1;
+      if (rand >= 99) {
+        targetTier = 5; // 1%
+      } else if (rand >= 94) {
+        targetTier = 4; // 5%
+      } else if (rand >= 80) {
+        targetTier = 3; // 14%
+      } else if (rand >= 50) {
+        targetTier = 2; // 30%
+      } else {
+        targetTier = 1; // 50%
+      }
+
+      const pool = WATCHES_DB.filter(w => w.tier === targetTier);
+      if (pool.length === 0) return WATCHES_DB[Math.floor(Math.random() * WATCHES_DB.length)];
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    // =========================================================
+    // 3. UI ELEMENTE & ANZEIGE-LOGIK
+    // =========================================================
+    const watchCard = document.getElementById('watch-card');
+    const watchImg = document.getElementById('watch-img');
+    const watchBrand = document.getElementById('watch-brand');
+    const watchModel = document.getElementById('watch-model');
+    const watchRef = document.getElementById('watch-ref');
+    const watchYear = document.getElementById('watch-year');
+    const watchPrice = document.getElementById('watch-price');
+    const watchUser = document.getElementById('watch-user');
+    const watchIdEl = document.getElementById('watch-id');
+    const watchTierBadge = document.getElementById('watch-tier-badge');
+
+    const tresorCard = document.getElementById('tresor-card');
+    const tresorAvatar = document.getElementById('tresor-avatar');
+    const tresorAvatarFallback = document.getElementById('tresor-avatar-fallback');
+    const tresorUser = document.getElementById('tresor-user');
+    const tresorRank = document.getElementById('tresor-rank');
+    const tresorCount = document.getElementById('tresor-count');
+    const tresorTotalVal = document.getElementById('tresor-total-value');
+    const vitrineSlots = document.getElementById('vitrine-slots');
+
+    const cooldownPill = document.getElementById('cooldown-pill');
+    const cdUserEl = document.getElementById('cd-user');
+    const cdTimeEl = document.getElementById('cd-time');
+
+    let watchHideTimer = null;
+    let tresorHideTimer = null;
+    let cdHideTimer = null;
+
+    function formatPound(num) {
+      return '£ ' + Number(num).toLocaleString('de-DE');
+    }
+
+    function getRankTitle(count, totalValue) {
+      if (totalValue >= 5000000) return 'Lord der Haute Horlogerie';
+      if (totalValue >= 500000) return 'Erlauchter Kronen-Kollektor';
+      if (count >= 25) return 'Großmeister des Salons';
+      if (count >= 10) return 'Passionierter Chronometrist';
+      if (count >= 5) return 'Gutsherr mit feinem Gespür';
+      return 'Novize des Uhrmacher-Handwerks';
+    }
+
+    // --- UHR ZEIGEN ---
+    function displayDrawnWatch(user, watch) {
+      if (!watch) return;
+
+      watchImg.onerror = function() {
+        if (watch.remote_img && watchImg.src !== watch.remote_img) {
+          watchImg.src = watch.remote_img;
+        }
+      };
+      watchImg.src = watch.img;
+      watchBrand.textContent = watch.brand;
+      watchModel.textContent = watch.model;
+      watchRef.textContent = watch.ref;
+      watchYear.textContent = watch.year;
+      watchPrice.textContent = formatPound(watch.price);
+      watchUser.textContent = user;
+      watchIdEl.textContent = watch.id;
+
+      // Tier Badge
+      watchTierBadge.className = `tier-badge tier-${watch.tier}`;
+      watchTierBadge.textContent = `Tier ${watch.tier} – ${watch.tierName}`;
+
+      watchCard.classList.add('show');
+
+      if (watchHideTimer) clearTimeout(watchHideTimer);
+      watchHideTimer = setTimeout(() => {
+        watchCard.classList.remove('show');
+      }, 10000); // 10 Sekunden edle Präsentation
+    }
+
+    // --- TRESOR ZEIGEN ---
+    async function displayUserTresor(user, avatarUrl = null) {
+      const cleanUser = user.toLowerCase().trim();
+      const uData = vaultData[cleanUser] || { lastDraw: 0, watches: [] };
+
+      tresorUser.textContent = user;
+
+      // Avatar
+      if (avatarUrl) {
+        tresorAvatar.src = avatarUrl;
+        tresorAvatar.style.display = 'block';
+        tresorAvatarFallback.style.display = 'none';
+      } else {
+        tresorAvatar.style.display = 'none';
+        tresorAvatarFallback.style.display = 'flex';
+        tresorAvatarFallback.textContent = user.charAt(0).toUpperCase();
+      }
+
+      // Berechnung
+      const userWatchObjects = (uData.watches || []).map(id => WATCHES_DB.find(w => w.id === id)).filter(Boolean);
+      const totalCount = userWatchObjects.length;
+      const totalVal = userWatchObjects.reduce((acc, w) => acc + (w.price || 0), 0);
+
+      tresorCount.textContent = `${totalCount} / 100`;
+      tresorTotalVal.textContent = formatPound(totalVal);
+      tresorRank.textContent = getRankTitle(totalCount, totalVal);
+
+      // Top 3 Uhren nach Preis sortiert für die Vitrine
+      const top3 = [...userWatchObjects].sort((a,b) => b.price - a.price).slice(0, 3);
+      vitrineSlots.innerHTML = '';
+
+      if (top3.length === 0) {
+        vitrineSlots.innerHTML = '<div style="font-family: \'IM Fell English\', serif; font-style: italic; font-size: 13px; color: rgba(200,168,75,0.6); width: 100%; text-align: center; padding: 10px 0;">Der Tresor ist noch unberührt. Ziehe deine erste Uhr mit !watch</div>';
+      } else {
+        top3.forEach(w => {
+          const item = document.createElement('div');
+          item.className = 'vitrine-slot-item';
+          item.innerHTML = `
+            <img src="${w.img}" class="slot-img">
+            <div class="slot-name">${w.brand}</div>
+            <div class="slot-val">${formatPound(w.price)}</div>
+          `;
+          vitrineSlots.appendChild(item);
+        });
+      }
+
+      tresorCard.classList.add('show');
+      if (tresorHideTimer) clearTimeout(tresorHideTimer);
+      tresorHideTimer = setTimeout(() => {
+        tresorCard.classList.remove('show');
+      }, 10000);
+    }
+
+    // --- COOLDOWN POPUP ---
+    function displayCooldown(user, remainingMs) {
+      const mins = Math.ceil(remainingMs / (60 * 1000));
+      cdUserEl.textContent = user;
+      cdTimeEl.textContent = `${mins} Minute${mins > 1 ? 'n' : ''}`;
+
+      cooldownPill.classList.add('show');
+      if (cdHideTimer) clearTimeout(cdHideTimer);
+      cdHideTimer = setTimeout(() => {
+        cooldownPill.classList.remove('show');
+      }, 6000);
+    }
+
+    // =========================================================
+    // 4. BEFEHLS-VERARBEITUNG (!watch / !uhr & !tresor)
+    // =========================================================
+    function handleWatchCommand(user) {
+      const cleanUser = user.toLowerCase().trim();
+      const now = Date.now();
+
+      if (!vaultData[cleanUser]) {
+        vaultData[cleanUser] = { lastDraw: 0, watches: [] };
+      }
+
+      const uData = vaultData[cleanUser];
+      const timePassed = now - uData.lastDraw;
+
+      // Cooldown Prüfung
+      if (timePassed < COOLDOWN_MS) {
+        displayCooldown(user, COOLDOWN_MS - timePassed);
+        return;
+      }
+
+      // Ziehung durchführen
+      const drawnWatch = rollRandomWatch();
+      if (!drawnWatch) return;
+
+      uData.lastDraw = now;
+      if (!uData.watches.includes(drawnWatch.id)) {
+        uData.watches.push(drawnWatch.id);
+      }
+      saveVault();
+
+      displayDrawnWatch(user, drawnWatch);
+    }
+
+    function handleTresorCommand(user) {
+      displayUserTresor(user);
+    }
+
+    // =========================================================
+    // 5. TEST-STATION-FUNKTIONEN
+    // =========================================================
+    function testDrawWatch(id) {
+      const w = WATCHES_DB.find(item => item.id === id);
+      displayDrawnWatch('Lord Chris', w);
+    }
+
+    function testTresor() {
+      // Test-Tresor füllen
+      const cleanUser = 'chris';
+      vaultData[cleanUser] = {
+        lastDraw: Date.now(),
+        watches: [1, 36, 62, 82, 94]
+      };
+      saveVault();
+      displayUserTresor('Lord Chris');
+    }
+
+    // =========================================================
+    // 6. TWITCH IRC CHAT ANBINDUNG (OHNE STREAMBELEMETS ZWANG)
+    // =========================================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelParam = urlParams.get('channel') || 'd0ppelxp';
+
+    if (window.obsstudio || urlParams.get('preview') === '0' || urlParams.get('hide_preview') === '1') {
+      document.body.classList.add('no-preview');
+    }
+
+    function connectTwitchIrc(channelName) {
+      const targetChan = channelName.toLowerCase().replace('#', '');
+      const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+      ws.onopen = function () {
+        ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+        ws.send('PASS SCHMOOPIIE');
+        ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+        ws.send(`JOIN #${targetChan}`);
+        console.log(`[Twitch IRC Horologie] Verbunden mit #${targetChan}`);
+      };
+
+      ws.onmessage = function (event) {
+        const lines = event.data.split('\r\n');
+        for (let line of lines) {
+          if (!line) continue;
+          if (line.startsWith('PING')) {
+            ws.send('PONG :tmi.twitch.tv');
+            continue;
+          }
+
+          if (line.includes('PRIVMSG')) {
+            const match = line.match(/@([^ ]+) :([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)/);
+            let displayName = 'Gentleman';
+            let chatText = '';
+
+            if (match) {
+              const rawTags = match[1];
+              const username = match[2];
+              chatText = match[3].trim();
+              const tagMatch = rawTags.match(/display-name=([^;]+)/);
+              displayName = (tagMatch && tagMatch[1]) ? tagMatch[1] : username;
+            } else {
+              const matchUser = line.match(/display-name=([^;]+)/);
+              const matchNick = line.match(/:([^!]+)!/);
+              displayName = matchUser ? matchUser[1] : (matchNick ? matchNick[1] : 'Gentleman');
+              const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
+              if (textIdx !== -1) {
+                chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
+              }
+            }
+
+            if (!chatText) continue;
+            const cmd = chatText.toLowerCase();
+
+            if (cmd === '!watch' || cmd === '!uhr' || cmd.startsWith('!watch ') || cmd.startsWith('!uhr ')) {
+              handleWatchCommand(displayName);
+            } else if (cmd === '!tresor' || cmd === '!sammlung' || cmd === '!vitrine') {
+              handleTresorCommand(displayName);
+            }
+          }
+        }
+      };
+
+      ws.onclose = function () {
+        setTimeout(() => connectTwitchIrc(channelName), 4000);
+      };
+    }
+
+    if (channelParam) {
+      connectTwitchIrc(channelParam);
+    }
+  </script>
+</body>
+</html>

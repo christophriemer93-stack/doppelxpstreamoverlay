@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen - Goal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        /* StreamElements CSS start */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: transparent;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 100vh;
+            padding-bottom: 28px;
+        }
+
+        .goal-card {
+            width: 380px;
+            background: linear-gradient(160deg, #1c2a1c 0%, #243220 50%, #1c2a1c 100%);
+            border: 1px solid rgba(180,140,60,0.4);
+            box-shadow:
+                0 0 0 1px rgba(0,0,0,0.4),
+                0 6px 30px rgba(0,0,0,0.7),
+                inset 0 1px 0 rgba(200,168,75,0.15);
+            position: relative;
+        }
+
+        /* Top gold line */
+        .goal-card::before {
+            content: '';
+            display: block;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(200,168,75,0.4) 15%, #c8a84b 35%, #d4a843 50%, #c8a84b 65%, rgba(200,168,75,0.4) 85%, transparent);
+        }
+
+        /* Bottom gold line */
+        .goal-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(200,168,75,0.4) 15%, #c8a84b 35%, #d4a843 50%, #c8a84b 65%, rgba(200,168,75,0.4) 85%, transparent);
+        }
+
+        .goal-inner {
+            padding: 14px 20px 18px;
+        }
+
+        .goal-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.8);
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .goal-subtitle {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 14px;
+            color: rgba(232,220,192,0.7);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(200,168,75,0.25);
+        }
+        .divider-ornament {
+            font-size: 10px;
+            color: rgba(200,168,75,0.5);
+        }
+
+        /* Progress bar */
+        .progress-wrapper {
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .progress-percent {
+            position: absolute;
+            top: -18px;
+            right: 0;
+            font-family: 'Playfair Display', serif;
+            font-size: 10px;
+            color: rgba(200,168,75,0.7);
+            letter-spacing: 1px;
+            transition: right 0.8s ease;
+        }
+
+        .progress-track {
+            height: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(180,140,60,0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, rgba(200,168,75,0.6) 0%, #c8a84b 60%, #d4b84e 100%);
+            box-shadow: 0 0 8px rgba(200,168,75,0.4);
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        /* Shimmer on the fill */
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .goal-counts {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 8px;
+        }
+
+        .count-current {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 22px;
+            color: #c8a84b;
+            text-shadow: 0 0 10px rgba(200,168,75,0.3);
+        }
+
+        .count-label {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 11px;
+            color: rgba(200,168,75,0.5);
+        }
+
+        .count-goal {
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            color: rgba(200,168,75,0.6);
+        }
+        /* StreamElements CSS end */
+
+        /* Preview */
+        .preview-controls {
+            position: fixed;
+            top: 10px; left: 10px;
+            background: rgba(0,0,0,0.85);
+            padding: 10px; border-radius: 5px;
+            display: flex; gap: 8px; z-index: 999;
+        }
+        .preview-controls button {
+            padding: 5px 10px; cursor: pointer;
+            background: #243220; color: #c8a84b; border: 1px solid #c8a84b;
+            font-family: 'Playfair Display', serif; font-size: 11px;
+        }
+        html { background: #222; }
+    </style>
+</head>
+<body>
+    <!-- Preview controls -->
+    <div class="preview-controls">
+        <button onclick="addFollower()">+ Follower</button>
+        <button onclick="addSub()">+ Sub</button>
+        <button onclick="resetGoal()">Reset</button>
+    </div>
+
+    <!-- StreamElements HTML start -->
+    <div class="goal-card">
+        <div class="goal-inner">
+            <div class="goal-title">✦ Das Ziel des Anwesens ✦</div>
+            <div class="goal-subtitle">Verbündete gesucht</div>
+            <div class="divider">
+                <div class="divider-line"></div>
+                <div class="divider-ornament">✦</div>
+                <div class="divider-line"></div>
+            </div>
+            <div class="progress-wrapper">
+                <span class="progress-percent" id="percent-label">0%</span>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+            <div class="goal-counts">
+                <div>
+                    <div class="count-current" id="count-current">0</div>
+                    <div class="count-label">Verbündete</div>
+                </div>
+                <div class="count-goal" id="count-goal">Ziel: 100</div>
+            </div>
+        </div>
+    </div>
+    <!-- StreamElements HTML end -->
+
+    <script>
+        // StreamElements JS start
+
+        // === EINSTELLUNGEN ===
+        const GOAL_TARGET = 100;     // Ziel (änderbar)
+        const GOAL_TYPE = 'follower'; // 'follower' oder 'subscriber'
+        // =====================
+
+        let currentCount = 0;
+
+        function updateDisplay() {
+            const pct = Math.min(100, Math.round((currentCount / GOAL_TARGET) * 100));
+            document.getElementById('count-current').innerText = currentCount;
+            document.getElementById('count-goal').innerText = `Ziel: ${GOAL_TARGET}`;
+            document.getElementById('progress-fill').style.width = pct + '%';
+            document.getElementById('percent-label').innerText = pct + '%';
+        }
+
+        window.addEventListener('onWidgetLoad', function (obj) {
+            if (!obj.detail || !obj.detail.session) return;
+            const session = obj.detail.session.data;
+            if (!session) return;
+
+            if (GOAL_TYPE === 'follower' && session['follower-session-total']) {
+                currentCount = parseInt(session['follower-session-total']) || 0;
+            } else if (GOAL_TYPE === 'subscriber' && session['subscriber-session-total']) {
+                currentCount = parseInt(session['subscriber-session-total']) || 0;
+            }
+            updateDisplay();
+        });
+
+        window.addEventListener('onEventReceived', function (obj) {
+            if (!obj.detail || !obj.detail.event) return;
+            const listener = obj.detail.listener;
+
+            if (GOAL_TYPE === 'follower' && listener === 'follower-latest') {
+                currentCount++;
+                updateDisplay();
+            } else if (GOAL_TYPE === 'subscriber' && listener === 'subscriber-latest') {
+                currentCount++;
+                updateDisplay();
+            }
+        });
+
+        updateDisplay();
+        // StreamElements JS end
+
+        // Preview simulator
+        function addFollower() {
+            window.dispatchEvent(new CustomEvent('onEventReceived', {
+                detail: { listener: 'follower-latest', event: { name: 'Test' } }
+            }));
+        }
+        function addSub() {
+            window.dispatchEvent(new CustomEvent('onEventReceived', {
+                detail: { listener: 'subscriber-latest', event: { name: 'Test' } }
+            }));
+        }
+        function resetGoal() {
+            currentCount = 0;
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>

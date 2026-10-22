@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen – Stream Ende (Outro)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background: #091008;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* === HINTERGRUND & CANVAS === */
+        #bg-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1920px; height: 1080px;
+            z-index: 0;
+        }
+
+        #particle-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1920px; height: 1080px;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .vignette {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(0,0,0,0.85) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* === RAHMENLINIEN OBEN / UNTEN === */
+        .frame-top, .frame-bottom {
+            position: absolute;
+            left: 0; right: 0;
+            height: 3px;
+            z-index: 20;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(200,168,75,0.4) 10%,
+                #c8a84b 30%,
+                #d4a843 50%,
+                #c8a84b 70%,
+                rgba(200,168,75,0.4) 90%,
+                transparent 100%
+            );
+        }
+        .frame-top { top: 0; }
+        .frame-bottom { bottom: 0; }
+
+        /* === ECK-ORNAMENTE === */
+        .corner { position: absolute; width: 65px; height: 65px; z-index: 21; }
+        .corner svg { width: 100%; height: 100%; }
+        .corner-tl { top: 3px; left: 0; }
+        .corner-tr { top: 3px; right: 0; transform: scaleX(-1); }
+        .corner-bl { bottom: 3px; left: 0; transform: scaleY(-1); }
+        .corner-br { bottom: 3px; right: 0; transform: scale(-1,-1); }
+
+        /* === HAUPTCONTAINER === */
+        .main-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1920px; height: 1080px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 60px 120px 45px 120px;
+            z-index: 10;
+        }
+
+        /* --- 1. KOPFZEILE (FIN / ABSCHLUSS) --- */
+        .header-block {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .estate-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.65);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 10px;
+        }
+        .estate-brand::before, .estate-brand::after {
+            content: '';
+            width: 45px; height: 1px;
+            background: rgba(200,168,75,0.4);
+        }
+
+        .outro-title {
+            font-weight: 900;
+            font-size: 76px;
+            line-height: 1.05;
+            color: #e8dcc0;
+            letter-spacing: 4px;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.9), 0 0 60px rgba(200,168,75,0.12);
+            margin-bottom: 6px;
+        }
+
+        .outro-subtitle {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 20px;
+            color: rgba(200,168,75,0.75);
+            letter-spacing: 0.5px;
+        }
+
+        /* --- 2. MITTELBEREICH: DAS REGISTER DES SALONS (30-TAGE CREDITS) --- */
+        .roster-wrapper {
+            width: 1380px;
+            height: 490px;
+            background: linear-gradient(160deg, #132014 0%, #1a2a17 50%, #101c10 100%);
+            border: 1px solid rgba(180,140,60,0.35);
+            box-shadow: 0 10px 45px rgba(0,0,0,0.85), inset 0 1px 0 rgba(200,168,75,0.2);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        /* Goldene Linien an den Roster-Kanten */
+        .roster-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #c8a84b 30%, #e0c060 50%, #c8a84b 70%, transparent);
+        }
+        .roster-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #c8a84b 30%, #e0c060 50%, #c8a84b 70%, transparent);
+        }
+
+        .roster-header-bar {
+            padding: 13px 40px;
+            background: rgba(14,24,14,0.96);
+            border-bottom: 1px solid rgba(180,140,60,0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .roster-header-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #c8a84b;
+            font-weight: 800;
+        }
+
+        .roster-header-meta {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 14.5px;
+            color: #e5c96a;
+            letter-spacing: 0.5px;
+        }
+
+        /* 2 Spalten: Abonnenten & Follower */
+        .columns-container {
+            flex: 1;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .roster-col {
+            flex: 1;
+            padding: 18px 45px 22px 45px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .col-divider {
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, rgba(200,168,75,0.3) 20%, rgba(200,168,75,0.3) 80%, transparent);
+            position: relative;
+            flex-shrink: 0;
+        }
+        .col-divider::before {
+            content: '✦';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(200,168,75,0.7);
+            font-size: 11px;
+            background: #192719;
+            padding: 4px 0;
+        }
+
+        .col-headline {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed rgba(200,168,75,0.25);
+        }
+
+        .col-headline-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .col-count-badge {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 800;
+            color: #e5c96a;
+            background: rgba(8, 14, 9, 0.9);
+            border: 1px solid rgba(200, 168, 75, 0.4);
+            padding: 2px 8px;
+            border-radius: 2px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+        }
+
+        /* Sanft rollende Liste (Credits Roll) */
+        .scroll-window {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Schatten-Verlauf oben und unten für weichen Ein-/Auslauf */
+        .scroll-window::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 25px;
+            background: linear-gradient(180deg, rgba(20,32,20,0.95), transparent);
+            z-index: 5;
+            pointer-events: none;
+        }
+        .scroll-window::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 35px;
+            background: linear-gradient(0deg, rgba(18,28,18,0.95), transparent);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .scroll-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Nur animieren wenn viele Einträge vorhanden sind */
+        .scroll-content.is-scrolling {
+            animation: gentle-roll 22s linear infinite;
+        }
+
+        @keyframes gentle-roll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+
+        .roster-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            background: rgba(12,20,12,0.55);
+            border-left: 2.5px solid #c8a84b;
+            padding: 8px 16px;
+            box-shadow: 1px 2px 6px rgba(0,0,0,0.45);
+            border-radius: 0 2px 2px 0;
+            transition: background 0.2s ease;
+        }
+
+        .roster-name {
+            font-weight: 700;
+            font-size: 16.5px;
+            color: #e8dcc0;
+            letter-spacing: 0.5px;
+        }
+
+        .roster-badge {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 13px;
+            color: #c8a84b;
+        }
+
+        /* Leerer Zustand (wenn in den letzten 30 Tagen keine Einträge vorliegen) */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: rgba(200, 168, 75, 0.5);
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 16px;
+            text-align: center;
+            padding: 40px 20px;
+            gap: 10px;
+        }
+
+        .empty-state .empty-icon {
+            font-size: 22px;
+            color: rgba(200, 168, 75, 0.35);
+        }
+
+        /* --- 3. FUSSZEILE (SOCIALS & DANKSAGUNG) --- */
+        .footer-block {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .socials-row {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.75);
+        }
+
+        .social-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .social-dot {
+            font-size: 8px;
+            color: rgba(200,168,75,0.4);
+        }
+
+        .closing-motto {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 16px;
+            color: rgba(232,220,192,0.5);
+        }
+
+        /* ---------------------------------------------------------
+           VORSCHAU- & TEST-BEDIENLEISTE (?preview=1)
+           --------------------------------------------------------- */
+        .preview-bar {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: rgba(10, 16, 10, 0.96);
+            border: 1px solid rgba(200, 168, 75, 0.45);
+            border-radius: 6px;
+            padding: 12px 16px;
+            color: #f3ebd6;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+            max-width: 440px;
+        }
+
+        body.show-preview .preview-bar {
+            display: flex !important;
+        }
+
+        .btn-test {
+            background: #172418;
+            color: #f3ebd6;
+            border: 1px solid #c8a84b;
+            padding: 5px 9px;
+            border-radius: 3px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-test:hover {
+            background: #c8a84b;
+            color: #0b110b;
+        }
+        .btn-danger {
+            border-color: #8c3434;
+            color: #fca5a5;
+        }
+        .btn-danger:hover {
+            background: #8c3434;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="frame-top"></div>
+    <div class="frame-bottom"></div>
+
+    <!-- Ecken -->
+    <div class="corner corner-tl">
+        <svg viewBox="0 0 65 65" fill="none">
+            <path d="M5 60 L5 5 L60 5" stroke="rgba(200,168,75,0.75)" stroke-width="2"/>
+            <path d="M5 5 L13 13" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="5" cy="5" r="2.5" fill="rgba(200,168,75,0.8)"/>
+        </svg>
+    </div>
+    <div class="corner corner-tr">
+        <svg viewBox="0 0 65 65" fill="none">
+            <path d="M5 60 L5 5 L60 5" stroke="rgba(200,168,75,0.75)" stroke-width="2"/>
+            <path d="M5 5 L13 13" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="5" cy="5" r="2.5" fill="rgba(200,168,75,0.8)"/>
+        </svg>
+    </div>
+    <div class="corner corner-bl">
+        <svg viewBox="0 0 65 65" fill="none">
+            <path d="M5 60 L5 5 L60 5" stroke="rgba(200,168,75,0.75)" stroke-width="2"/>
+            <path d="M5 5 L13 13" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="5" cy="5" r="2.5" fill="rgba(200,168,75,0.8)"/>
+        </svg>
+    </div>
+    <div class="corner corner-br">
+        <svg viewBox="0 0 65 65" fill="none">
+            <path d="M5 60 L5 5 L60 5" stroke="rgba(200,168,75,0.75)" stroke-width="2"/>
+            <path d="M5 5 L13 13" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="5" cy="5" r="2.5" fill="rgba(200,168,75,0.8)"/>
+        </svg>
+    </div>
+
+    <!-- Hintergrund -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Testbedienfeld -->
+    <div class="preview-bar" id="previewBar">
+        <div style="font-family:'Playfair Display',serif; font-weight:900; color:#e5c96a; font-size:13px;">
+            ✦ ENDSCREEN 30-TAGE-REGISTER • TEST-STATION
+        </div>
+        <div style="font-size:10px; color:#a4b8a5;">
+            Zeigt strikt nur Abonnenten & Follower der letzten 30 Tage an.
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn-test" onclick="addTestSub('Lord_Alastair', 1)">+ Test-Sub (Monat 1)</button>
+            <button class="btn-test" onclick="addTestSub('Baron_Balthasar', 3)">+ Test-Sub (Monat 3)</button>
+            <button class="btn-test" onclick="addTestFollower('Sir_Galahad')">+ Test-Follower</button>
+            <button class="btn-test btn-danger" onclick="clearHistory()">🗑 Register leeren</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+
+        <!-- 1. HEADER -->
+        <div class="header-block">
+            <div class="estate-brand">✦ DOPPEL XP // THE GENTLEMEN ✦</div>
+            <div class="outro-title">Das Geschäft ist besiegelt.</div>
+            <div class="outro-subtitle">Die Bücher schließen sich für heute. Vielen Dank für Ihre geschätzte Anwesenheit.</div>
+        </div>
+
+        <!-- 2. DAS EHRENREGISTER (CREDITS) -->
+        <div class="roster-wrapper">
+            <div class="roster-header-bar">
+                <div class="roster-header-title">✦ &nbsp; Das Ehrenregister des Salons</div>
+                <div class="roster-header-meta">Gönner & Gefährten der letzten 30 Tage</div>
+            </div>
+
+            <div class="columns-container">
+                <!-- SPALTE 1: ABONNENTEN -->
+                <div class="roster-col">
+                    <div class="col-headline">
+                        <div class="col-headline-left">
+                            <span>✦</span> Abonnenten (Letzte 30 Tage)
+                        </div>
+                        <div class="col-count-badge" id="subs-count">0</div>
+                    </div>
+                    <div class="scroll-window">
+                        <div class="scroll-content" id="subs-list">
+                            <!-- Wird dynamisch befüllt -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TRENNLINIE -->
+                <div class="col-divider"></div>
+
+                <!-- SPALTE 2: FOLLOWER -->
+                <div class="roster-col">
+                    <div class="col-headline">
+                        <div class="col-headline-left">
+                            <span>✦</span> Die neuen Gefährten (Follower)
+                        </div>
+                        <div class="col-count-badge" id="followers-count">0</div>
+                    </div>
+                    <div class="scroll-window">
+                        <div class="scroll-content" id="followers-list">
+                            <!-- Wird dynamisch befüllt -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. FOOTER -->
+        <div class="footer-block">
+            <div class="socials-row">
+                <div class="social-item"><span>✦</span> Twitch: twitch.tv/d0ppelxp</div>
+                <div class="social-dot">•</div>
+                <div class="social-item"><span>✦</span> YouTube: @d0ppelxp</div>
+                <div class="social-dot">•</div>
+                <div class="social-item"><span>✦</span> Community: The Gentlemen Salon</div>
+            </div>
+            <div class="closing-motto">„Gute Manieren und absolute Diskretion. Bis zum nächsten Mal, Gentlemen.“</div>
+        </div>
+
+    </div>
+
+    <script>
+        // =========================================================
+        // 1. EINSTELLUNGEN & PARAMETER
+        // =========================================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const channelParam = urlParams.get('channel') || 'd0ppelxp';
+        if (urlParams.get('preview') === '1' || urlParams.get('test') === '1') {
+            document.body.classList.add('show-preview');
+        }
+
+        // =========================================================
+        // 2. HINTERGRUND & GOLDENE PARTIKEL (WIE BEIM STARTSCREEN)
+        // =========================================================
+        const bgCanvas = document.getElementById('bg-canvas');
+        bgCanvas.width = 1920;
+        bgCanvas.height = 1080;
+        const bgCtx = bgCanvas.getContext('2d');
+
+        const bgGrad = bgCtx.createRadialGradient(960, 480, 80, 960, 480, 950);
+        bgGrad.addColorStop(0, '#192818');
+        bgGrad.addColorStop(0.55, '#101a0f');
+        bgGrad.addColorStop(1, '#070d06');
+        bgCtx.fillStyle = bgGrad;
+        bgCtx.fillRect(0, 0, 1920, 1080);
+
+        // Die schwebenden Goldfunken
+        const pCanvas = document.getElementById('particle-canvas');
+        pCanvas.width = 1920;
+        pCanvas.height = 1080;
+        const pCtx = pCanvas.getContext('2d');
+
+        const particles = Array.from({ length: 85 }, () => ({
+            x: Math.random() * 1920,
+            y: Math.random() * 1080,
+            r: Math.random() * 2.0 + 0.4,
+            speed: Math.random() * 0.28 + 0.05,
+            drift: (Math.random() - 0.5) * 0.16,
+            phase: Math.random() * Math.PI * 2,
+            isBright: Math.random() > 0.45
+        }));
+
+        function drawParticles() {
+            pCtx.clearRect(0, 0, 1920, 1080);
+            const now = Date.now() * 0.001;
+
+            particles.forEach(p => {
+                const alpha = 0.10 + Math.abs(Math.sin(now * 0.6 + p.phase)) * 0.35;
+                pCtx.beginPath();
+                pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                pCtx.fillStyle = p.isBright 
+                    ? `rgba(229, 201, 106, ${alpha.toFixed(2)})` 
+                    : `rgba(200, 168, 75, ${alpha.toFixed(2)})`;
+                pCtx.shadowBlur = p.r * 2.5;
+                pCtx.shadowColor = 'rgba(229, 201, 106, 0.45)';
+                pCtx.fill();
+
+                p.y -= p.speed;
+                p.x += p.drift + Math.sin(now * 0.4 + p.phase) * 0.1;
+
+                if (p.y < -6) {
+                    p.y = 1086;
+                    p.x = Math.random() * 1920;
+                }
+                if (p.x < -6) p.x = 1926;
+                if (p.x > 1926) p.x = -6;
+            });
+
+            requestAnimationFrame(drawParticles);
+        }
+        drawParticles();
+
+        // =========================================================
+        // 3. 30-TAGE HISTORIE & SPEICHER-LOGIK
+        // =========================================================
+        const HISTORY_STORAGE_KEY = 'gentlemen_history_v1';
+        const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+        let historyData = {
+            subs: [],     // { name, timestamp, tag, months }
+            followers: [] // { name, timestamp, tag }
+        };
+
+        function loadHistory() {
+            try {
+                const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
+                if (saved) {
+                    historyData = JSON.parse(saved);
+                }
+            } catch (e) {
+                historyData = { subs: [], followers: [] };
+            }
+            cleanExpiredEntries();
+        }
+
+        function saveHistory() {
+            try {
+                localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(historyData));
+            } catch (e) {}
+        }
+
+        // Strikte Bereinigung: Alles älter als 30 Tage fliegt raus!
+        function cleanExpiredEntries() {
+            const cutoff = Date.now() - THIRTY_DAYS_MS;
+            if (Array.isArray(historyData.subs)) {
+                historyData.subs = historyData.subs.filter(item => {
+                    const t = item.timestamp || 0;
+                    return t >= cutoff;
+                });
+            } else {
+                historyData.subs = [];
+            }
+
+            if (Array.isArray(historyData.followers)) {
+                historyData.followers = historyData.followers.filter(item => {
+                    const t = item.timestamp || 0;
+                    return t >= cutoff;
+                });
+            } else {
+                historyData.followers = [];
+            }
+            saveHistory();
+        }
+
+        // Neuer Abonnent hinzufügen (oder vorhandenen aktualisieren)
+        function addSubscriber(name, timestamp = Date.now(), months = 1, isGift = false) {
+            if (!name) return;
+            const cleanName = String(name).trim();
+            const lower = cleanName.toLowerCase();
+
+            // Streamer & Bots ausschließen
+            if (lower === channelParam.toLowerCase() || lower === 'streamelements' || lower === 'nightbot') return;
+
+            let tag = 'Abonnent';
+            if (isGift) {
+                tag = 'Gift-Abo';
+            } else if (months > 1) {
+                tag = `Monat ${months}`;
+            }
+
+            // Bestehenden Eintrag suchen und aktualisieren, sonst neu anlegen
+            const idx = historyData.subs.findIndex(s => s.name.toLowerCase() === lower);
+            const entry = {
+                name: cleanName,
+                timestamp: timestamp,
+                tag: tag,
+                months: months
+            };
+
+            if (idx >= 0) {
+                historyData.subs[idx] = entry;
+            } else {
+                historyData.subs.unshift(entry);
+            }
+
+            cleanExpiredEntries();
+            renderAll();
+        }
+
+        // Neuer Follower hinzufügen
+        function addFollower(name, timestamp = Date.now()) {
+            if (!name) return;
+            const cleanName = String(name).trim();
+            const lower = cleanName.toLowerCase();
+
+            // Streamer & Bots ausschließen
+            if (lower === channelParam.toLowerCase() || lower === 'streamelements' || lower === 'nightbot') return;
+
+            const daysAgo = Math.floor((Date.now() - timestamp) / (24 * 60 * 60 * 1000));
+            let tag = 'Neuer Gefährte';
+            if (daysAgo === 0) tag = 'Heute beigetreten';
+            else if (daysAgo === 1) tag = 'Gestern beigetreten';
+            else if (daysAgo > 1) tag = `Vor ${daysAgo} Tagen`;
+
+            const idx = historyData.followers.findIndex(f => f.name.toLowerCase() === lower);
+            const entry = {
+                name: cleanName,
+                timestamp: timestamp,
+                tag: tag
+            };
+
+            if (idx >= 0) {
+                historyData.followers[idx] = entry;
+            } else {
+                historyData.followers.unshift(entry);
+            }
+
+            cleanExpiredEntries();
+            renderAll();
+        }
+
+        // =========================================================
+        // 4. RENDERING DER REGISTER-LISTEN
+        // =========================================================
+        const subsListEl = document.getElementById('subs-list');
+        const followersListEl = document.getElementById('followers-list');
+        const subsCountEl = document.getElementById('subs-count');
+        const followersCountEl = document.getElementById('followers-count');
+
+        function renderRoster(element, countEl, items, emptyMessage) {
+            cleanExpiredEntries();
+            countEl.textContent = items.length;
+
+            if (!items || items.length === 0) {
+                element.className = 'scroll-content';
+                element.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">✦</div>
+                        <div>${esc(emptyMessage)}</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Wenn weniger als 5 Einträge vorhanden sind: KEIN endloses Scrollen, sauber gestapelt!
+            if (items.length < 5) {
+                element.className = 'scroll-content';
+                element.innerHTML = items.map(item => `
+                    <div class="roster-card">
+                        <span class="roster-name">${esc(item.name)}</span>
+                        <span class="roster-badge">${esc(item.tag || 'Ehrenmitglied')}</span>
+                    </div>
+                `).join('');
+            } else {
+                // Ab 5 Einträgen: Verdoppeln für den eleganten Endlos-Scroll
+                element.className = 'scroll-content is-scrolling';
+                const displayItems = [...items, ...items];
+                element.innerHTML = displayItems.map(item => `
+                    <div class="roster-card">
+                        <span class="roster-name">${esc(item.name)}</span>
+                        <span class="roster-badge">${esc(item.tag || 'Ehrenmitglied')}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderAll() {
+            renderRoster(
+                subsListEl,
+                subsCountEl,
+                historyData.subs,
+                'Keine neuen Abonnements in den letzten 30 Tagen verzeichnet.'
+            );
+            renderRoster(
+                followersListEl,
+                followersCountEl,
+                historyData.followers,
+                'Keine neuen Gefährten in den letzten 30 Tagen verzeichnet.'
+            );
+        }
+
+        function extractSubMonths(e) {
+            if (!e) return 1;
+            // Falls StreamElements explizit months oder streak liefert
+            if (typeof e.months === 'number' && e.months > 0 && e.months < 120) return e.months;
+            if (typeof e.streak === 'number' && e.streak > 0 && e.streak < 120) return e.streak;
+
+            // StreamElements übergibt bei tier-1 oft e.amount = 1000 (Tier 2 = 2000, Tier 3 = 3000)
+            // Nur wenn amount ein realistischer Monatswert ist (1 bis 99)
+            if (typeof e.amount === 'number' && e.amount > 0 && e.amount < 100) {
+                return e.amount;
+            }
+            return 1;
+        }
+
+        function isGiftSub(e) {
+            if (!e) return false;
+            return e.gifted === true || e.bulkGifted === true || (e.sender && e.sender !== e.name);
+        }
+
+        // =========================================================
+        // 5. STREAMELEMENTS INTEGRATION
+        // =========================================================
+        window.addEventListener('onWidgetLoad', function (obj) {
+            if (obj && obj.detail && obj.detail.recents) {
+                const recents = obj.detail.recents;
+                const cutoff = Date.now() - THIRTY_DAYS_MS;
+
+                recents.forEach(e => {
+                    if (!e || !e.name) return;
+                    const time = e.createdAt ? new Date(e.createdAt).getTime() : 0;
+                    // Strikte 30-Tage Prüfung: Alles älter als 30 Tage wird ignoriert!
+                    if (time >= cutoff) {
+                        if (e.type === 'subscriber') {
+                            const months = extractSubMonths(e);
+                            addSubscriber(e.name, time, months, isGiftSub(e));
+                        } else if (e.type === 'follower') {
+                            addFollower(e.name, time);
+                        }
+                    }
+                });
+            }
+            renderAll();
+        });
+
+        window.addEventListener('onEventReceived', function (obj) {
+            if (!obj || !obj.detail) return;
+            const listener = obj.detail.listener;
+            const event = obj.detail.event;
+            if (!event) return;
+
+            if (listener === 'subscriber-latest' || listener === 'subscriber') {
+                const months = extractSubMonths(event);
+                addSubscriber(event.name || event.username, Date.now(), months, isGiftSub(event));
+            } else if (listener === 'follower-latest' || listener === 'follower') {
+                addFollower(event.name || event.username, Date.now());
+            }
+        });
+
+        // =========================================================
+        // 6. TWITCH IRC LIVE-LISTENER (USERNOTICE FÜR SUBS & GIFTS)
+        // =========================================================
+        function connectTwitchIrc(channelName) {
+            const targetChan = channelName.toLowerCase().replace('#', '');
+            const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+            ws.onopen = function () {
+                ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+                ws.send('PASS SCHMOOPIIE');
+                ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+                ws.send(`JOIN #${targetChan}`);
+                console.log(`[Twitch IRC Outro] Verbunden mit #${targetChan}`);
+            };
+
+            ws.onmessage = function (event) {
+                const lines = event.data.split('\r\n');
+                for (let line of lines) {
+                    if (!line) continue;
+                    if (line.startsWith('PING')) {
+                        ws.send('PONG :tmi.twitch.tv');
+                        continue;
+                    }
+
+                    // USERNOTICE für Abonnements & Resubs
+                    if (line.includes('USERNOTICE')) {
+                        const tagPart = line.split(' :')[0] || '';
+                        const msgIdMatch = tagPart.match(/msg-id=([a-z0-9_-]+)/);
+                        const msgId = msgIdMatch ? msgIdMatch[1] : '';
+
+                        const nameMatch = tagPart.match(/display-name=([^;]+)/) || tagPart.match(/login=([^;]+)/);
+                        const subName = nameMatch ? nameMatch[1] : null;
+
+                        const monthsMatch = tagPart.match(/msg-param-cumulative-months=([0-9]+)/);
+                        const months = monthsMatch ? parseInt(monthsMatch[1], 10) : 1;
+
+                        if (msgId === 'sub' || msgId === 'resub') {
+                            if (subName) addSubscriber(subName, Date.now(), months, false);
+                        } else if (msgId === 'subgift') {
+                            const recipientMatch = tagPart.match(/msg-param-recipient-display-name=([^;]+)/);
+                            const recipient = recipientMatch ? recipientMatch[1] : subName;
+                            if (recipient) addSubscriber(recipient, Date.now(), 1, true);
+                        }
+                    }
+                }
+            };
+
+            ws.onclose = function () {
+                setTimeout(() => connectTwitchIrc(channelName), 5000);
+            };
+        }
+
+        // =========================================================
+        // 7. TEST-FUNKTIONEN FÜR DIE TEST-STATION
+        // =========================================================
+        function addTestSub(name, months = 1) {
+            addSubscriber(name, Date.now(), months);
+        }
+
+        function addTestFollower(name) {
+            addFollower(name, Date.now());
+        }
+
+        function clearHistory() {
+            if (confirm("Möchtest du wirklich alle gespeicherten Subs und Follower aus dem Register löschen?")) {
+                historyData = { subs: [], followers: [] };
+                saveHistory();
+                renderAll();
+            }
+        }
+
+        function esc(s) {
+            return String(s || '')
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // Start
+        loadHistory();
+        renderAll();
+        connectTwitchIrc(channelParam);
+    </script>
+</body>
+</html>

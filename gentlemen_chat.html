@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen - Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        /* StreamElements CSS start */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: transparent;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0 0 20px 20px;
+        }
+
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 380px;
+        }
+
+        .chat-message {
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, rgba(28,42,28,0.94) 0%, rgba(35,50,28,0.94) 100%);
+            border: 1px solid rgba(180,140,60,0.3);
+            border-left: 3px solid #c8a84b;
+            padding: 8px 12px;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(200,168,75,0.1);
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slide-in 0.4s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+            position: relative;
+        }
+
+        @keyframes slide-in {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .chat-message.fade-out {
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 3px;
+        }
+
+        .chat-ornament {
+            color: rgba(200,168,75,0.5);
+            font-size: 9px;
+        }
+
+        .chat-username {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 13px;
+            color: #c8a84b;
+            text-shadow: 0 0 8px rgba(200,168,75,0.3);
+        }
+
+        .chat-text,
+        .chat-text * {
+            font-family: 'IM Fell English', serif !important;
+            font-size: 15px !important;
+            color: #e8dcc0 !important; /* Immer warmes Pergament-Creme statt Schwarz */
+            line-height: 1.45 !important;
+            word-break: break-word !important;
+        }
+
+        /* 7TV, BTTV & Twitch Emotes */
+        .chat-text img {
+            height: 26px !important;
+            width: auto !important;
+            vertical-align: middle !important;
+            margin: -2px 3px 0 3px !important;
+            display: inline-block !important;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+        }
+        /* StreamElements CSS end */
+
+        /* Preview controls */
+        .preview-controls {
+            position: fixed;
+            top: 10px; left: 10px;
+            background: rgba(0,0,0,0.85);
+            padding: 10px; border-radius: 5px;
+            display: flex; flex-direction: column; gap: 6px;
+            z-index: 999;
+        }
+        .preview-controls button {
+            padding: 5px 10px; cursor: pointer;
+            background: #243220; color: #c8a84b; border: 1px solid #c8a84b;
+            font-family: 'Playfair Display', serif; font-size: 11px;
+        }
+        html { background: #222; }
+    </style>
+</head>
+<body>
+    <!-- Preview controls -->
+    <div class="preview-controls">
+        <b style="color:#c8a84b;font-family:'Playfair Display',serif;font-size:12px;">Chat Preview</b>
+        <button onclick="simulateMessage('Lord Pearson', 'Sehr gut gespielt, alter Freund.')">Test Nachricht 1</button>
+        <button onclick="simulateMessage('Bobby Glass', 'Was ist da gerade passiert?! LUL')">Test Nachricht 2</button>
+        <button onclick="simulateMessage('Mercy', 'Das Anwesen sieht heute prächtig aus.')">Test Nachricht 3</button>
+    </div>
+
+    <!-- StreamElements HTML start -->
+    <div id="chat-container"></div>
+    <!-- StreamElements HTML end -->
+
+    <script>
+        // StreamElements JS start
+        const MAX_MESSAGES = 6;
+        const MESSAGE_LIFETIME = 30000; // 30 Sekunden
+
+        const container = document.getElementById('chat-container');
+
+        window.addEventListener('onEventReceived', function (obj) {
+            if (!obj.detail || !obj.detail.event) return;
+            if (obj.detail.listener !== 'message') return;
+
+            const data = obj.detail.event.data;
+            if (!data) return;
+
+            // StreamElements liefert 7TV, BTTV & Twitch Emotes fertig gerendert in renderedText:
+            const content = data.renderedText || escapeHtml(data.text || '');
+            const name = data.displayName || data.nick || 'Unbekannt';
+
+            addMessage(name, content);
+        });
+
+        function addMessage(username, messageHtml) {
+            // Max messages enforced
+            while (container.children.length >= MAX_MESSAGES) {
+                container.removeChild(container.firstChild);
+            }
+
+            const el = document.createElement('div');
+            el.className = 'chat-message';
+            el.innerHTML = `
+                <div class="chat-header">
+                    <span class="chat-ornament">✦</span>
+                    <span class="chat-username">${escapeHtml(username)}</span>
+                </div>
+                <div class="chat-text">${messageHtml}</div>
+            `;
+            container.appendChild(el);
+
+            // Auto-fade after lifetime
+            setTimeout(() => {
+                el.classList.add('fade-out');
+                setTimeout(() => {
+                    if (el.parentNode) el.parentNode.removeChild(el);
+                }, 800);
+            }, MESSAGE_LIFETIME);
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+        // StreamElements JS end
+
+        // Preview simulator
+        function simulateMessage(name, text) {
+            window.dispatchEvent(new CustomEvent('onEventReceived', {
+                detail: {
+                    listener: 'message',
+                    event: { data: { displayName: name, text: text } }
+                }
+            }));
+        }
+    </script>
+</body>
+</html>

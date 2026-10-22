@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen - Labels</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        /* StreamElements CSS start */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: transparent;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-start;
+            height: 100vh;
+            padding: 0 0 28px 20px;
+            gap: 0;
+        }
+
+        .label-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .label-card {
+            width: 230px;
+            background: linear-gradient(135deg, rgba(28,42,28,0.93) 0%, rgba(35,50,28,0.93) 100%);
+            border: 1px solid rgba(180,140,60,0.3);
+            border-left: 3px solid rgba(200,168,75,0.7);
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(200,168,75,0.1);
+            padding: 7px 12px 8px;
+            position: relative;
+        }
+
+        /* Top shimmer line */
+        .label-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 3px; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(200,168,75,0.4), transparent);
+        }
+
+        .label-type {
+            font-family: 'Playfair Display', serif;
+            font-size: 8px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.55);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 4px;
+        }
+
+        .label-type .ornament {
+            font-size: 7px;
+            opacity: 0.7;
+        }
+
+        .label-name {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 15px;
+            color: #c8a84b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 0 10px rgba(200,168,75,0.25);
+            transition: opacity 0.3s ease;
+        }
+
+        .label-name.updating {
+            opacity: 0;
+        }
+
+        .label-name.placeholder {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: 13px;
+            color: rgba(200,168,75,0.35);
+        }
+        /* StreamElements CSS end */
+
+        /* Preview */
+        .preview-controls {
+            position: fixed;
+            top: 10px; right: 10px;
+            background: rgba(0,0,0,0.85);
+            padding: 10px; border-radius: 5px;
+            display: flex; flex-direction: column; gap: 6px; z-index: 999;
+        }
+        .preview-controls button {
+            padding: 5px 10px; cursor: pointer;
+            background: #243220; color: #c8a84b; border: 1px solid #c8a84b;
+            font-family: 'Playfair Display', serif; font-size: 11px;
+        }
+        html { background: #222; }
+    </style>
+</head>
+<body>
+    <!-- Preview controls -->
+    <div class="preview-controls">
+        <b style="color:#c8a84b;font-family:'Playfair Display',serif;font-size:11px;">Label Preview</b>
+        <button onclick="simulateEvent('follower-latest', {name: 'Lord Pearson'})">Test Follower</button>
+        <button onclick="simulateEvent('subscriber-latest', {name: 'Bobby Glass'})">Test Sub</button>
+        <button onclick="simulateEvent('tip-latest', {name: 'Mercy', amount: 50})">Test Tip</button>
+    </div>
+
+    <!-- StreamElements HTML start -->
+    <div class="label-stack">
+
+        <div class="label-card">
+            <div class="label-type">
+                <span class="ornament">✦</span>
+                Letzter Verbündeter
+            </div>
+            <div class="label-name placeholder" id="follower-name">— Noch niemand —</div>
+        </div>
+
+        <div class="label-card">
+            <div class="label-type">
+                <span class="ornament">✦</span>
+                Treuer Gönner
+            </div>
+            <div class="label-name placeholder" id="subscriber-name">— Noch niemand —</div>
+        </div>
+
+        <div class="label-card">
+            <div class="label-type">
+                <span class="ornament">✦</span>
+                Großzügige Zuwendung
+            </div>
+            <div class="label-name placeholder" id="tip-name">— Noch niemand —</div>
+        </div>
+
+    </div>
+    <!-- StreamElements HTML end -->
+
+    <script>
+        // StreamElements JS start
+        function setLabel(elementId, name) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+
+            // Fade out, swap name, fade in
+            el.classList.add('updating');
+            setTimeout(() => {
+                el.classList.remove('placeholder');
+                el.innerText = name;
+                el.classList.remove('updating');
+            }, 300);
+        }
+
+        window.addEventListener('onWidgetLoad', function (obj) {
+            if (!obj.detail || !obj.detail.session) return;
+            const data = obj.detail.session.data;
+            if (!data) return;
+
+            if (data['follower-latest'] && data['follower-latest'].name)
+                setLabel('follower-name', data['follower-latest'].name);
+            if (data['subscriber-latest'] && data['subscriber-latest'].name)
+                setLabel('subscriber-name', data['subscriber-latest'].name);
+            if (data['tip-latest'] && data['tip-latest'].name)
+                setLabel('tip-name', data['tip-latest'].name);
+        });
+
+        window.addEventListener('onEventReceived', function (obj) {
+            if (!obj.detail || !obj.detail.event) return;
+            const listener = obj.detail.listener;
+            const name = obj.detail.event.name || obj.detail.event.displayName || 'Unbekannt';
+
+            if (listener === 'follower-latest') setLabel('follower-name', name);
+            else if (listener === 'subscriber-latest') setLabel('subscriber-name', name);
+            else if (listener === 'tip-latest') setLabel('tip-name', name);
+        });
+        // StreamElements JS end
+
+        // Preview simulator
+        function simulateEvent(listener, eventData) {
+            window.dispatchEvent(new CustomEvent('onEventReceived', {
+                detail: { listener, event: eventData }
+            }));
+        }
+    </script>
+</body>
+</html>

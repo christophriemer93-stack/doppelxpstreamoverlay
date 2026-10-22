@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen – Das Club-Register & Ahnengalerie (Ledger)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       THE GENTLEMEN – DAS CLUB-REGISTER // DIE AHNENGALERIE
+       ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Playfair Display', serif;
+      pointer-events: none;
+      position: relative;
+    }
+
+    /* ---------------------------------------------------------
+       1. HAUPTKARTE: DAS GOLDENE CLUB-BUCH
+       --------------------------------------------------------- */
+    .ledger-card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.92);
+      width: 580px;
+      background: linear-gradient(145deg, rgba(13, 23, 14, 0.985) 0%, rgba(19, 32, 20, 0.985) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.55);
+      border-radius: 4px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.85),
+        0 0 0 3px rgba(200, 168, 75, 0.22),
+        0 20px 60px rgba(0, 0, 0, 0.95),
+        inset 0 1px 0 rgba(229, 201, 106, 0.35);
+      opacity: 0;
+      transition: all 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .ledger-card.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    /* Goldene Zierbänder oben & unten */
+    .ledger-card::before,
+    .ledger-card::after {
+      content: '';
+      display: block;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #c8a84b 30%, #f3ebd6 50%, #c8a84b 70%, transparent);
+    }
+
+    .ledger-inner {
+      padding: 24px 28px 20px;
+      position: relative;
+    }
+
+    /* Wasserzeichen DXP Monogramm */
+    .ledger-inner::before {
+      content: '✦';
+      position: absolute;
+      font-size: 200px;
+      color: rgba(200, 168, 75, 0.025);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200,168,75,0.6));
+    }
+    .divider-line.right {
+      background: linear-gradient(90deg, rgba(200,168,75,0.6), transparent);
+    }
+    .divider-ornament {
+      font-size: 11px;
+      color: #e5c96a;
+    }
+
+    .ledger-tagline {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #c8a84b;
+      text-align: center;
+      margin-bottom: 2px;
+    }
+
+    .ledger-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: #f3ebd6;
+      text-align: center;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+      margin-bottom: 2px;
+    }
+
+    .ledger-subtitle {
+      font-family: 'IM Fell English', serif;
+      font-size: 14px;
+      font-style: italic;
+      color: #d8cdb4;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    /* ---------------------------------------------------------
+       2. DIE 4 REGISTER-KATEGORIEN (GRID)
+       --------------------------------------------------------- */
+    .ledger-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .pillar-box {
+      background: rgba(8, 14, 9, 0.7);
+      border: 1px solid rgba(200, 168, 75, 0.25);
+      border-radius: 3px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pillar-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #c8a84b, #e5c96a);
+    }
+
+    .pillar-avatar-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid #e5c96a;
+      box-shadow: 0 0 8px rgba(200, 168, 75, 0.3);
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #0d170e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pillar-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .pillar-avatar-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #1a2c1b 0%, #0c140d 100%);
+      color: #e5c96a;
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .pillar-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .pillar-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 8.5px;
+      font-weight: 700;
+      color: #c8a84b;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .pillar-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: #f3ebd6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 2px 0 1px;
+    }
+
+    .pillar-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #4ade80;
+    }
+
+    /* ---------------------------------------------------------
+       3. FUSSZEILE (TIMER-BAR)
+       --------------------------------------------------------- */
+    .ledger-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(200, 168, 75, 0.2);
+      padding-top: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9.5px;
+      color: #8a9c8b;
+    }
+
+    .ledger-footer-right {
+      color: #e5c96a;
+      font-weight: 600;
+    }
+
+    .ledger-timer-bar-wrap {
+      width: 100%;
+      height: 2.5px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 1px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .ledger-timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #c8a84b, #e5c96a);
+      transition: width 0.15s linear;
+    }
+
+    /* ---------------------------------------------------------
+       PREVIEW CONTROLS (TESTEN)
+       --------------------------------------------------------- */
+    .preview-bar {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(10, 16, 10, 0.95);
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #f3ebd6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      z-index: 9999;
+      display: none; /* Standardmäßig KOMPLETT ausgeblendet! */
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: all;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      max-width: 440px;
+    }
+
+    body.show-preview .preview-bar {
+      display: flex !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TESTBEDIENFELD -->
+  <div class="preview-bar" id="previewBar">
+    <div class="preview-title">
+      <span>✦ AHNENGALERIE • TEST-STATION</span>
+      <span style="font-size: 10px; color: #8a9c8b; cursor: pointer;" onclick="document.body.classList.toggle('no-preview')">[Ausblenden]</span>
+    </div>
+    <div style="font-size: 10px; color: #a4b8a5;">
+      Befehl im Chat: <strong style="color:#e5c96a;">!watchtime</strong> oder <strong style="color:#e5c96a;">!zeit</strong>
+    </div>
+    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+      <button class="btn-test" onclick="showLedgerCard()">▶ Ahnengalerie jetzt anzeigen (15s)</button>
+      <button class="btn-test" onclick="simulateActivity('Lord_Pearson')">+ Watchtime simulieren</button>
+      <button class="btn-test" onclick="resetLedgerData()" style="border-color:#8c3434; color:#fca5a5;">↺ Reset</button>
+    </div>
+  </div>
+
+  <!-- DIE AHNENGALERIE (LEDGER) -->
+  <div class="ledger-card" id="ledgerCard">
+    <div class="ledger-inner">
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-ornament">✦</div>
+        <div class="divider-line right"></div>
+      </div>
+      <div class="ledger-tagline">DOPPEL XP // DAS CLUB-REGISTER</div>
+      <div class="ledger-title">DIE AHNENGALERIE</div>
+      <div class="ledger-subtitle">Die herausragendsten Persönlichkeiten des Salons</div>
+
+      <!-- 4 Hauptsäulen -->
+      <div class="ledger-grid">
+        
+        <!-- Säule 1: Meister der Zeit (Top Watchtime / Anwesenheit) -->
+        <div class="pillar-box">
+          <div class="pillar-avatar-wrap">
+            <img class="pillar-avatar-img" id="avatarTime" src="" style="display:none;" onerror="this.style.display='none'; document.getElementById('fbTime').style.display='flex';">
+            <div class="pillar-avatar-fallback" id="fbTime">✦</div>
+          </div>
+          <div class="pillar-info">
+            <div class="pillar-title">Dienstältester Lord</div>
+            <div class="pillar-name" id="nameTime">Niemand</div>
+            <div class="pillar-value" id="valTime">0 Std. Anwesenheit</div>
+          </div>
+        </div>
+
+        <!-- Säule 2: Großmeister der Jagd (Fasanenjagd) -->
+        <div class="pillar-box">
+          <div class="pillar-avatar-wrap">
+            <img class="pillar-avatar-img" id="avatarHunt" src="" style="display:none;" onerror="this.style.display='none'; document.getElementById('fbHunt').style.display='flex';">
+            <div class="pillar-avatar-fallback" id="fbHunt">✦</div>
+          </div>
+          <div class="pillar-info">
+            <div class="pillar-title">Großmeister der Jagd</div>
+            <div class="pillar-name" id="nameHunt">Niemand</div>
+            <div class="pillar-value" id="valHunt">0 Fasane erlegt</div>
+          </div>
+        </div>
+
+        <!-- Säule 3: Großlexikograph (Wordle Meister) -->
+        <div class="pillar-box">
+          <div class="pillar-avatar-wrap">
+            <img class="pillar-avatar-img" id="avatarWordle" src="" style="display:none;" onerror="this.style.display='none'; document.getElementById('fbWordle').style.display='flex';">
+            <div class="pillar-avatar-fallback" id="fbWordle">✦</div>
+          </div>
+          <div class="pillar-info">
+            <div class="pillar-title">Großlexikograph</div>
+            <div class="pillar-name" id="nameWordle">Niemand</div>
+            <div class="pillar-value" id="valWordle">0 Wörter gelöst</div>
+          </div>
+        </div>
+
+        <!-- Säule 4: Gönner der Krone (Top Supporter / Mäzen) -->
+        <div class="pillar-box">
+          <div class="pillar-avatar-wrap">
+            <img class="pillar-avatar-img" id="avatarPatron" src="" style="display:none;" onerror="this.style.display='none'; document.getElementById('fbPatron').style.display='flex';">
+            <div class="pillar-avatar-fallback" id="fbPatron">✦</div>
+          </div>
+          <div class="pillar-info">
+            <div class="pillar-title">Mäzen des Salons</div>
+            <div class="pillar-name" id="namePatron">Niemand</div>
+            <div class="pillar-value" id="valPatron">Ehrenmitglied</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ledger-footer">
+        <div>Eintrag im Salon-Register &bull; Auf ewig verbrieft</div>
+        <div class="ledger-footer-right">✦ D0PPELXP CLUB ✦</div>
+      </div>
+
+      <div class="ledger-timer-bar-wrap">
+        <div class="ledger-timer-bar" id="ledgerTimerBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="cloud_db.js"></script>
+  <script>
+    // =========================================================
+    // 1. EINSTELLUNGEN & KANAL
+    // =========================================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelParam = urlParams.get('channel') || 'd0ppelxp';
+    if (urlParams.get('preview') === '1' || urlParams.get('test') === '1') {
+      document.body.classList.add('show-preview');
+    }
+
+    // Streamer & Bots aus der Watchtime-Ahnengalerie ausschließen
+    const STOP_WORDS = new Set([
+      'ein', 'eine', 'einer', 'eines', 'einem', 'einen',
+      'der', 'die', 'das', 'dem', 'den', 'des',
+      'du', 'er', 'sie', 'es', 'wir', 'ihr',
+      'und', 'oder', 'ist', 'hat', 'hatte', 'sind', 'haben',
+      'danke', 'dankeschön', 'glückwunsch', 'hallo', 'moin',
+      'viewer', 'zuschauer', 'watchtime', 'zeit', 'stunden', 'minuten',
+      'the', 'a', 'an', 'you', 'he', 'she', 'it', 'we', 'they',
+      'has', 'have', 'is', 'are', 'was', 'were',
+      'd0ppelxp', 'chris', 'streamelements', 'nightbot', 'moobot', 'fossabot'
+    ]);
+
+    function isStreamerOrBot(username) {
+      if (!username) return true;
+      const u = username.toLowerCase().trim().replace('@', '').replace('#', '');
+      const streamer = channelParam.toLowerCase().replace('#', '');
+      return u === streamer || u === 'd0ppelxp' || u === 'chris' || u === 'streamelements' || u === 'nightbot' || u === 'moobot' || u === 'fossabot' || STOP_WORDS.has(u) || u.length < 3;
+    }
+
+    // =========================================================
+    // 2. STREAMELEMENTS INTEGRATION & WATCHTIME TRACKER
+    // =========================================================
+    const LEDGER_STORAGE_KEY = 'gentlemen_ledger_v1';
+    let ledgerData = {
+      watchtime: {}, // username -> { displayName, minutes }
+      patrons: {},   // username -> { displayName, amount }
+      seTopWatchtimeUser: null, // Von StreamElements API
+      lastAutoPopup: Date.now()
+    };
+
+    try {
+      const saved = localStorage.getItem(LEDGER_STORAGE_KEY);
+      if (saved) {
+        ledgerData = JSON.parse(saved);
+        // Vorhandene ungültige Einträge (z.B. 'ein', Streamer, Bots) rigoros löschen
+        if (ledgerData.watchtime) {
+          Object.keys(ledgerData.watchtime).forEach(k => {
+            if (isStreamerOrBot(k)) delete ledgerData.watchtime[k];
+          });
+        }
+        if (ledgerData.seTopWatchtimeUser && isStreamerOrBot(ledgerData.seTopWatchtimeUser.username)) {
+          ledgerData.seTopWatchtimeUser = null;
+        }
+        saveLedgerData();
+      }
+    } catch (e) {}
+
+    function saveLedgerData() {
+      try {
+        localStorage.setItem(LEDGER_STORAGE_KEY, JSON.stringify(ledgerData));
+        // Cloud-Sync zu Firebase
+        if (window.CloudDB && ledgerData.watchtime) {
+          Object.keys(ledgerData.watchtime).forEach(user => {
+            const entry = ledgerData.watchtime[user];
+            window.CloudDB.updateWatchtime(user, entry.minutes, entry.displayName);
+          });
+        }
+      } catch (e) {}
+    }
+
+    // Cloud-Daten beim Start laden
+    async function initCloudWatchtime() {
+      if (window.CloudDB) {
+        const cloudData = await window.CloudDB.getWatchtimeData();
+        if (cloudData && Object.keys(cloudData).length > 0) {
+          Object.keys(cloudData).forEach(u => {
+            if (!isStreamerOrBot(u)) {
+              if (!ledgerData.watchtime[u] || cloudData[u].minutes > ledgerData.watchtime[u].minutes) {
+                ledgerData.watchtime[u] = cloudData[u];
+              }
+            }
+          });
+          renderLedger();
+        }
+      }
+    }
+    initCloudWatchtime();
+
+    // StreamElements Public Leaderboard API abfragen (Punkte & Watchtime)
+    async function fetchStreamElementsLeaderboard(channelName) {
+      try {
+        const chan = channelName.toLowerCase().replace('#', '');
+        const res = await fetch(`https://api.streamelements.com/kappa/v2/points/${chan}/top?limit=15`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.users && data.users.length > 0) {
+            // Finde den ersten echten ZUSCHAUER (Streamer, Bots & Füllwörter überspringen)
+            const topUser = data.users.find(u => !isStreamerOrBot(u.username));
+            if (topUser) {
+              ledgerData.seTopWatchtimeUser = {
+                username: topUser.username,
+                displayName: topUser.username,
+                points: topUser.points || 0,
+                rank: 1
+              };
+              saveLedgerData();
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Wenn der StreamElements-Bot auf !watchtime antwortet, Zahl extrahieren:
+    // z.B. "Streamelements: @User hat 142 Stunden und 15 Minuten zugeschaut."
+    // oder "User hat 142 Stunden..."
+    function parseStreamElementsBotMessage(botText) {
+      try {
+        if (!botText) return;
+
+        // 1. Stunden und Minuten aus dem Text extrahieren
+        const hoursMatch = botText.match(/(\d+)\s*(?:std|stunde|stunden|h|hours|hour)/i);
+        const minsMatch = botText.match(/(\d+)\s*(?:min|minute|minuten|m|minutes)/i);
+
+        const hrs = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
+        const mins = minsMatch ? parseInt(minsMatch[1], 10) : 0;
+        const totalMin = (hrs * 60) + mins;
+        if (totalMin <= 0) return;
+
+        // 2. Ziel-Username finden (Niemals Füllwörter wie "Ein" oder den Bot/Streamer matchen!)
+        let targetUser = null;
+        let targetDisplay = null;
+
+        // Fall A: Explizite @Erwähnung (@Username)
+        const atMatch = botText.match(/@([a-zA-Z0-9_]{3,25})/);
+        if (atMatch && !isStreamerOrBot(atMatch[1])) {
+          targetUser = atMatch[1].toLowerCase();
+          targetDisplay = atMatch[1];
+        }
+
+        // Fall B: Name direkt vor einem Verb ("Username hat ...", "Username schaut ...")
+        if (!targetUser) {
+          const verbMatch = botText.match(/(?:^|[\s,;:])([a-zA-Z0-9_]{3,25})\s+(?:hat|schaut|ist|has|spent|is)\b/i);
+          if (verbMatch && !isStreamerOrBot(verbMatch[1])) {
+            targetUser = verbMatch[1].toLowerCase();
+            targetDisplay = verbMatch[1];
+          }
+        }
+
+        // Fall C: Erstes Wort, sofern es ein echter Username und kein Füllwort ist
+        if (!targetUser) {
+          const firstWordMatch = botText.match(/^([a-zA-Z0-9_]{3,25})\b/);
+          if (firstWordMatch && !isStreamerOrBot(firstWordMatch[1])) {
+            targetUser = firstWordMatch[1].toLowerCase();
+            targetDisplay = firstWordMatch[1];
+          }
+        }
+
+        // 3. Wenn gültiger Zuschauer gefunden:
+        if (targetUser && !isStreamerOrBot(targetUser)) {
+          if (!ledgerData.watchtime[targetUser]) {
+            ledgerData.watchtime[targetUser] = { displayName: targetDisplay, minutes: 0 };
+          }
+          ledgerData.watchtime[targetUser].minutes = Math.max(ledgerData.watchtime[targetUser].minutes, totalMin);
+          ledgerData.watchtime[targetUser].displayName = targetDisplay;
+          saveLedgerData();
+        }
+      } catch (e) {
+        console.error("Fehler beim Parsen der Watchtime-Nachricht:", e);
+      }
+    }
+
+    // Aktive Chatter im Stream (kontinuierliches Backup-Tracking)
+    let activeChatters = new Map(); // username -> lastSeenTimestamp
+
+    function registerChatterActivity(username) {
+      const clean = username.toLowerCase().trim();
+      if (isStreamerOrBot(clean)) return; // Streamer, Bots & Wörter nicht tracken!
+
+      activeChatters.set(clean, { displayName: username, lastSeen: Date.now() });
+      if (!ledgerData.watchtime[clean]) {
+        ledgerData.watchtime[clean] = { displayName: username, minutes: 1 };
+      }
+      saveLedgerData();
+    }
+
+    // Backup-Ticker: Jede Minute aktiv = +1 Minute
+    setInterval(() => {
+      const now = Date.now();
+      const cutoff = now - (15 * 60 * 1000);
+      let updated = false;
+
+      activeChatters.forEach((val, key) => {
+        if (isStreamerOrBot(key)) return;
+        if (val.lastSeen >= cutoff) {
+          if (!ledgerData.watchtime[key]) {
+            ledgerData.watchtime[key] = { displayName: val.displayName, minutes: 0 };
+          }
+          ledgerData.watchtime[key].minutes++;
+          updated = true;
+        }
+      });
+
+      if (updated) saveLedgerData();
+    }, 60000);
+
+    // =========================================================
+    // 2. KREUZABFRAGE DER 4 BESTEN (JAGD, WORDLE, ZEIT, MÄZEN)
+    // =========================================================
+    function getTopPerformers() {
+      // 1. Top Watchtime (Bevorzugt StreamElements Leaderboard falls vorhanden, sonst lokaler Tracker)
+      let topTime = { name: 'Noch unbesetzt', value: '0 Std. Anwesenheit', user: null };
+
+      if (ledgerData.seTopWatchtimeUser && ledgerData.seTopWatchtimeUser.username && !isStreamerOrBot(ledgerData.seTopWatchtimeUser.username)) {
+        topTime = {
+          name: ledgerData.seTopWatchtimeUser.displayName,
+          value: `Rang 1 &bull; ${ledgerData.seTopWatchtimeUser.points} Punkte`,
+          user: ledgerData.seTopWatchtimeUser.username.toLowerCase()
+        };
+      }
+
+      let maxMin = 0;
+      Object.keys(ledgerData.watchtime || {}).forEach(k => {
+        if (isStreamerOrBot(k)) return; // Füllwörter, Bots & Streamer überspringen!
+        const item = ledgerData.watchtime[k];
+        if (item.minutes > maxMin) {
+          maxMin = item.minutes;
+          const hrs = (item.minutes / 60).toFixed(1);
+          // Wenn lokaler Tracker echte Stunden hat, zeige diese
+          topTime = { name: item.displayName, value: `${hrs} Std. Anwesenheit`, user: k };
+        }
+      });
+
+      // 2. Top Jäger (aus gentlemen_pheasant_hunt_v2)
+      let topHunt = { name: 'Noch unbesetzt', value: '0 Fasane', user: null };
+      try {
+        const huntDB = JSON.parse(localStorage.getItem('gentlemen_pheasant_hunt_v2') || '{}');
+        let maxHits = 0;
+        Object.keys(huntDB).forEach(k => {
+          const rec = huntDB[k];
+          if (rec.totalHits > maxHits) {
+            maxHits = rec.totalHits;
+            topHunt = { name: rec.displayName || k, value: `${rec.totalHits} Fasane erlegt`, user: k };
+          }
+        });
+      } catch (e) {}
+
+      // 3. Top Wortschmied (aus gentlemen_wordle_shared_v1)
+      let topWordle = { name: 'Noch unbesetzt', value: '0 Wörter', user: null };
+      try {
+        const wordleDB = JSON.parse(localStorage.getItem('gentlemen_wordle_shared_v1') || '{}');
+        let maxSolved = 0;
+        Object.keys(wordleDB).forEach(k => {
+          const rec = wordleDB[k];
+          if (rec.totalSolved > maxSolved) {
+            maxSolved = rec.totalSolved;
+            topWordle = { name: rec.displayName || k, value: `${rec.totalSolved} Wörter gelöst`, user: k };
+          }
+        });
+      } catch (e) {}
+
+      // 4. Top Mäzen / Supporter
+      let topPatron = { name: 'Noch unbesetzt', value: 'Ehrenmitglied', user: null };
+      let maxBits = 0;
+      Object.keys(ledgerData.patrons || {}).forEach(k => {
+        const p = ledgerData.patrons[k];
+        if (p.amount > maxBits) {
+          maxBits = p.amount;
+          topPatron = { name: p.displayName || k, value: `${p.amount} Bits gespendet`, user: k };
+        }
+      });
+
+      return { topTime, topHunt, topWordle, topPatron };
+    }
+
+    // =========================================================
+    // 3. ANZEIGE & ANIMATION DER AHNENGALERIE
+    // =========================================================
+    const ledgerCard = document.getElementById('ledgerCard');
+    const timerBar = document.getElementById('ledgerTimerBar');
+    let isLedgerShowing = false;
+    let ledgerHideTimeout = null;
+
+    async function showLedgerCard(durationMs = 15000) {
+      if (isLedgerShowing) return;
+      isLedgerShowing = true;
+
+      const leaders = getTopPerformers();
+
+      // UI Befüllen
+      document.getElementById('nameTime').textContent = leaders.topTime.name;
+      document.getElementById('valTime').textContent = leaders.topTime.value;
+
+      document.getElementById('nameHunt').textContent = leaders.topHunt.name;
+      document.getElementById('valHunt').textContent = leaders.topHunt.value;
+
+      document.getElementById('nameWordle').textContent = leaders.topWordle.name;
+      document.getElementById('valWordle').textContent = leaders.topWordle.value;
+
+      document.getElementById('namePatron').textContent = leaders.topPatron.name;
+      document.getElementById('valPatron').textContent = leaders.topPatron.value;
+
+      // Avatare parallel abrufen
+      applyAvatar(leaders.topTime.user, 'avatarTime', 'fbTime');
+      applyAvatar(leaders.topHunt.user, 'avatarHunt', 'fbHunt');
+      applyAvatar(leaders.topWordle.user, 'avatarWordle', 'fbWordle');
+      applyAvatar(leaders.topPatron.user, 'avatarPatron', 'fbPatron');
+
+      // Karte einblenden
+      timerBar.style.width = '100%';
+      ledgerCard.classList.add('show');
+
+      const start = Date.now();
+      const interval = setInterval(() => {
+        const left = (start + durationMs) - Date.now();
+        if (left <= 0) {
+          clearInterval(interval);
+        } else {
+          timerBar.style.width = `${(left / durationMs) * 100}%`;
+        }
+      }, 100);
+
+      ledgerHideTimeout = setTimeout(() => {
+        ledgerCard.classList.remove('show');
+        setTimeout(() => { isLedgerShowing = false; }, 750);
+      }, durationMs);
+    }
+
+    // =========================================================
+    // 4. TWITCH AVATAR FETCHER
+    // =========================================================
+    const avatarCache = new Map();
+    async function applyAvatar(username, imgId, fallbackId) {
+      const img = document.getElementById(imgId);
+      const fallback = document.getElementById(fallbackId);
+
+      if (!username) {
+        img.style.display = 'none';
+        fallback.style.display = 'flex';
+        fallback.textContent = '✦';
+        return;
+      }
+
+      fallback.textContent = username.charAt(0).toUpperCase();
+
+      if (avatarCache.has(username)) {
+        img.src = avatarCache.get(username);
+        img.style.display = 'block';
+        fallback.style.display = 'none';
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://decapi.me/twitch/avatar/${encodeURIComponent(username)}`);
+        if (res.ok) {
+          const text = await res.text();
+          if (text && text.startsWith('http')) {
+            avatarCache.set(username, text.trim());
+            img.src = text.trim();
+            img.style.display = 'block';
+            fallback.style.display = 'none';
+            return;
+          }
+        }
+      } catch (e) {}
+
+      img.style.display = 'none';
+      fallback.style.display = 'flex';
+    }
+
+    // =========================================================
+    // 5. KEIN AUTO-POPUP (NUR AUF CHAT-BEFEHL !watchtime)
+    // =========================================================
+
+    // =========================================================
+    // 6. EVENT LISTENER (StreamElements & Native IRC)
+    // =========================================================
+    window.addEventListener('onEventReceived', function (obj) {
+      if (!obj || !obj.detail) return;
+      
+      // Chatnachrichten
+      if (obj.detail.listener === 'message') {
+        const d = obj.detail.event.data;
+        if (!d) return;
+        const user = d.displayName || d.nick || 'Gentleman';
+        registerChatterActivity(user);
+
+        const text = (d.text || '').toLowerCase().trim();
+        if (text === '!watchtime' || text === '!zeit') {
+          showLedgerCard();
+        }
+      }
+
+      // Cheer / Tip Event für "Mäzen des Salons"
+      if (obj.detail.listener === 'cheer-latest' || obj.detail.listener === 'tip-latest') {
+        const e = obj.detail.event;
+        if (e && e.name && e.amount) {
+          const key = e.name.toLowerCase().trim();
+          if (!ledgerData.patrons[key]) {
+            ledgerData.patrons[key] = { displayName: e.name, amount: 0 };
+          }
+          ledgerData.patrons[key].amount += parseInt(e.amount, 10);
+          saveLedgerData();
+        }
+      }
+    });
+
+    function connectTwitchIrc(channelName) {
+      if (window.StreamElements) return;
+      const targetChan = channelName.toLowerCase().replace('#', '');
+      const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+      ws.onopen = function () {
+        ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+        ws.send('PASS SCHMOOPIIE');
+        ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+        ws.send(`JOIN #${targetChan}`);
+        console.log(`[Twitch IRC Ledger] Verbunden mit #${targetChan}`);
+      };
+
+      ws.onmessage = function (event) {
+        const lines = event.data.split('\r\n');
+        for (let line of lines) {
+          if (!line) continue;
+          if (line.startsWith('PING')) {
+            ws.send('PONG :tmi.twitch.tv');
+            continue;
+          }
+
+          if (line.includes('PRIVMSG')) {
+            const match = line.match(/@([^ ]+) :([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)/);
+            let displayName = 'Gentleman';
+            let chatText = '';
+
+            if (match) {
+              const rawTags = match[1];
+              const username = match[2];
+              chatText = match[3].trim();
+              const tagMatch = rawTags.match(/display-name=([^;]+)/);
+              displayName = (tagMatch && tagMatch[1]) ? tagMatch[1] : username;
+            } else {
+              const matchUser = line.match(/display-name=([^;]+)/);
+              const matchNick = line.match(/:([^!]+)!/);
+              displayName = matchUser ? matchUser[1] : (matchNick ? matchNick[1] : 'Gentleman');
+              const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
+              if (textIdx !== -1) {
+                chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
+              }
+            }
+
+            if (displayName) registerChatterActivity(displayName);
+
+            // Wenn StreamElements Bot im Chat antwortet (z.B. auf !watchtime)
+            if (displayName.toLowerCase() === 'streamelements' || displayName.toLowerCase() === 'nightbot') {
+              parseStreamElementsBotMessage(chatText);
+            }
+
+            const cmd = chatText.toLowerCase();
+            if (cmd === '!watchtime' || cmd === '!zeit') {
+              showLedgerCard();
+            }
+          }
+        }
+      };
+
+      ws.onclose = function () {
+        setTimeout(() => connectTwitchIrc(channelName), 4000);
+      };
+    }
+
+    if (channelParam) {
+      connectTwitchIrc(channelParam);
+      fetchStreamElementsLeaderboard(channelParam);
+    }
+
+    // =========================================================
+    // 7. TEST-FUNKTIONEN
+    // =========================================================
+    function simulateActivity(username) {
+      registerChatterActivity(username);
+      const clean = username.toLowerCase().trim();
+      ledgerData.watchtime[clean].minutes += 120; // 2 Std dazu
+      saveLedgerData();
+      alert(`+2 Stunden Watchtime für ${username} hinzugefügt!`);
+    }
+
+    function resetLedgerData() {
+      if (confirm("Wirklich das Salon-Register und die Watchtime zurücksetzen?")) {
+        ledgerData = { watchtime: {}, patrons: {}, lastAutoPopup: Date.now() };
+        saveLedgerData();
+        alert("Salon-Register zurückgesetzt!");
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gentlemen Darts - Studio Teststation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #040805;
+            --sidebar-bg: #09120b;
+            --gold-bright: #f0d57e;
+            --gold-metallic: #c8a84b;
+            --text-light: #f7f2e4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Linke Spalte: Mobil-Controller Vorschau */
+        .controller-panel {
+            width: 440px;
+            background: var(--sidebar-bg);
+            border-right: 2px solid rgba(200, 168, 75, 0.35);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(200, 168, 75, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            letter-spacing: 1.5px;
+        }
+
+        .controller-frame-wrapper {
+            flex: 1;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #020403;
+        }
+
+        .phone-frame {
+            width: 390px;
+            height: 780px;
+            border: 8px solid #1a291e;
+            border-radius: 36px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.9), 0 0 15px rgba(200, 168, 75, 0.2);
+            overflow: hidden;
+            background: #070c08;
+            position: relative;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 18px;
+            background: #1a291e;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            z-index: 50;
+        }
+
+        iframe#controllerFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding-top: 10px;
+        }
+
+        /* Rechter Hauptbereich: OBS Stream Vorschau */
+        .stream-preview-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: radial-gradient(circle at center, #101c13 0%, #030604 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stream-top-bar {
+            padding: 12px 28px;
+            background: #060b07;
+            border-bottom: 1px solid rgba(200, 168, 75, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .obs-stage-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Simulierter 16:9 Stream Viewport (skaliert) */
+        .obs-1080p-viewport {
+            width: 1280px;
+            height: 720px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+            border: 2px solid var(--gold-metallic);
+            border-radius: 6px;
+            overflow: hidden;
+            background: #050a06;
+        }
+
+        /* Simulierter Kamera-Feed Hintergrund */
+        .simulated-cam-bg {
+            position: absolute;
+            top: 98px;
+            left: 36px;
+            right: 36px;
+            height: 720px;
+            display: flex;
+            gap: 28px;
+            transform-origin: top left;
+            transform: scale(0.666667); /* Skaliert 1920x1080 auf 1280x720 */
+            width: 1848px;
+            pointer-events: none;
+        }
+
+        .fake-cam {
+            flex: 1;
+            height: 100%;
+            background: #111a13;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(247, 242, 228, 0.25);
+            font-size: 24px;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 2px;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .fake-cam-werfer {
+            background: radial-gradient(circle at center, #1b2f21 0%, #08110a 80%);
+        }
+
+        .fake-cam-board {
+            background: radial-gradient(circle at center, #263e2d 0%, #0a140d 80%);
+        }
+
+        /* Iframe des eigentlichen 1920x1080 Overlays, skaliert auf 1280x720 */
+        .overlay-iframe-scaler {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1920px;
+            height: 1080px;
+            transform-origin: top left;
+            transform: scale(0.666667); /* 1280 / 1920 */
+            pointer-events: none;
+        }
+
+        iframe#overlayFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+        }
+
+        /* OBS Guide Footer */
+        .setup-guide-bar {
+            background: #08100a;
+            border-top: 1px solid rgba(200, 168, 75, 0.3);
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: rgba(247, 242, 228, 0.7);
+        }
+
+        .param-badge {
+            color: var(--gold-bright);
+            font-family: monospace;
+            background: rgba(200, 168, 75, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(200, 168, 75, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Linke Seite: Handy-Fernbedienung (Oche Controller) -->
+    <div class="controller-panel">
+        <div class="panel-header">
+            <span class="panel-title">📱 Oche Remote (Handy / Numpad)</span>
+            <button onclick="clearAndResetAll()" style="background: rgba(200,168,75,0.2); border: 1px solid var(--gold-metallic); color: var(--gold-bright); font-size: 10px; padding: 4px 8px; border-radius: 4px; cursor: pointer;">RESET DATA</button>
+        </div>
+
+        <div class="controller-frame-wrapper">
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <iframe id="controllerFrame" src="darts_controller.html"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rechte Seite: Simulierter OBS Stream (1080p Overlay) -->
+    <div class="stream-preview-area">
+        <div class="stream-top-bar">
+            <div style="font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold-bright); font-weight: 700;">
+                ❖ OBS STREAM VORSCHAU (1920 × 1080 PX)
+            </div>
+            <div>
+                Tippe links Punkte ein ➔ Das Overlay zieht die Punkte exakt ab!
+            </div>
+        </div>
+
+        <div class="obs-stage-container">
+            <div class="obs-1080p-viewport">
+                <!-- Simulierter Kamera-Hintergrund für Cam 1 & Cam 2 -->
+                <div class="simulated-cam-bg">
+                    <div class="fake-cam fake-cam-werfer">
+                        <span style="font-size: 50px; margin-bottom: 10px;">🎯</span>
+                        <span>KAMERA 1: WERFER</span>
+                    </div>
+                    <div class="fake-cam fake-cam-board">
+                        <span style="font-size: 50px; margin-bottom: 10px;">🎯</span>
+                        <span>KAMERA 2: DARTBOARD</span>
+                    </div>
+                </div>
+
+                <!-- Das skalierte echte 1080p Overlay -->
+                <div class="overlay-iframe-scaler">
+                    <iframe id="overlayFrame" src="darts_overlay.html"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guide Footer -->
+        <div class="setup-guide-bar">
+            <div>
+                <strong>OBS Browser-Quelle:</strong> <span class="param-badge">darts_overlay.html</span>
+                (Breite: <span class="param-badge">1920</span> | Höhe: <span class="param-badge">1080</span>)
+            </div>
+            <div>
+                <strong>Handy/Tablet Fernbedienung:</strong> <span class="param-badge">darts_controller.html</span>
+            </div>
+            <div>
+                <strong>Shortcut:</strong> Tastatur-Numpad am PC funktioniert ebenfalls direkt!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function clearAndResetAll() {
+            localStorage.removeItem('gentlemen_darts_state');
+            document.getElementById('controllerFrame').src = 'darts_controller.html?' + Date.now();
+            document.getElementById('overlayFrame').src = 'darts_overlay.html?' + Date.now();
+        }
+    </script>
+</body>
+</html>

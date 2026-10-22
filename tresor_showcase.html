@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gentlemen - Uhrenvitrine & Tresor-Showcase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Playfair+Display:ital,wght@0,600;0,800;1,400&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --manor-black: #060a07;
+            --manor-green-dark: #0c150e;
+            --manor-green: #142217;
+            --gold-light: #f3ebd6;
+            --gold-bright: #e7ca6d;
+            --gold-metallic: #c8a84b;
+            --gold-dark: #8c7028;
+            --gold-shadow: rgba(200, 168, 75, 0.25);
+            --rarity-mythic: linear-gradient(135deg, #ff85a1, #e0c3fc, #8ec5fc);
+            --rarity-legendary: linear-gradient(135deg, #ffe082, #ffb300, #ff8f00);
+            --rarity-rare: linear-gradient(135deg, #81c784, #388e3c, #1b5e20);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: transparent;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Montserrat', sans-serif;
+            color: var(--gold-light);
+        }
+
+        /* Container der Vitrine (optimiert für 1080p Overlay oder Corner-Cam) */
+        .showcase-wrapper {
+            position: relative;
+            width: 580px;
+            background: linear-gradient(180deg, rgba(12, 21, 14, 0.95) 0%, rgba(6, 10, 7, 0.98) 100%);
+            border: 2px solid var(--gold-metallic);
+            border-radius: 8px;
+            padding: 24px 28px 20px 28px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85),
+                        inset 0 0 40px rgba(200, 168, 75, 0.08),
+                        0 0 25px var(--gold-shadow);
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+        }
+
+        /* Zierleisten und Gentlemen-Ecken */
+        .showcase-wrapper::before, .showcase-wrapper::after {
+            content: "❖";
+            position: absolute;
+            font-size: 14px;
+            color: var(--gold-bright);
+            opacity: 0.85;
+            text-shadow: 0 0 6px var(--gold-bright);
+        }
+        .showcase-wrapper::before { top: 8px; left: 10px; }
+        .showcase-wrapper::after { top: 8px; right: 10px; }
+
+        .corner-bottom-left, .corner-bottom-right {
+            position: absolute;
+            font-size: 14px;
+            color: var(--gold-bright);
+            opacity: 0.85;
+            text-shadow: 0 0 6px var(--gold-bright);
+            bottom: 8px;
+        }
+        .corner-bottom-left { left: 10px; }
+        .corner-bottom-right { right: 10px; }
+
+        /* Header mit Badge & Titel */
+        .showcase-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(200, 168, 75, 0.3);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .header-title-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tresor-icon {
+            font-size: 24px;
+            color: var(--gold-bright);
+            filter: drop-shadow(0 0 8px rgba(231, 202, 109, 0.6));
+            animation: pulseGlow 3s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { filter: drop-shadow(0 0 4px rgba(231, 202, 109, 0.4)); }
+            100% { filter: drop-shadow(0 0 12px rgba(231, 202, 109, 0.9)); }
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: var(--gold-bright);
+            text-transform: uppercase;
+        }
+
+        .header-sub {
+            font-size: 10px;
+            font-weight: 500;
+            color: rgba(243, 235, 214, 0.65);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .counter-pill {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--gold-metallic);
+            background: rgba(20, 34, 23, 0.8);
+            border: 1px solid var(--gold-dark);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        /* 3D Vitrinen-Bühne */
+        .stage-container {
+            position: relative;
+            height: 240px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 900px;
+            margin-bottom: 15px;
+        }
+
+        /* Spotlight von oben */
+        .spotlight {
+            position: absolute;
+            top: -20px;
+            width: 220px;
+            height: 240px;
+            background: radial-gradient(ellipse at top, rgba(231, 202, 109, 0.22) 0%, rgba(200, 168, 75, 0.05) 50%, transparent 80%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Samt-Podest */
+        .pedestal {
+            position: absolute;
+            bottom: 10px;
+            width: 240px;
+            height: 38px;
+            background: linear-gradient(180deg, #1c2b1f 0%, #0d1710 100%);
+            border: 1.5px solid var(--gold-metallic);
+            border-radius: 50%;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9),
+                        inset 0 2px 6px rgba(231, 202, 109, 0.4),
+                        0 0 20px rgba(200, 168, 75, 0.2);
+            z-index: 2;
+        }
+        .pedestal-cushion {
+            position: absolute;
+            top: 4px;
+            left: 20px;
+            right: 20px;
+            height: 22px;
+            background: radial-gradient(ellipse at center, #27382a 0%, #111a13 100%);
+            border-radius: 50%;
+            border: 1px solid rgba(200, 168, 75, 0.3);
+        }
+
+        /* Rotierender Uhren-Träger */
+        .watch-3d-turntable {
+            position: relative;
+            width: 150px;
+            height: 180px;
+            transform-style: preserve-3d;
+            animation: rotateWatch 18s linear infinite;
+            z-index: 4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes rotateWatch {
+            0% { transform: translateY(-5px) rotateY(0deg); }
+            50% { transform: translateY(5px) rotateY(180deg); }
+            100% { transform: translateY(-5px) rotateY(360deg); }
+        }
+
+        /* Uhren Grafik / SVG Komponente */
+        .watch-face-container {
+            position: relative;
+            width: 130px;
+            height: 150px;
+            filter: drop-shadow(0 15px 20px rgba(0, 0, 0, 0.85));
+            transition: all 0.5s ease;
+        }
+
+        /* Info Bereich unter der Vitrine */
+        .watch-details {
+            text-align: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        .rarity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .rarity-mythic {
+            background: linear-gradient(135deg, rgba(238, 9, 121, 0.3) 0%, rgba(255, 106, 0, 0.3) 100%);
+            border-color: #ff6a00;
+            color: #ffc299;
+            text-shadow: 0 0 8px rgba(255, 106, 0, 0.8);
+        }
+        .rarity-legendary {
+            background: linear-gradient(135deg, rgba(255, 179, 0, 0.25) 0%, rgba(200, 168, 75, 0.4) 100%);
+            border-color: var(--gold-bright);
+            color: #fff3c4;
+            text-shadow: 0 0 8px rgba(231, 202, 109, 0.8);
+        }
+        .rarity-rare {
+            background: linear-gradient(135deg, rgba(46, 125, 50, 0.25) 0%, rgba(27, 94, 32, 0.4) 100%);
+            border-color: #81c784;
+            color: #c8e6c9;
+            text-shadow: 0 0 8px rgba(129, 199, 132, 0.6);
+        }
+
+        .watch-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        .watch-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .watch-value {
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gold-bright);
+            letter-spacing: 1px;
+        }
+
+        .watch-edition {
+            font-size: 11px;
+            color: rgba(243, 235, 214, 0.6);
+            letter-spacing: 0.5px;
+        }
+
+        /* Besitzer Banner */
+        .owner-card {
+            background: rgba(20, 34, 23, 0.7);
+            border: 1px solid rgba(200, 168, 75, 0.35);
+            border-radius: 6px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .owner-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .owner-crown {
+            color: var(--gold-bright);
+            font-size: 14px;
+        }
+
+        .owner-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(243, 235, 214, 0.6);
+        }
+
+        .owner-name {
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gold-light);
+            letter-spacing: 1px;
+        }
+
+        .owner-pull-date {
+            font-size: 10px;
+            color: rgba(200, 168, 75, 0.8);
+            font-style: italic;
+        }
+
+        /* Fortschrittsbalken für nächsten Wechsel */
+        .progress-bar-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold-bright));
+            box-shadow: 0 0 8px var(--gold-bright);
+        }
+
+        /* Neueingang / Alert Flash Effekt */
+        .new-pull-alert {
+            animation: highlightFlash 1.5s ease-out;
+        }
+
+        @keyframes highlightFlash {
+            0% { box-shadow: 0 0 50px rgba(231, 202, 109, 0.9), inset 0 0 30px rgba(231, 202, 109, 0.6); }
+            100% { box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), inset 0 0 40px rgba(200, 168, 75, 0.08); }
+        }
+
+        /* Einblend-/Ausblend-Animation */
+        .fade-transition {
+            opacity: 0;
+            transform: scale(0.96);
+            transition: all 0.4s ease-out;
+        }
+        .fade-in {
+            opacity: 1;
+            transform: scale(1);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="showcase-wrapper" id="showcaseWrapper">
+        <div class="corner-bottom-left">❖</div>
+        <div class="corner-bottom-right">❖</div>
+
+        <!-- Vitrinen Kopfzeile -->
+        <div class="showcase-header">
+            <div class="header-title-box">
+                <span class="tresor-icon">🏛️</span>
+                <div>
+                    <div class="header-title">Der Gentlemen-Tresor</div>
+                    <div class="header-sub">Exklusive Uhren-Sammlung der Community</div>
+                </div>
+            </div>
+            <div class="counter-pill" id="counterPill">UHR 1 / 6</div>
+        </div>
+
+        <!-- 3D Bühne & Spotlight -->
+        <div class="stage-container">
+            <div class="spotlight"></div>
+            
+            <div class="watch-3d-turntable" id="watchTurntable">
+                <div class="watch-face-container" id="watchSvgContainer">
+                    <!-- Dynamische SVG Uhr -->
+                </div>
+            </div>
+
+            <div class="pedestal">
+                <div class="pedestal-cushion"></div>
+            </div>
+        </div>
+
+        <!-- Details der aktuellen Uhr -->
+        <div class="watch-details" id="watchDetails">
+            <div id="rarityBadge" class="rarity-badge rarity-mythic">
+                <span>✦</span> <span id="rarityText">MYTHISCHES MEISTERWERK</span> <span>✦</span>
+            </div>
+            <div class="watch-name" id="watchName">Patek Philippe Grandmaster Chime</div>
+            
+            <div class="watch-meta-row">
+                <span class="watch-value" id="watchValue">Wert: 2.850.000 €</span>
+                <span style="color: rgba(200,168,75,0.4)">•</span>
+                <span class="watch-edition" id="watchEdition">Ref. 6300G • Weißgold</span>
+            </div>
+
+            <!-- Besitzer Info -->
+            <div class="owner-card">
+                <div class="owner-left">
+                    <span class="owner-crown">👑</span>
+                    <div>
+                        <div class="owner-label">Eigentümer im Salon</div>
+                        <div class="owner-name" id="ownerName">Lord_Baron92</div>
+                    </div>
+                </div>
+                <div class="owner-pull-date" id="pullDate">Gezogen vor 2 Tagen</div>
+            </div>
+        </div>
+
+        <!-- Zeitbalken bis zur nächsten Uhr -->
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <script src="cloud_db.js"></script>
+    <script>
+        // Uhren-Datenbank für den Tresor (Top-Sammlungen deiner Zuschauer)
+        const vaultCollection = [
+            {
+                name: "Patek Philippe Grandmaster",
+                sub: "Chime Ref. 6300G • Weißgold",
+                value: "2.850.000 €",
+                rarity: "mythic",
+                rarityLabel: "MYTHISCHES MEISTERWERK",
+                owner: "Lord_Baron92",
+                date: "Gezogen am Sonntag",
+                dialColor: "#0b151e",
+                caseColor: "#e0e6ed",
+                bezelColor: "#b8c4ce",
+                strapColor: "#1a2228",
+                type: "grandmaster"
+            },
+            {
+                name: "Rolex Daytona 'Rainbow'",
+                sub: "Ref. 116595RBOW • Everose-Gold",
+                value: "480.000 €",
+                rarity: "mythic",
+                rarityLabel: "SAPHIR-UNIKAT",
+                owner: "Lady_Viktoria",
+                date: "Gezogen gestern",
+                dialColor: "#000000",
+                caseColor: "#e6a188",
+                bezelColor: "rainbow",
+                strapColor: "#b2735d",
+                type: "daytona"
+            },
+            {
+                name: "A. Lange & Söhne Zeitwerk",
+                sub: "Minutenrepetition • Platin",
+                value: "420.000 €",
+                rarity: "legendary",
+                rarityLabel: "LEGENDÄRE MECHANIK",
+                owner: "Sir_Pommespanzer",
+                date: "Gezogen vor 4 Tagen",
+                dialColor: "#171c24",
+                caseColor: "#d8dfe5",
+                bezelColor: "#9aa3ab",
+                strapColor: "#11141a",
+                type: "zeitwerk"
+            },
+            {
+                name: "Audemars Piguet Royal Oak",
+                sub: "Jumbo Extra-Thin • 16202ST",
+                value: "85.000 €",
+                rarity: "legendary",
+                rarityLabel: "IKONE DER HAUTE HORLOGERIE",
+                owner: "Kavallerie_Tim",
+                date: "Gezogen vor 1 Woche",
+                dialColor: "#0d2b45",
+                caseColor: "#c2c8cf",
+                bezelColor: "#a2aab3",
+                strapColor: "#8f979e",
+                type: "royaloak"
+            },
+            {
+                name: "Vacheron Constantin 222",
+                sub: "Historiques • Gelbgold 18K",
+                value: "72.000 €",
+                rarity: "rare",
+                rarityLabel: "EDLER KLASSIKER",
+                owner: "Count_Schneidemeister",
+                date: "Gezogen heute",
+                dialColor: "#d4af37",
+                caseColor: "#e5c358",
+                bezelColor: "#c79e26",
+                strapColor: "#caa432",
+                type: "vc222"
+            },
+            {
+                name: "Omega Speedmaster 'Snoopy'",
+                sub: "50th Anniversary Silver Snoopy",
+                value: "22.500 €",
+                rarity: "rare",
+                rarityLabel: "BEGEHRTE SONDEREDITION",
+                owner: "Gentleman_Chris",
+                date: "Gezogen vor 2 Wochen",
+                dialColor: "#f3ebd6",
+                caseColor: "#cbd3db",
+                bezelColor: "#1c3d73",
+                strapColor: "#193561",
+                type: "speedmaster"
+            }
+        ];
+
+        let currentIndex = 0;
+        const ROTATION_TIME_MS = 16000; // Wechsel alle 16 Sekunden
+        let progressInterval = null;
+        let progressStartTime = 0;
+
+        // SVG Render-Engine für realistische edle Uhren
+        function renderWatchSvg(watch) {
+            let bezelStyle = `fill="${watch.caseColor}" stroke="${watch.bezelColor}" stroke-width="4"`;
+            let rainbowDefs = "";
+
+            if (watch.bezelColor === "rainbow") {
+                rainbowDefs = `
+                    <defs>
+                        <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ff3b30"/>
+                            <stop offset="20%" stop-color="#ff9500"/>
+                            <stop offset="40%" stop-color="#ffcc00"/>
+                            <stop offset="60%" stop-color="#34c759"/>
+                            <stop offset="80%" stop-color="#007aff"/>
+                            <stop offset="100%" stop-color="#af52de"/>
+                        </linearGradient>
+                    </defs>
+                `;
+                bezelStyle = `fill="${watch.caseColor}" stroke="url(#rainbowGrad)" stroke-width="6"`;
+            }
+
+            return `
+                <svg width="130" height="170" viewBox="0 0 130 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    ${rainbowDefs}
+                    <!-- Armband oben -->
+                    <rect x="42" y="5" width="46" height="40" rx="3" fill="${watch.strapColor}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                    <line x1="48" y1="12" x2="82" y2="12" stroke="rgba(255,255,255,0.2)" stroke-dasharray="2,2"/>
+                    
+                    <!-- Armband unten -->
+                    <rect x="42" y="125" width="46" height="40" rx="3" fill="${watch.strapColor}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                    <line x1="48" y1="158" x2="82" y2="158" stroke="rgba(255,255,255,0.2)" stroke-dasharray="2,2"/>
+
+                    <!-- Bandanstöße / Horn -->
+                    <path d="M38 42 L46 22 L54 22 L50 42 Z" fill="${watch.bezelColor}"/>
+                    <path d="M92 42 L84 22 L76 22 L80 42 Z" fill="${watch.bezelColor}"/>
+                    <path d="M38 128 L46 148 L54 148 L50 128 Z" fill="${watch.bezelColor}"/>
+                    <path d="M92 128 L84 148 L76 148 L80 128 Z" fill="${watch.bezelColor}"/>
+
+                    <!-- Krone -->
+                    <rect x="110" y="80" width="7" height="10" rx="2" fill="${watch.caseColor}" stroke="${watch.bezelColor}" stroke-width="1"/>
+
+                    <!-- Gehäuse Basis -->
+                    <circle cx="65" cy="85" r="48" ${bezelStyle} filter="drop-shadow(0 4px 10px rgba(0,0,0,0.5))"/>
+
+                    <!-- Zifferblatt -->
+                    <circle cx="65" cy="85" r="38" fill="${watch.dialColor}"/>
+                    <circle cx="65" cy="85" r="37" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+                    <!-- Subdials (Chronograph / Komplikationen) -->
+                    <circle cx="53" cy="85" r="10" fill="rgba(0,0,0,0.25)" stroke="rgba(200,168,75,0.4)" stroke-width="0.8"/>
+                    <circle cx="77" cy="85" r="10" fill="rgba(0,0,0,0.25)" stroke="rgba(200,168,75,0.4)" stroke-width="0.8"/>
+                    <circle cx="65" cy="97" r="9" fill="rgba(0,0,0,0.3)" stroke="rgba(200,168,75,0.4)" stroke-width="0.8"/>
+
+                    <!-- Indizes (Stundenstriche) -->
+                    <line x1="65" y1="50" x2="65" y2="54" stroke="${watch.caseColor}" stroke-width="2"/>
+                    <line x1="65" y1="116" x2="65" y2="120" stroke="${watch.caseColor}" stroke-width="2"/>
+                    <line x1="30" y1="85" x2="34" y2="85" stroke="${watch.caseColor}" stroke-width="2"/>
+                    <line x1="96" y1="85" x2="100" y2="85" stroke="${watch.caseColor}" stroke-width="2"/>
+
+                    <!-- Diamanten/Punkte auf 1, 2, 4, 5, 7, 8, 10, 11 -->
+                    <circle cx="82" cy="55" r="1.5" fill="#f3ebd6"/>
+                    <circle cx="95" cy="68" r="1.5" fill="#f3ebd6"/>
+                    <circle cx="95" cy="102" r="1.5" fill="#f3ebd6"/>
+                    <circle cx="82" cy="115" r="1.5" fill="#f3ebd6"/>
+                    <circle cx="48" cy="115" r="1.5" fill="#f3ebd6"/>
+                    <circle cx="35" cy="102" r="1.5" fill="#f3ebd6"/>
+                    <circle cx="35" cy="68" r="1.5" fill="#f3ebd6"/>
+                    <circle cx="48" cy="55" r="1.5" fill="#f3ebd6"/>
+
+                    <!-- Zeiger -->
+                    <!-- Stundenzeiger (zeigt auf 10 Uhr) -->
+                    <line x1="65" y1="85" x2="50" y2="72" stroke="${watch.caseColor}" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- Minutenzeiger (zeigt auf 2 Uhr) -->
+                    <line x1="65" y1="85" x2="84" y2="68" stroke="${watch.caseColor}" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Sekundenzeiger (Gold/Rot) -->
+                    <line x1="65" y1="89" x2="65" y2="52" stroke="#e7ca6d" stroke-width="0.9"/>
+                    <circle cx="65" cy="85" r="2.5" fill="#e7ca6d"/>
+
+                    <!-- Glas-Glanz Reflexion -->
+                    <path d="M 40 60 Q 65 52 88 66 A 37 37 0 0 0 40 60 Z" fill="white" opacity="0.12"/>
+                </svg>
+            `;
+        }
+
+        function displayWatch(index, triggerAlert = false) {
+            const watch = vaultCollection[index];
+            const details = document.getElementById('watchDetails');
+            const svgContainer = document.getElementById('watchSvgContainer');
+            const wrapper = document.getElementById('showcaseWrapper');
+
+            // Sanftes Ausfaden
+            details.classList.remove('fade-in');
+            details.classList.add('fade-transition');
+
+            setTimeout(() => {
+                // Daten aktualisieren
+                document.getElementById('counterPill').innerText = `UHR ${index + 1} / ${vaultCollection.length}`;
+                document.getElementById('watchName').innerText = watch.name;
+                document.getElementById('watchValue').innerText = `Wert: ${watch.value}`;
+                document.getElementById('watchEdition').innerText = watch.sub;
+                document.getElementById('ownerName').innerText = watch.owner;
+                document.getElementById('pullDate').innerText = watch.date;
+
+                // Rarity Badge styling
+                const badge = document.getElementById('rarityBadge');
+                badge.className = `rarity-badge rarity-${watch.rarity}`;
+                document.getElementById('rarityText').innerText = watch.rarityLabel;
+
+                // Uhr Rendering
+                svgContainer.innerHTML = renderWatchSvg(watch);
+
+                // Sanftes Einfaden
+                details.classList.remove('fade-transition');
+                details.classList.add('fade-in');
+
+                if (triggerAlert) {
+                    wrapper.classList.add('new-pull-alert');
+                    setTimeout(() => wrapper.classList.remove('new-pull-alert'), 1800);
+                }
+            }, 300);
+
+            resetProgressBar();
+        }
+
+        function resetProgressBar() {
+            clearInterval(progressInterval);
+            const bar = document.getElementById('progressBar');
+            progressStartTime = Date.now();
+
+            progressInterval = setInterval(() => {
+                const elapsed = Date.now() - progressStartTime;
+                const percent = Math.min((elapsed / ROTATION_TIME_MS) * 100, 100);
+                bar.style.width = percent + "%";
+
+                if (elapsed >= ROTATION_TIME_MS) {
+                    nextWatch();
+                }
+            }, 50);
+        }
+
+        function nextWatch() {
+            currentIndex = (currentIndex + 1) % vaultCollection.length;
+            displayWatch(currentIndex);
+        }
+
+        // Streamer.bot / Twitch / WebSocket API Integration
+        // Ermöglicht das Einspeisen von Live-Pulls oder Chat-Befehlen (!tresor @user)
+        window.addNewVaultWatch = function(watchData) {
+            vaultCollection.unshift(watchData);
+            currentIndex = 0;
+            displayWatch(0, true);
+        };
+
+        // BroadcastChannel / URL-Parameter Support (?compact=true oder ?index=2)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('index')) {
+            currentIndex = parseInt(urlParams.get('index')) || 0;
+        }
+
+        // Start
+        displayWatch(currentIndex);
+
+        // ============================================================
+        // CLOUD-SYNCHRONISATION MIT FIREBASE REALTIME DATABASE
+        // ============================================================
+        async function loadCloudWatches() {
+            if (window.CloudDB) {
+                const cloudWatches = await window.CloudDB.getVaultWatches();
+                if (cloudWatches && cloudWatches.length > 0) {
+                    // Fügt Cloud-Uhren an den Anfang der Vitrine
+                    vaultCollection.unshift(...cloudWatches);
+                    displayWatch(0);
+                }
+            }
+        }
+        loadCloudWatches();
+
+        // Überladene Version von addNewVaultWatch speichert auch in Firebase
+        const originalAddNew = window.addNewVaultWatch;
+        window.addNewVaultWatch = function(watchData) {
+            originalAddNew(watchData);
+            if (window.CloudDB) {
+                window.CloudDB.saveWatch(watchData);
+            }
+        };
+    </script>
+</body>
+</html>

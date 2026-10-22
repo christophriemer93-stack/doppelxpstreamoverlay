@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen – Minimalistischer Cam-Rahmen (Moosgrün & Gold)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       THE GENTLEMEN – ULTRA-SLIM MOOSGRÜN & GOLD CAM-RAHMEN
+       ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      position: relative;
+    }
+
+    /* Der Rahmen passt sich millimetergenau jeder Cam-Größe an */
+    .cam-frame {
+      position: absolute;
+      inset: 2px;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    /* ---------------------------------------------------------
+       STIL 1: DAS GENTLEMEN-RIBBON (MOOSGRÜN MIT GOLDSÄUMEN)
+       Nur ~5px schmal!
+       Außen feines Gold (1.5px), Kern aus edlem Moosgrün (3px),
+       innen zartes Gold (1px). Absoluter Luxus-Look!
+       --------------------------------------------------------- */
+    .style-ribbon {
+      border: 3.5px solid #0d1a0f; /* Dunkles Moosgrün */
+      outline: 1.5px solid #e5c96a; /* Äußere Goldkante */
+      outline-offset: 0px;
+      box-shadow: 
+        inset 0 0 0 1px #c8a84b, /* Innere Goldkante */
+        0 0 0 2px rgba(8, 14, 9, 0.95),
+        0 6px 25px rgba(0, 0, 0, 0.85),
+        0 0 15px rgba(13, 26, 15, 0.7);
+      border-radius: 3px;
+    }
+
+    /* ---------------------------------------------------------
+       STIL 2: MOOSGRÜNER SATIN-RAHMEN MIT GOLD-ECKEN
+       Schlanke 4px Moosgrün-Kante mit 4 edlen goldenen L-Winkeln
+       --------------------------------------------------------- */
+    .style-green-corners {
+      border: 3px solid #112213;
+      box-shadow: 
+        0 0 0 1px rgba(200, 168, 75, 0.4),
+        inset 0 0 0 1px rgba(200, 168, 75, 0.3),
+        0 6px 20px rgba(0, 0, 0, 0.85);
+      border-radius: 2px;
+    }
+
+    .corner-bracket {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-color: #e5c96a;
+      border-style: solid;
+      pointer-events: none;
+      filter: drop-shadow(0 0 3px rgba(229, 201, 106, 0.5));
+    }
+    .corner-tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; }
+    .corner-tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; }
+    .corner-bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; }
+    .corner-br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }
+
+    /* ---------------------------------------------------------
+       STIL 3: ULTRA-THIN PINSTRIPE (2px GOLD + MOOSGRÜNE AURA)
+       Rasiermesserdünne 2px Goldlinie auf dunklem Moosgrün-Hintergrund
+       --------------------------------------------------------- */
+    .style-thin-aura {
+      border: 2px solid #e5c96a;
+      box-shadow: 
+        0 0 0 2px #0c180e, /* Moosgrüne Schattenkante */
+        0 0 15px rgba(14, 28, 16, 0.9),
+        0 6px 20px rgba(0, 0, 0, 0.9);
+      border-radius: 2px;
+    }
+
+    /* ---------------------------------------------------------
+       OPTIONALE MIKRO-PLAKETTE (MOOSGRÜN & GOLD DXP MONOGRAMM)
+       Dezent, 20px hoch, sitzt bündig unten mittig
+       --------------------------------------------------------- */
+    .micro-pill {
+      position: absolute;
+      bottom: -11px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #0d1a0f 0%, #152617 100%);
+      border: 1.5px solid #e5c96a;
+      border-radius: 12px;
+      padding: 2px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.85);
+      white-space: nowrap;
+    }
+
+    .micro-pill-text {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 11px;
+      color: #f3ebd6;
+      letter-spacing: 2px;
+    }
+
+    .micro-pill-diamond {
+      font-size: 8px;
+      color: #e5c96a;
+    }
+
+    /* ---------------------------------------------------------
+       TEST-BEDIENFELD (Nur im Browser sichtbar, in OBS unsichtbar)
+       --------------------------------------------------------- */
+    .preview-bar {
+      position: fixed;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 17, 11, 0.96);
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      border-radius: 6px;
+      padding: 10px 18px;
+      color: #f3ebd6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      pointer-events: all;
+    }
+
+    .preview-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-style {
+      background: #172418;
+      color: #f3ebd6;
+      border: 1px solid #c8a84b;
+      padding: 5px 10px;
+      border-radius: 3px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-style.active,
+    .btn-style:hover {
+      background: #c8a84b;
+      color: #0b110b;
+    }
+
+    body.no-preview .preview-bar {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       TESTLEISTE (Klicke zum Durchprobieren der Moosgrün-Stile)
+       ========================================================= -->
+  <div class="preview-bar" id="previewBar">
+    <span style="font-weight:700; color:#e5c96a; font-family:'Playfair Display',serif;">✦ Schmale Moosgrün-Stile:</span>
+    <div class="preview-btns">
+      <button class="btn-style active" id="btn1" onclick="setStyle('ribbon')">1. Gentlemen-Ribbon (Moosgrün + Gold)</button>
+      <button class="btn-style" id="btn2" onclick="setStyle('green-corners')">2. Moosgrün mit Gold-Ecken</button>
+      <button class="btn-style" id="btn3" onclick="setStyle('thin-aura')">3. Goldline mit Moosgrün-Aura</button>
+      <button class="btn-style" id="btnPill" onclick="togglePill()">✦ Plakette an/aus</button>
+    </div>
+    <span style="font-size: 10px; color: #8a9c8b; cursor: pointer; margin-left: 6px;" onclick="document.body.classList.toggle('no-preview')">[Ausblenden]</span>
+  </div>
+
+  <!-- =========================================================
+       KAMERARAHMEN (MOOSGRÜN & GOLD)
+       ========================================================= -->
+  <div class="cam-frame style-ribbon" id="mainFrame">
+    <!-- Optionale Eck-Klammern für Stil 2 -->
+    <div class="corner-bracket corner-tl" id="cTl" style="display: none;"></div>
+    <div class="corner-bracket corner-tr" id="cTr" style="display: none;"></div>
+    <div class="corner-bracket corner-bl" id="cBl" style="display: none;"></div>
+    <div class="corner-bracket corner-br" id="cBr" style="display: none;"></div>
+
+    <!-- Optionale dezent-schmale DXP-Mikro-Plakette -->
+    <div class="micro-pill" id="microPill" style="display: none;">
+      <span class="micro-pill-diamond">✦</span>
+      <span class="micro-pill-text">DXP</span>
+      <span class="micro-pill-diamond">✦</span>
+    </div>
+  </div>
+
+  <script>
+    const frame = document.getElementById('mainFrame');
+    const pill = document.getElementById('microPill');
+    const corners = [
+      document.getElementById('cTl'),
+      document.getElementById('cTr'),
+      document.getElementById('cBl'),
+      document.getElementById('cBr')
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const styleParam = urlParams.get('style') || 'ribbon';
+    const pillParam = urlParams.get('pill') === '1';
+
+    // In OBS Studio automatisch Testleiste ausblenden
+    if (window.obsstudio || urlParams.get('preview') === '0' || urlParams.get('hide_preview') === '1') {
+      document.body.classList.add('no-preview');
+    }
+
+    function setStyle(styleName) {
+      frame.className = 'cam-frame';
+      corners.forEach(c => c.style.display = 'none');
+
+      document.querySelectorAll('.btn-style').forEach(b => b.classList.remove('active'));
+
+      if (styleName === 'ribbon') {
+        frame.classList.add('style-ribbon');
+        document.getElementById('btn1')?.classList.add('active');
+      } else if (styleName === 'green-corners') {
+        frame.classList.add('style-green-corners');
+        corners.forEach(c => c.style.display = 'block');
+        document.getElementById('btn2')?.classList.add('active');
+      } else if (styleName === 'thin-aura') {
+        frame.classList.add('style-thin-aura');
+        document.getElementById('btn3')?.classList.add('active');
+      }
+    }
+
+    function togglePill() {
+      if (pill.style.display === 'none') {
+        pill.style.display = 'flex';
+        document.getElementById('btnPill')?.classList.add('active');
+      } else {
+        pill.style.display = 'none';
+        document.getElementById('btnPill')?.classList.remove('active');
+      }
+    }
+
+    setStyle(styleParam);
+    if (pillParam) togglePill();
+  </script>
+</body>
+</html>

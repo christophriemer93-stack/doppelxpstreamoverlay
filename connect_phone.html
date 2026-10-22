@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gentlemen Darts - Handy verbinden</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #060a07;
+            --panel-bg: #0c150e;
+            --gold-bright: #f0d57e;
+            --gold-metallic: #c8a84b;
+            --text-light: #f7f2e4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .connect-card {
+            background: linear-gradient(180deg, #0e1911 0%, #060a07 100%);
+            border: 2px solid var(--gold-metallic);
+            border-radius: 12px;
+            padding: 32px 36px;
+            max-width: 540px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(200, 168, 75, 0.1);
+            position: relative;
+        }
+
+        .corner {
+            position: absolute;
+            font-size: 16px;
+            color: var(--gold-bright);
+        }
+        .corner.tl { top: 12px; left: 14px; }
+        .corner.tr { top: 12px; right: 14px; }
+        .corner.bl { bottom: 12px; left: 14px; }
+        .corner.br { bottom: 12px; right: 14px; }
+
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        .sub {
+            font-size: 13px;
+            color: rgba(247, 242, 228, 0.7);
+            margin-bottom: 20px;
+        }
+
+        /* QR Code Container */
+        .qr-wrapper {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 20px;
+            box-shadow: 0 0 25px rgba(200, 168, 75, 0.3);
+            border: 2px solid var(--gold-bright);
+        }
+
+        .qr-wrapper img {
+            width: 210px;
+            height: 210px;
+            display: block;
+        }
+
+        .step-box {
+            background: rgba(18, 32, 21, 0.85);
+            border: 1px solid rgba(200, 168, 75, 0.3);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 18px;
+            text-align: left;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .step-num {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: var(--gold-metallic);
+            color: #000;
+            font-weight: 800;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            margin-right: 6px;
+            font-size: 11px;
+        }
+
+        .url-pill {
+            display: block;
+            background: #080d09;
+            border: 1px solid var(--gold-metallic);
+            color: var(--gold-bright);
+            font-family: monospace;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .btn-firewall {
+            background: linear-gradient(180deg, #c8a84b 0%, #9e7f2b 100%);
+            border: 1px solid #ffd875;
+            color: #060a07;
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 10px 16px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-bottom: 14px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="connect-card">
+        <div class="corner tl">❖</div>
+        <div class="corner tr">❖</div>
+        <div class="corner bl">❖</div>
+        <div class="corner br">❖</div>
+
+        <div class="title">❖ HANDY VERBINDEN ❖</div>
+        <div class="sub">The Gentlemen Darts Club • Oche Remote</div>
+
+        <!-- QR Code -->
+        <div class="qr-wrapper">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=http://192.168.2.181:8080/darts_controller.html" alt="QR Code">
+        </div>
+
+        <div class="step-box">
+            <div><span class="step-num">1</span> <strong>Firewall einmalig freigeben:</strong></div>
+            <div style="margin-left: 28px; margin-top: 4px; color: rgba(247,242,228,0.7);">
+                Mache einen <strong>Rechtsklick</strong> auf die Datei <code>FIREWALL_FREIGEBEN.bat</code> ➔ <strong>„Als Administrator ausführen“</strong>.
+            </div>
+
+            <div style="margin-top: 12px;"><span class="step-num">2</span> <strong>Server starten:</strong></div>
+            <div style="margin-left: 28px; margin-top: 4px; color: rgba(247,242,228,0.7);">
+                Doppelklick auf <code>START_DARTS.bat</code> (Fenster einfach offen lassen).
+            </div>
+
+            <div style="margin-top: 12px;"><span class="step-num">3</span> <strong>QR-Code oben scannen:</strong></div>
+            <div style="margin-left: 28px; margin-top: 4px; color: rgba(247,242,228,0.7);">
+                Halte deine Handy-Kamera darauf oder öffne im Handy-Browser:
+            </div>
+            <span class="url-pill">http://192.168.2.181:8080/darts_controller.html</span>
+        </div>
+    </div>
+
+</body>
+</html>

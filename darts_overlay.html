@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gentlemen Darts - OBS Overlay</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --manor-black: #060a07;
+            --manor-green-deep: #0a130c;
+            --manor-green: #122015;
+            --gold-bright: #f0d57e;
+            --gold-metallic: #c8a84b;
+            --gold-dark: #826620;
+            --text-light: #f7f2e4;
+            --text-muted: rgba(247, 242, 228, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            width: 1920px;
+            height: 1080px;
+            background: transparent;
+            overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-light);
+            position: relative;
+        }
+
+        /* -------------------------------------------------------------------------
+           0. MANOR GREEN CANVAS & FLOATING EMBER SPARKS
+           ------------------------------------------------------------------------- */
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1920px;
+            height: 1080px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* -------------------------------------------------------------------------
+           1. TOP HEADER (SCHLANK & EDEL)
+           ------------------------------------------------------------------------- */
+        .darts-header {
+            position: absolute;
+            top: 24px;
+            left: 36px;
+            right: 36px;
+            height: 58px;
+            background: linear-gradient(180deg, rgba(14, 25, 17, 0.96) 0%, rgba(6, 10, 7, 0.98) 100%);
+            border: 1.5px solid var(--gold-metallic);
+            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8),
+                        inset 0 0 20px rgba(200, 168, 75, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            z-index: 20;
+        }
+
+        .header-title-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-ornament {
+            color: var(--gold-bright);
+            font-size: 15px;
+            text-shadow: 0 0 8px var(--gold-bright);
+        }
+
+        .header-main-title {
+            font-family: 'Cinzel', serif;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--gold-bright);
+            text-transform: uppercase;
+        }
+
+        .header-match-pill {
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            color: var(--gold-metallic);
+            background: rgba(18, 32, 21, 0.9);
+            border: 1px solid var(--gold-dark);
+            padding: 6px 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 12px rgba(200, 168, 75, 0.15);
+        }
+
+        .header-leg-score {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #ffffff;
+        }
+
+        .legs-badge {
+            background: rgba(200, 168, 75, 0.15);
+            border: 1px solid var(--gold-metallic);
+            color: var(--gold-bright);
+            padding: 3px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        /* -------------------------------------------------------------------------
+           2. DUAL-CAMERA VIEWPORT FRAMES (CAM 1 & CAM 2)
+           ------------------------------------------------------------------------- */
+        .cam-viewport-container {
+            position: absolute;
+            top: 98px;
+            left: 36px;
+            right: 36px;
+            height: 720px;
+            display: flex;
+            gap: 28px;
+            z-index: 5;
+        }
+
+        .cam-box {
+            flex: 1;
+            height: 100%;
+            position: relative;
+            background: transparent;
+            border: 2px solid rgba(200, 168, 75, 0.45);
+            border-radius: 8px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+        }
+
+        /* Goldene Ecken für den Gentlemen Manor Look (Keine Cam-Namen mehr) */
+        .cam-corner {
+            position: absolute;
+            font-size: 14px;
+            color: var(--gold-bright);
+            opacity: 0.85;
+            z-index: 10;
+            text-shadow: 0 0 6px var(--gold-bright);
+            pointer-events: none;
+        }
+        .cam-corner.tl { top: 6px; left: 8px; }
+        .cam-corner.tr { top: 6px; right: 8px; }
+        .cam-corner.bl { bottom: 6px; left: 8px; }
+        .cam-corner.br { bottom: 6px; right: 8px; }
+
+        /* -------------------------------------------------------------------------
+           3. BOTTOM SCORECARD & STATS BAR
+           ------------------------------------------------------------------------- */
+        .bottom-scoreboard-container {
+            position: absolute;
+            bottom: 24px;
+            left: 36px;
+            right: 36px;
+            height: 204px;
+            display: flex;
+            gap: 28px;
+            z-index: 20;
+        }
+
+        /* Spieler Scorecard */
+        .player-scorecard {
+            flex: 1;
+            background: linear-gradient(180deg, rgba(14, 25, 17, 0.95) 0%, rgba(6, 10, 7, 0.98) 100%);
+            border: 2px solid var(--gold-metallic);
+            border-radius: 8px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.85),
+                        inset 0 0 25px rgba(200, 168, 75, 0.08);
+            backdrop-filter: blur(12px);
+            padding: 16px 26px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        /* Solo-Modus: Volle Breite zentriert & majestätisch */
+        .bottom-scoreboard-container.solo-mode .player-scorecard#cardP1 {
+            flex: 1;
+        }
+        .bottom-scoreboard-container.solo-mode .player-scorecard#cardP2 {
+            display: none !important;
+        }
+
+        /* Aktiver Werfer Leuchteffekt */
+        .player-scorecard.active {
+            border-color: #ffd875;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.85),
+                        0 0 25px rgba(231, 202, 109, 0.35),
+                        inset 0 0 35px rgba(200, 168, 75, 0.15);
+        }
+
+        .active-dart-indicator {
+            position: absolute;
+            top: 14px;
+            right: 22px;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: rgba(46, 125, 50, 0.3);
+            border: 1px solid #81c784;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #c8e6c9;
+            text-transform: uppercase;
+        }
+        .player-scorecard.active .active-dart-indicator {
+            display: flex;
+        }
+
+        /* Obere Zeile in der Card */
+        .card-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(200, 168, 75, 0.25);
+            padding-bottom: 8px;
+        }
+
+        .player-name {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .player-stats-mini {
+            display: flex;
+            gap: 18px;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+        .stat-value-highlight {
+            color: var(--gold-bright);
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+        }
+
+        /* Mittlere Zeile: RIESIGE RESTPUNKTE & LETZTE AUFNAHME */
+        .card-middle-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin: 4px 0;
+        }
+
+        .score-remaining-box {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+        }
+
+        .score-huge {
+            font-family: 'Cinzel', serif;
+            font-size: 70px;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1;
+            letter-spacing: 1px;
+            text-shadow: 0 4px 18px rgba(0,0,0,0.9);
+        }
+
+        .score-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .last-throw-box {
+            text-align: right;
+        }
+        .last-throw-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .last-throw-value {
+            font-family: 'Cinzel', serif;
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        /* Untere Zeile: CHECKOUT ROUTE */
+        .card-bottom-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(10, 18, 12, 0.7);
+            border: 1px solid rgba(200, 168, 75, 0.25);
+            border-radius: 4px;
+            padding: 6px 16px;
+            min-height: 40px;
+        }
+
+        .checkout-label {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gold-metallic);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .checkout-route {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .checkout-dart-pill {
+            background: linear-gradient(180deg, rgba(200, 168, 75, 0.3) 0%, rgba(130, 102, 32, 0.4) 100%);
+            border: 1px solid var(--gold-metallic);
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 3px 12px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        .no-checkout-text {
+            font-size: 11px;
+            color: rgba(247, 242, 228, 0.4);
+            font-style: italic;
+        }
+
+        /* -------------------------------------------------------------------------
+           4. VOLLBILD 180er / 140er / HIGHSCORE CELEBRATION ALERT OVERLAY
+           ------------------------------------------------------------------------- */
+        .celebration-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, rgba(14, 25, 17, 0.88) 0%, rgba(6, 10, 7, 0.95) 70%);
+            z-index: 100;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .celebration-box {
+            text-align: center;
+            background: linear-gradient(180deg, #122216 0%, #060a07 100%);
+            border: 3px solid var(--gold-bright);
+            border-radius: 12px;
+            padding: 40px 80px;
+            box-shadow: 0 0 80px rgba(231, 202, 109, 0.5),
+                        inset 0 0 40px rgba(200, 168, 75, 0.2);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative;
+        }
+
+        .celebration-title {
+            font-family: 'Cinzel', serif;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .celebration-score {
+            font-family: 'Cinzel', serif;
+            font-size: 110px;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1;
+            text-shadow: 0 0 35px var(--gold-bright);
+            margin-bottom: 12px;
+        }
+
+        .celebration-sub {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 22px;
+            color: var(--text-light);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 0. Manor Green Background Canvas mit schwebenden goldenen Funken (mit Cam Cutouts) -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- 1. Header oben -->
+    <div class="darts-header">
+        <div class="header-title-box">
+            <span class="header-ornament">❖</span>
+            <span class="header-main-title" id="headerTitle">THE GENTLEMEN DARTS CLUB</span>
+        </div>
+
+        <div class="header-match-pill" id="headerMatchSub">501 DOUBLE OUT</div>
+
+        <div class="header-leg-score" id="headerLegContainer">
+            <span id="legLabelText">LEGS:</span>
+            <span class="legs-badge" id="legScoreBadge">0</span>
+        </div>
+    </div>
+
+    <!-- 2. Dual-Camera Viewport Frames (Keine Cam-Labels mehr, nur edle Rahmen) -->
+    <div class="cam-viewport-container">
+        <!-- Kamera 1: Werfer -->
+        <div class="cam-box">
+            <div class="cam-corner tl">❖</div>
+            <div class="cam-corner tr">❖</div>
+            <div class="cam-corner bl">❖</div>
+            <div class="cam-corner br">❖</div>
+        </div>
+
+        <!-- Kamera 2: Dartboard -->
+        <div class="cam-box">
+            <div class="cam-corner tl">❖</div>
+            <div class="cam-corner tr">❖</div>
+            <div class="cam-corner bl">❖</div>
+            <div class="cam-corner br">❖</div>
+        </div>
+    </div>
+
+    <!-- 3. Bottom Scorecards -->
+    <div class="bottom-scoreboard-container solo-mode" id="scoreboardContainer">
+        <!-- Spieler 1 (Chris / D0ppelXP) -->
+        <div class="player-scorecard active" id="cardP1">
+            <div class="active-dart-indicator">
+                <span>🎯</span>
+                <span>AM WURF</span>
+            </div>
+
+            <div class="card-top-row">
+                <span class="player-name" id="p1_name">D0PPELXP</span>
+                <div class="player-stats-mini">
+                    <span>3-DART-AVG: <span class="stat-value-highlight" id="p1_avg">0.0</span></span>
+                    <span>•</span>
+                    <span>DARTS: <span class="stat-value-highlight" id="p1_darts">0</span></span>
+                    <span>•</span>
+                    <span>LEGS: <span class="stat-value-highlight" id="p1_legs">0</span></span>
+                </div>
+            </div>
+
+            <div class="card-middle-row">
+                <div class="score-remaining-box">
+                    <span class="score-huge" id="p1_score">501</span>
+                    <span class="score-label">REST</span>
+                </div>
+                <div class="last-throw-box">
+                    <div class="last-throw-label">LETZTE AUFNAHME</div>
+                    <div class="last-throw-value" id="p1_last">-</div>
+                </div>
+            </div>
+
+            <div class="card-bottom-row">
+                <span class="checkout-label"><span>❖</span> CHECKOUT:</span>
+                <div class="checkout-route" id="p1_checkout">
+                    <span class="no-checkout-text">Kein Finish möglich</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spieler 2 (Gast / Gegner - wird bei isMatchPvP: true eingeblendet) -->
+        <div class="player-scorecard" id="cardP2">
+            <div class="active-dart-indicator">
+                <span>🎯</span>
+                <span>AM WURF</span>
+            </div>
+
+            <div class="card-top-row">
+                <span class="player-name" id="p2_name">GAST</span>
+                <div class="player-stats-mini">
+                    <span>AVG: <span class="stat-value-highlight" id="p2_avg">0.0</span></span>
+                    <span>•</span>
+                    <span>DARTS: <span class="stat-value-highlight" id="p2_darts">0</span></span>
+                    <span>•</span>
+                    <span>LEGS: <span class="stat-value-highlight" id="p2_legs">0</span></span>
+                </div>
+            </div>
+
+            <div class="card-middle-row">
+                <div class="score-remaining-box">
+                    <span class="score-huge" id="p2_score">501</span>
+                    <span class="score-label">REST</span>
+                </div>
+                <div class="last-throw-box">
+                    <div class="last-throw-label">LETZTE AUFNAHME</div>
+                    <div class="last-throw-value" id="p2_last">-</div>
+                </div>
+            </div>
+
+            <div class="card-bottom-row">
+                <span class="checkout-label"><span>❖</span> CHECKOUT:</span>
+                <div class="checkout-route" id="p2_checkout">
+                    <span class="no-checkout-text">Kein Finish möglich</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Celebration Alert Overlay (180, Match Win etc.) -->
+    <div class="celebration-overlay" id="celebrationOverlay">
+        <div class="celebration-box">
+            <div class="celebration-title" id="celebTitle">MAXIMUM SCORE</div>
+            <div class="celebration-score" id="celebScore">180</div>
+            <div class="celebration-sub" id="celebSub">ONE HUNDRED AND EIGHTY!</div>
+        </div>
+    </div>
+
+    <!-- MQTT Client Library für Firewall-freien Cloud Sync -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="darts_shared.js"></script>
+    <script>
+        let currentState = loadState();
+
+        // Cloud-Verbindung in OBS aufbauen
+        try {
+            window.mqttClient = mqtt.connect(MQTT_BROKER_WS, {
+                clientId: 'obs_overlay_' + Math.random().toString(16).substr(2, 8),
+                clean: true
+            });
+
+            window.mqttClient.on('connect', () => {
+                console.log("OBS Overlay Cloud Sync verbunden!");
+                window.mqttClient.subscribe(MQTT_TOPIC);
+            });
+
+            window.mqttClient.on('message', (topic, message) => {
+                try {
+                    const cloudState = JSON.parse(message.toString());
+                    updateUI(cloudState);
+                    saveState(cloudState, false);
+                } catch(e) {}
+            });
+        } catch(e) {
+            console.warn("MQTT OBS Error:", e);
+        }
+
+        function renderCheckout(score) {
+            if (currentState.mode === 'double_out') {
+                const route = CHECKOUT_TABLE[score];
+                if (route && route.length > 0) {
+                    return route.map(item => `<span class="checkout-dart-pill">${item}</span>`).join('');
+                }
+            } else {
+                if (score <= 60) {
+                    return `<span class="checkout-dart-pill">${score}</span>`;
+                }
+            }
+            return `<span class="no-checkout-text">Kein Finish möglich</span>`;
+        }
+
+        function calculateAverage(player) {
+            if (player.dartsThrown === 0) return "0.0";
+            const avg = (player.totalScored / player.dartsThrown) * 3;
+            return avg.toFixed(1);
+        }
+
+        function updateUI(state) {
+            currentState = state;
+
+            // Header Mode Text
+            const modeText = state.mode === 'double_out' ? 'DOUBLE OUT' : 'SINGLE OUT';
+            document.getElementById('headerMatchSub').innerText = `${state.gameType} ${modeText} ${state.isMatchPvP ? '• 1v1 MATCH' : '• SOLO'}`;
+
+            // Solo vs PvP Umschaltung
+            const container = document.getElementById('scoreboardContainer');
+            if (state.isMatchPvP) {
+                container.classList.remove('solo-mode');
+                document.getElementById('legLabelText').innerText = "LEGS:";
+                document.getElementById('legScoreBadge').innerText = `${state.players[0].legs} - ${state.players[1].legs}`;
+            } else {
+                container.classList.add('solo-mode');
+                document.getElementById('legLabelText').innerText = "LEGS GEWONNEN:";
+                document.getElementById('legScoreBadge').innerText = `${state.players[0].legs}`;
+            }
+
+            // P1 Card
+            const p1 = state.players[0];
+            document.getElementById('p1_name').innerText = p1.name;
+            document.getElementById('p1_score').innerText = p1.score;
+            document.getElementById('p1_avg').innerText = calculateAverage(p1);
+            document.getElementById('p1_darts').innerText = p1.dartsThrown;
+            document.getElementById('p1_legs').innerText = p1.legs;
+            document.getElementById('p1_last').innerText = p1.lastScore > 0 ? p1.lastScore : "-";
+            document.getElementById('p1_checkout').innerHTML = renderCheckout(p1.score);
+
+            // P2 Card (falls PvP)
+            const p2 = state.players[1];
+            document.getElementById('p2_name').innerText = p2.name;
+            document.getElementById('p2_score').innerText = p2.score;
+            document.getElementById('p2_avg').innerText = calculateAverage(p2);
+            document.getElementById('p2_darts').innerText = p2.dartsThrown;
+            document.getElementById('p2_legs').innerText = p2.legs;
+            document.getElementById('p2_last').innerText = p2.lastScore > 0 ? p2.lastScore : "-";
+            document.getElementById('p2_checkout').innerHTML = renderCheckout(p2.score);
+
+            // Active Highlight
+            const cardP1 = document.getElementById('cardP1');
+            const cardP2 = document.getElementById('cardP2');
+            if (!state.isMatchPvP || state.activePlayer === 0) {
+                cardP1.classList.add('active');
+                cardP2.classList.remove('active');
+            } else {
+                cardP1.classList.remove('active');
+                cardP2.classList.add('active');
+            }
+
+            // Celebration Alert
+            if (state.lastAlert) {
+                triggerCelebration(state.lastAlert);
+                state.lastAlert = null;
+                saveState(state);
+            }
+        }
+
+        function triggerCelebration(alertData) {
+            const overlay = document.getElementById('celebrationOverlay');
+            document.getElementById('celebTitle').innerText = alertData.title;
+            document.getElementById('celebScore').innerText = alertData.score;
+            document.getElementById('celebSub').innerText = alertData.sub;
+
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 3000);
+        }
+
+        // BroadcastChannel Listener
+        if (window.BroadcastChannel) {
+            const bc = new BroadcastChannel(BROADCAST_KEY);
+            bc.onmessage = (event) => {
+                updateUI(event.data);
+            };
+        }
+
+        // Storage Listener Fallback
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEY) {
+                updateUI(JSON.parse(e.newValue));
+            }
+        });
+
+        // Polling Fallback für IFrames (prüft alle 250ms nach neuen Werten im localStorage)
+        setInterval(() => {
+            const latest = loadState();
+            const p1 = latest.players[0];
+            const currP1 = currentState.players[0];
+            if (p1.score !== currP1.score || p1.lastScore !== currP1.lastScore || latest.gameType !== currentState.gameType || latest.isMatchPvP !== currentState.isMatchPvP || latest.lastAlert !== null) {
+                updateUI(latest);
+            }
+        }, 250);
+
+        // Init
+        updateUI(currentState);
+
+        // ============================================================
+        // MANOR GREEN HINTERGRUND & SCHWEBENDE GOLD-FUNKEN
+        // ============================================================
+        const canvas = document.getElementById('bg-canvas');
+        canvas.width = 1920;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
+
+        const bgGrad = ctx.createRadialGradient(960, 540, 100, 960, 540, 1100);
+        bgGrad.addColorStop(0, '#1c2f1e');
+        bgGrad.addColorStop(0.5, '#121f14');
+        bgGrad.addColorStop(1, '#070d08');
+
+        // 75 feine schwebende Gold-Glühfunken
+        const particles = Array.from({ length: 75 }, () => ({
+            x: Math.random() * 1920,
+            y: Math.random() * 1080,
+            r: Math.random() * 2.0 + 0.3,
+            speed: Math.random() * 0.35 + 0.08,
+            drift: (Math.random() - 0.5) * 0.2,
+            phase: Math.random() * Math.PI * 2
+        }));
+
+        function renderManorBackground() {
+            // 1. Hintergrund leeren
+            ctx.clearRect(0, 0, 1920, 1080);
+
+            // 2. Manor-Grün-Verlauf über gesamte Fläche
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 1920, 1080);
+
+            // 3. Gold-Funken zeichnen
+            const now = Date.now() * 0.001;
+            particles.forEach(p => {
+                const alpha = 0.14 + Math.abs(Math.sin(now * 0.8 + p.phase)) * 0.45;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(231, 202, 109, ${alpha.toFixed(2)})`;
+                ctx.shadowColor = '#e7ca6d';
+                ctx.shadowBlur = 6;
+                ctx.fill();
+
+                p.y -= p.speed;
+                p.x += p.drift;
+                if (p.y < -5) { p.y = 1085; p.x = Math.random() * 1920; }
+                if (p.x < 0) p.x = 1920;
+                if (p.x > 1920) p.x = 0;
+            });
+
+            // 4. Glasklare Transparenz für Cam 1 & Cam 2 ausschneiden (Clear-Rects)
+            // Cam 1: x: 36, y: 98, w: 910, h: 720
+            // Cam 2: x: 974, y: 98, w: 910, h: 720
+            ctx.clearRect(36, 98, 910, 720);
+            ctx.clearRect(974, 98, 910, 720);
+
+            requestAnimationFrame(renderManorBackground);
+        }
+        renderManorBackground();
+    </script>
+</body>
+</html>

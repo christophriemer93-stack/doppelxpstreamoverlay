@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen – Fasanenjagd & Stash Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       THE GENTLEMEN – FASANENJAGD & STASH SYSTEM
+       ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Playfair Display', serif;
+      pointer-events: none;
+      position: relative;
+    }
+
+    /* ---------------------------------------------------------
+       1. HAUPTKARTE (OBEN ZENTRIERT) – JAGD-START & ERGEBNIS
+       --------------------------------------------------------- */
+    .top-hunt-card {
+      position: absolute;
+      top: -450px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 580px;
+      background: linear-gradient(145deg, rgba(13, 23, 14, 0.98) 0%, rgba(20, 34, 21, 0.98) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.5);
+      border-radius: 4px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.8),
+        0 0 0 3px rgba(200, 168, 75, 0.2),
+        0 15px 50px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(229, 201, 106, 0.3);
+      opacity: 0;
+      transition: top 0.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .top-hunt-card.show {
+      top: 35px;
+      opacity: 1;
+    }
+
+    /* Goldene Zierleisten oben & unten */
+    .top-hunt-card::before,
+    .top-hunt-card::after {
+      content: '';
+      display: block;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #c8a84b 30%, #f3ebd6 50%, #c8a84b 70%, transparent);
+    }
+
+    .hunt-card-inner {
+      padding: 22px 28px;
+      position: relative;
+    }
+
+    /* Wasserzeichen */
+    .hunt-card-inner::before {
+      content: '✦';
+      position: absolute;
+      font-size: 160px;
+      color: rgba(200, 168, 75, 0.035);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200,168,75,0.6));
+    }
+    .divider-line.right {
+      background: linear-gradient(90deg, rgba(200,168,75,0.6), transparent);
+    }
+    .divider-ornament {
+      font-size: 12px;
+      color: #e5c96a;
+    }
+
+    .hunt-tagline {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #c8a84b;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .hunt-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: #f3ebd6;
+      text-align: center;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+      margin-bottom: 6px;
+    }
+
+    .hunt-desc {
+      font-family: 'IM Fell English', serif;
+      font-size: 16px;
+      color: #d8cdb4;
+      text-align: center;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    /* Countdown-Balken für 20 Sekunden Start-Animation */
+    .hunt-timer-bar-wrapper {
+      width: 100%;
+      height: 4px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 10px;
+      border: 1px solid rgba(200,168,75,0.25);
+    }
+
+    .hunt-timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #c8a84b, #e5c96a);
+      transition: width 0.1s linear;
+    }
+
+    /* Ergebnis-Tabelle in der Karte */
+    .hunt-results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 220px;
+      overflow-y: hidden;
+      margin: 12px 0 6px;
+    }
+
+    .hunt-result-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8, 14, 9, 0.7);
+      border: 1px solid rgba(200, 168, 75, 0.25);
+      border-left: 3px solid #c8a84b;
+      padding: 6px 12px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+
+    .hunt-result-user {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      color: #f3ebd6;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hunt-result-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-gold {
+      background: rgba(229, 201, 106, 0.2);
+      color: #e5c96a;
+      border: 1px solid #e5c96a;
+    }
+    .badge-hit {
+      background: rgba(74, 222, 128, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(74, 222, 128, 0.5);
+    }
+    .badge-miss {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    /* ---------------------------------------------------------
+       2. STASH KARTE (LINKS MITTIG REINFAHREND)
+       --------------------------------------------------------- */
+    .stash-card {
+      position: absolute;
+      top: 50%;
+      left: -480px;
+      transform: translateY(-50%);
+      width: 420px;
+      background: linear-gradient(135deg, rgba(13, 23, 14, 0.98) 0%, rgba(20, 34, 21, 0.98) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.45);
+      border-left: 5px solid #e5c96a;
+      border-radius: 4px;
+      box-shadow:
+        0 15px 45px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(229, 201, 106, 0.25),
+        0 0 20px rgba(200, 168, 75, 0.15);
+      opacity: 0;
+      transition: left 0.7s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .stash-card.show {
+      left: 35px;
+      opacity: 1;
+    }
+
+    .stash-inner {
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stash-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid rgba(200, 168, 75, 0.25);
+      padding-bottom: 12px;
+    }
+
+    .stash-avatar-wrapper {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 2px solid #e5c96a;
+      box-shadow: 0 0 0 2px rgba(10, 16, 10, 0.9), 0 0 10px rgba(200, 168, 75, 0.3);
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #0d170e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stash-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .stash-avatar-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #1a2c1b 0%, #0c140d 100%);
+      color: #e5c96a;
+      font-weight: 900;
+      font-size: 24px;
+    }
+
+    .stash-user-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .stash-tag {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: #c8a84b;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .stash-username {
+      font-size: 19px;
+      font-weight: 900;
+      color: #f3ebd6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    .stash-rank-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      color: #e5c96a;
+      letter-spacing: 0.8px;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Stash Stats Grid */
+    .stash-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stash-stat-box {
+      background: rgba(8, 14, 9, 0.7);
+      border: 1px solid rgba(200, 168, 75, 0.2);
+      border-radius: 3px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      color: #c8a84b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 900;
+      color: #f3ebd6;
+    }
+
+    /* Progress Balken zum nächsten Rang */
+    .stash-progress-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stash-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      color: #a0b2a1;
+      font-weight: 600;
+    }
+
+    .stash-progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(200, 168, 75, 0.3);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .stash-progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c8a84b, #e5c96a);
+      width: 0%;
+      transition: width 0.6s ease;
+    }
+
+    /* ---------------------------------------------------------
+       3. PREVIEW & TEST CONTROLS (Oben Rechts)
+       --------------------------------------------------------- */
+    .preview-bar {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(10, 16, 10, 0.95);
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #f3ebd6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: all;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      max-width: 420px;
+    }
+
+    .preview-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      color: #e5c96a;
+      font-size: 13px;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preview-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .btn-test {
+      background: #172418;
+      color: #f3ebd6;
+      border: 1px solid #c8a84b;
+      padding: 5px 9px;
+      border-radius: 3px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-test:hover {
+      background: #c8a84b;
+      color: #0b110b;
+    }
+
+    .btn-danger {
+      border-color: #8c3434;
+      background: #251212;
+      color: #fca5a5;
+    }
+    .btn-danger:hover {
+      background: #8c3434;
+      color: #fff;
+    }
+
+    body.no-preview .preview-bar {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       TEST-BEDIENFELD (Browser-Vorschau)
+       ========================================================= -->
+  <div class="preview-bar" id="previewBar">
+    <div class="preview-title">
+      <span>✦ FASANENJAGD &bull; TEST-STATION</span>
+      <span style="font-size: 10px; color: #8a9c8b; cursor: pointer;" onclick="document.body.classList.toggle('no-preview')">[Ausblenden]</span>
+    </div>
+    <div style="font-size: 10.5px; color: #a4b8a5;">
+      Nächste Random-Jagd in: <strong id="nextHuntCountdown" style="color:#e5c96a;">--:--</strong>
+      | Status: <strong id="huntStatus" style="color:#4ade80;">Bereit</strong>
+    </div>
+    <div class="preview-btns">
+      <button class="btn-test" onclick="triggerHuntStart()">▶ Jagd sofort starten</button>
+      <button class="btn-test" onclick="simulateShot('Lord_Pearson')">!schuss (Lord Pearson)</button>
+      <button class="btn-test" onclick="simulateShot('Bobby_Glass')">!schuss (Bobby Glass)</button>
+      <button class="btn-test" onclick="simulateShot('Lady_Genevieve')">!schuss (Genevieve)</button>
+      <button class="btn-test" onclick="endHuntNow()">⚡ Jagd sofort beenden (Ergebnis)</button>
+      <button class="btn-test" onclick="simulateStash('Lord_Pearson')">!stash (Lord Pearson)</button>
+      <button class="btn-test btn-danger" onclick="resetAllStats()">↺ Reset Jagdbuch</button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       1. HAUPT-JAGD-KARTE (OBEN ZENTRIERT)
+       ========================================================= -->
+  <div class="top-hunt-card" id="topHuntCard">
+    <div class="hunt-card-inner">
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-ornament">✦</div>
+        <div class="divider-line right"></div>
+      </div>
+      <div class="hunt-tagline" id="huntTagline">DOPPEL XP // KÖNIGLICHE FASANENJAGD</div>
+      <div class="hunt-title" id="huntTitle">DIE FASANENJAGD HAT BEGONNEN!</div>
+      <div class="hunt-desc" id="huntDesc">
+        Ein Schwarm Edelfasane steigt aus dem Dickicht auf!<br>
+        Legt eure Flinte an und tippt <strong>!schuss</strong> in den Chat!
+      </div>
+
+      <!-- Start-Countdown Balken (20 Sekunden) -->
+      <div class="hunt-timer-bar-wrapper" id="timerBarWrap" style="display: none;">
+        <div class="hunt-timer-bar" id="timerBar"></div>
+      </div>
+
+      <!-- Ergebnis-Liste (wird nach 2 Minuten befüllt) -->
+      <div class="hunt-results-list" id="resultsList" style="display: none;"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       2. STASH-KARTE (LINKS MITTIG REINFAHREND)
+       ========================================================= -->
+  <div class="stash-card" id="stashCard">
+    <div class="stash-inner">
+      <div class="stash-header">
+        <div class="stash-avatar-wrapper">
+          <img class="stash-avatar-img" id="stashAvatarImg" src="" alt="Avatar" onerror="showFallbackStashAvatar()">
+          <div class="stash-avatar-fallback" id="stashAvatarFallback" style="display: none;">D</div>
+        </div>
+        <div class="stash-user-info">
+          <div class="stash-tag">✦ DAS JAGDREGISTER ✦</div>
+          <div class="stash-username" id="stashUsername">Lord Pearson</div>
+          <div class="stash-rank-badge" id="stashRankBadge">
+            <span>✦</span> <span id="stashRankName">Rang 1: Treiber-Novize</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stash-grid">
+        <div class="stash-stat-box">
+          <span class="stat-label">Erlegte Fasane</span>
+          <span class="stat-val" id="stashTotalHits">0</span>
+        </div>
+        <div class="stash-stat-box">
+          <span class="stat-label">Seltene Goldfasane</span>
+          <span class="stat-val" style="color: #e5c96a;" id="stashRareHits">0</span>
+        </div>
+        <div class="stash-stat-box">
+          <span class="stat-label">Schüsse Gesamt</span>
+          <span class="stat-val" id="stashTotalShots">0</span>
+        </div>
+        <div class="stash-stat-box">
+          <span class="stat-label">Trefferquote</span>
+          <span class="stat-val" style="color: #4ade80;" id="stashAccuracy">0%</span>
+        </div>
+      </div>
+
+      <!-- Rang Fortschritt -->
+      <div class="stash-progress-section">
+        <div class="stash-progress-label">
+          <span id="stashNextRankLabel">Fortschritt zum nächsten Rang</span>
+          <span id="stashProgressCount">0 / 3</span>
+        </div>
+        <div class="stash-progress-bar-bg">
+          <div class="stash-progress-bar-fill" id="stashProgressFill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       LOGIK & SPIELMECHANIK
+       ========================================================= -->
+  <script>
+    // =========================================================
+    // 0. CROSS-GAME KOMMUNIKATION (BroadcastChannel)
+    //    Verhindert gleichzeitiges Laufen von Jagd & Worträtsel
+    // =========================================================
+    const gameChannel = new BroadcastChannel('gentlemen_games');
+    let otherGameActive = false;
+
+    gameChannel.onmessage = (e) => {
+      if (e.data && (e.data.type === 'wordle_start')) {
+        otherGameActive = true;
+      } else if (e.data && (e.data.type === 'wordle_end')) {
+        otherGameActive = false;
+      }
+    };
+
+    function broadcastHuntState(active) {
+      try {
+        gameChannel.postMessage({ type: active ? 'hunt_start' : 'hunt_end' });
+      } catch (e) {}
+    }
+
+    // =========================================================
+    // 1. DIE 15 RÄNGE DES GENTLEMEN-JAGDORDENS
+    // =========================================================
+    const RANKS = [
+      { rank: 1,  name: "Treiber-Novize",               minHits: 0,   maxHits: 2   },
+      { rank: 2,  name: "Jagdschüler",                 minHits: 3,   maxHits: 5   },
+      { rank: 3,  name: "Flintenputzer",               minHits: 6,   maxHits: 9   },
+      { rank: 4,  name: "Schrotflinten-Knappe",        minHits: 10,  maxHits: 14  },
+      { rank: 5,  name: "Passionierter Waidmann",      minHits: 15,  maxHits: 21  },
+      { rank: 6,  name: "Hochwild-Aufseher",           minHits: 22,  maxHits: 29  },
+      { rank: 7,  name: "Falkner des Salons",          minHits: 30,  maxHits: 39  },
+      { rank: 8,  name: "Meisterschütze von DoppelXP", minHits: 40,  maxHits: 51  },
+      { rank: 9,  name: "Hofjäger der Krone",          minHits: 52,  maxHits: 65  },
+      { rank: 10, name: "Königlicher Oberförster",      minHits: 66,  maxHits: 82  },
+      { rank: 11, name: "Freiherr der Fasanenjagd",     minHits: 83,  maxHits: 102 },
+      { rank: 12, name: "Graf von Flintenruh",          minHits: 103, maxHits: 125 },
+      { rank: 13, name: "Fürstlicher Jagdmeister",      minHits: 126, maxHits: 155 },
+      { rank: 14, name: "Herzog der Kaiser-Fasanerie",  minHits: 156, maxHits: 199 },
+      { rank: 15, name: "Großmeister des Jagdordens",  minHits: 200, maxHits: 99999 }
+    ];
+
+    function getRankInfo(totalHits) {
+      for (let i = RANKS.length - 1; i >= 0; i--) {
+        if (totalHits >= RANKS[i].minHits) {
+          const cur = RANKS[i];
+          const next = RANKS[i + 1] || null;
+          return { current: cur, next: next };
+        }
+      }
+      return { current: RANKS[0], next: RANKS[1] };
+    }
+
+    // =========================================================
+    // 2. EINSTELLUNGEN & PERSISTENTER SPEICHER
+    // =========================================================
+    const CONFIG = {
+      // Random Start-Intervall: Alle 25 bis 40 Minuten
+      minIntervalMinutes: 25,
+      maxIntervalMinutes: 40,
+
+      // Phasen-Dauern
+      startBannerDurationMs: 20000, // Start-Animation bleibt 20 Sek. im Bild
+      huntingRoundDurationMs: 120000, // 2 Minuten Jagdfenster (120 Sekunden)
+      resultsDurationMs: 18000,      // Ergebnis-Tabelle bleibt 18 Sek. im Bild
+      stashDurationMs: 9000,         // Stash bleibt 9 Sek. im Bild
+
+      // Chancen
+      baseHitChance: 0.65, // 65% Trefferchance
+      rareChance: 0.15     // 15% Chance auf seltenen Goldfasan
+
+    };
+
+    // Stash-Datenbank im localStorage
+    let userDatabase = {};
+    try {
+      const saved = localStorage.getItem('gentlemen_pheasant_hunt_v2');
+      if (saved) userDatabase = JSON.parse(saved);
+    } catch (e) {}
+
+    function saveDatabase() {
+      try {
+        localStorage.setItem('gentlemen_pheasant_hunt_v2', JSON.stringify(userDatabase));
+      } catch (e) {}
+    }
+
+    function getUserRecord(username) {
+      const key = username.toLowerCase().trim();
+      if (!userDatabase[key]) {
+        userDatabase[key] = {
+          displayName: username,
+          totalShots: 0,
+          totalHits: 0,
+          rareHits: 0,
+          misses: 0,
+          lastSeen: Date.now()
+        };
+      }
+      return userDatabase[key];
+    }
+
+    // =========================================================
+    // 3. JAGD-STATUS & PHASEN
+    // =========================================================
+    let isHuntActive = false;
+    let huntStartTime = 0;
+    let huntEndTimeout = null;
+    let roundParticipants = new Map(); // username -> shot timestamp
+
+    const topCard = document.getElementById('topHuntCard');
+    const huntTagline = document.getElementById('huntTagline');
+    const huntTitle = document.getElementById('huntTitle');
+    const huntDesc = document.getElementById('huntDesc');
+    const timerBarWrap = document.getElementById('timerBarWrap');
+    const timerBar = document.getElementById('timerBar');
+    const resultsList = document.getElementById('resultsList');
+    const huntStatusEl = document.getElementById('huntStatus');
+    const countdownEl = document.getElementById('nextHuntCountdown');
+
+    // ---------------------------------------------------------
+    // Phase 1: Jagd startet zufällig (oder per Test-Button)
+    // ---------------------------------------------------------
+    function triggerHuntStart() {
+      if (isHuntActive) return;
+      if (otherGameActive) {
+        scheduleNextRandomHunt(120); // 2 Min verschieben wenn anderes Spiel aktiv
+        return;
+      }
+      // Prüfe auch localStorage Lock falls BroadcastChannel verpasst wurde
+      const lastWordle = parseInt(localStorage.getItem('gentlemen_wordle_running_until') || '0', 10);
+      if (Date.now() < lastWordle) {
+        scheduleNextRandomHunt(120);
+        return;
+      }
+
+      isHuntActive = true;
+      localStorage.setItem('gentlemen_hunt_running_until', (Date.now() + CONFIG.huntingRoundDurationMs + CONFIG.resultsDurationMs).toString());
+      broadcastHuntState(true);
+      huntStartTime = Date.now();
+      roundParticipants.clear();
+
+      if (huntStatusEl) huntStatusEl.textContent = "Jagd aktiv (2 Min)!";
+
+      // 1. Start-Animation (bleibt 20 Sekunden sichtbar)
+      huntTagline.textContent = "DOPPEL XP // KÖNIGLICHE FASANENJAGD";
+      huntTitle.textContent = "DIE FASANENJAGD HAT BEGONNEN!";
+      huntDesc.innerHTML = `
+        Ein Schwarm Edelfasane steigt aus dem Dickicht auf!<br>
+        Legt eure Flinte an und tippt <strong>!schuss</strong> in den Chat!<br>
+        <span style="font-size: 13px; color: #e5c96a;">✦ Jagdzeit: 2 Minuten ✦</span>
+      `;
+
+      resultsList.style.display = 'none';
+      timerBarWrap.style.display = 'block';
+      timerBar.style.width = '100%';
+
+      topCard.classList.add('show');
+
+      // 20-Sekunden Countdown auf dem Start-Banner
+      const startBannerEnd = Date.now() + CONFIG.startBannerDurationMs;
+      const bannerInterval = setInterval(() => {
+        const remaining = startBannerEnd - Date.now();
+        if (remaining <= 0) {
+          clearInterval(bannerInterval);
+          topCard.classList.remove('show'); // Start-Banner nach 20s ausblenden
+        } else {
+          const pct = (remaining / CONFIG.startBannerDurationMs) * 100;
+          timerBar.style.width = `${pct}%`;
+        }
+      }, 100);
+
+      // Nach 2 Minuten (120s): Phase 3 Ergebnis-Verkündung
+      huntEndTimeout = setTimeout(() => {
+        endHuntRound();
+      }, CONFIG.huntingRoundDurationMs);
+    }
+
+    // ---------------------------------------------------------
+    // Phase 2: Chatter schießen mit !schuss
+    // ---------------------------------------------------------
+    function handleShotCommand(username) {
+      if (!isHuntActive) return; // Jagd läuft gerade nicht
+
+      const key = username.toLowerCase().trim();
+      if (roundParticipants.has(key)) {
+        // Wurde in dieser Runde bereits geschossen
+        return;
+      }
+
+      // Flinte angelegt für diese Runde!
+      roundParticipants.set(key, {
+        displayName: username,
+        shotTime: Date.now()
+      });
+    }
+
+    // ---------------------------------------------------------
+    // Phase 3: Jagd-Ergebnis nach 2 Minuten auswerten & zeigen
+    // ---------------------------------------------------------
+    function endHuntRound() {
+      if (!isHuntActive) return;
+      isHuntActive = false;
+      if (huntEndTimeout) clearTimeout(huntEndTimeout);
+
+      if (huntStatusEl) huntStatusEl.textContent = "Bereit";
+
+      const totalHunters = roundParticipants.size;
+      resultsList.innerHTML = '';
+
+      if (totalHunters === 0) {
+        // Niemand hat geschossen
+        huntTagline.textContent = "ERGEBNIS // FASANENJAGD BEENDET";
+        huntTitle.textContent = "DIE FASANE SIND ENTKOMMEN";
+        huntDesc.innerHTML = "Kein Schütze hat die Flinte angelegt.<br>Die Vögel zogen unversehrt über das Anwesen.";
+      } else {
+        huntTagline.textContent = "DAS HAUPTBUCH DER JAGD // ERGEBNIS";
+        huntTitle.textContent = `STRECKE GELEGT: ${totalHunters} SCHÜTZEN`;
+        huntDesc.innerHTML = "Die Flinte ruht. Hier ist das offizielle Ergebnis der Runde:";
+
+        // Schüsse der Runde auswerten
+        let totalBagged = 0;
+        let totalRare = 0;
+
+        roundParticipants.forEach((info, key) => {
+          const userRec = getUserRecord(info.displayName);
+          userRec.totalShots++;
+
+          const isHit = Math.random() < CONFIG.baseHitChance;
+          const row = document.createElement('div');
+          row.className = 'hunt-result-row';
+
+          if (isHit) {
+            const isRare = Math.random() < CONFIG.rareChance;
+            if (isRare) {
+              userRec.totalHits += 2;
+              userRec.rareHits += 1;
+              totalRare++;
+              totalBagged += 2;
+              row.innerHTML = `
+                <span class="hunt-result-user">✦ ${escapeHtml(info.displayName)}</span>
+                <span class="hunt-result-badge badge-gold">Goldener Kaiserfasan (+2)</span>
+              `;
+            } else {
+              userRec.totalHits += 1;
+              totalBagged += 1;
+              row.innerHTML = `
+                <span class="hunt-result-user">✦ ${escapeHtml(info.displayName)}</span>
+                <span class="hunt-result-badge badge-hit">Edelfasan erlegt (+1)</span>
+              `;
+            }
+          } else {
+            userRec.misses++;
+            row.innerHTML = `
+              <span class="hunt-result-user" style="opacity: 0.7;">${escapeHtml(info.displayName)}</span>
+              <span class="hunt-result-badge badge-miss">Im Geäst verfehlt</span>
+            `;
+          }
+          resultsList.appendChild(row);
+        });
+
+        saveDatabase();
+      }
+
+      timerBarWrap.style.display = 'none';
+      resultsList.style.display = 'flex';
+      topCard.classList.add('show');
+
+      // Nach eingestellter Dauer ausblenden & nächsten Random-Timer setzen
+      setTimeout(() => {
+        topCard.classList.remove('show');
+        localStorage.removeItem('gentlemen_hunt_running_until');
+        broadcastHuntState(false);
+        scheduleNextRandomHunt();
+      }, CONFIG.resultsDurationMs);
+    }
+
+    function endHuntNow() {
+      if (huntEndTimeout) clearTimeout(huntEndTimeout);
+      endHuntRound();
+    }
+
+    // ---------------------------------------------------------
+    // Phase 4: !stash Befehl (Fährt von links mittig rein)
+    // ---------------------------------------------------------
+    const stashQueue = [];
+    let isStashDisplaying = false;
+
+    const stashCard = document.getElementById('stashCard');
+    const stashUsername = document.getElementById('stashUsername');
+    const stashRankName = document.getElementById('stashRankName');
+    const stashTotalHits = document.getElementById('stashTotalHits');
+    const stashRareHits = document.getElementById('stashRareHits');
+    const stashTotalShots = document.getElementById('stashTotalShots');
+    const stashAccuracy = document.getElementById('stashAccuracy');
+    const stashNextRankLabel = document.getElementById('stashNextRankLabel');
+    const stashProgressCount = document.getElementById('stashProgressCount');
+    const stashProgressFill = document.getElementById('stashProgressFill');
+    const stashAvatarImg = document.getElementById('stashAvatarImg');
+    const stashAvatarFallback = document.getElementById('stashAvatarFallback');
+
+    function handleStashCommand(username, directAvatar = null) {
+      stashQueue.push({ username, directAvatar });
+      processStashQueue();
+    }
+
+    function processStashQueue() {
+      if (isStashDisplaying || stashQueue.length === 0) return;
+      isStashDisplaying = true;
+      const current = stashQueue.shift();
+      showStashCard(current.username, current.directAvatar);
+    }
+
+    async function showStashCard(username, directAvatar) {
+      const userRec = getUserRecord(username);
+      const rankInfo = getRankInfo(userRec.totalHits);
+
+      stashUsername.textContent = userRec.displayName || username;
+      stashRankName.textContent = `Rang ${rankInfo.current.rank}: ${rankInfo.current.name}`;
+      stashTotalHits.textContent = userRec.totalHits;
+      stashRareHits.textContent = userRec.rareHits;
+      stashTotalShots.textContent = userRec.totalShots;
+
+      const acc = userRec.totalShots > 0 ? Math.round((userRec.totalHits / userRec.totalShots) * 100) : 0;
+      stashAccuracy.textContent = `${acc}%`;
+
+      // Rang-Fortschritt berechnen
+      if (rankInfo.next) {
+        const needed = rankInfo.next.minHits;
+        const currentInRank = userRec.totalHits;
+        const range = needed - rankInfo.current.minHits;
+        const progress = Math.min(range, currentInRank - rankInfo.current.minHits);
+        const pct = Math.min(100, Math.max(0, Math.round((progress / range) * 100)));
+
+        stashNextRankLabel.textContent = `Ziel: Rang ${rankInfo.next.rank} (${rankInfo.next.name})`;
+        stashProgressCount.textContent = `${userRec.totalHits} / ${needed} Fasane`;
+        stashProgressFill.style.width = `${pct}%`;
+      } else {
+        stashNextRankLabel.textContent = "Höchster Rang erreicht!";
+        stashProgressCount.textContent = "MAXIMUM";
+        stashProgressFill.style.width = "100%";
+      }
+
+      // Profilbild laden (DecAPI -> IVR -> Fallback)
+      let avatar = directAvatar || await fetchTwitchAvatar(username);
+      if (avatar) {
+        stashAvatarFallback.style.display = 'none';
+        stashAvatarImg.style.display = 'block';
+        stashAvatarImg.src = avatar;
+      } else {
+        showFallbackStashAvatar(username.charAt(0));
+      }
+
+      // Von links mittig hereinfahren
+      stashCard.classList.add('show');
+
+      // Nach Ablauf wieder herausfahren
+      setTimeout(() => {
+        stashCard.classList.remove('show');
+        setTimeout(() => {
+          isStashDisplaying = false;
+          processStashQueue();
+        }, 750);
+      }, CONFIG.stashDurationMs);
+    }
+
+    function showFallbackStashAvatar(initial) {
+      stashAvatarImg.style.display = 'none';
+      stashAvatarFallback.style.display = 'flex';
+      stashAvatarFallback.textContent = (initial || '✦').toUpperCase();
+    }
+
+    // =========================================================
+    // 5. RANDOM TIMER SYSTEM (Unberechenbarer Start)
+    // =========================================================
+    let nextHuntTimestamp = 0;
+    let randomTimerInterval = null;
+
+    function scheduleNextRandomHunt() {
+      const minMs = CONFIG.minIntervalMinutes * 60 * 1000;
+      const maxMs = CONFIG.maxIntervalMinutes * 60 * 1000;
+      const randomWait = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+
+      nextHuntTimestamp = Date.now() + randomWait;
+
+      if (randomTimerInterval) clearInterval(randomTimerInterval);
+      randomTimerInterval = setInterval(() => {
+        const diff = nextHuntTimestamp - Date.now();
+        if (diff <= 0) {
+          clearInterval(randomTimerInterval);
+          triggerHuntStart();
+        } else {
+          updateCountdownDisplay(diff);
+        }
+      }, 1000);
+    }
+
+    function updateCountdownDisplay(diffMs) {
+      if (!countdownEl) return;
+      const totalSec = Math.floor(diffMs / 1000);
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+      countdownEl.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // =========================================================
+    // 6. AVATAR FETCHING PIPELINE
+    // =========================================================
+    const avatarCache = new Map();
+
+    async function fetchTwitchAvatar(username) {
+      const cleanUser = username.toLowerCase().trim();
+      if (avatarCache.has(cleanUser)) return avatarCache.get(cleanUser);
+
+      try {
+        const res = await fetch(`https://decapi.me/twitch/avatar/${encodeURIComponent(cleanUser)}`);
+        if (res.ok) {
+          const text = await res.text();
+          if (text && text.startsWith('http')) {
+            const url = text.trim();
+            avatarCache.set(cleanUser, url);
+            return url;
+          }
+        }
+      } catch (e) {}
+
+      try {
+        const res2 = await fetch(`https://api.ivr.fi/v2/twitch/user?login=${encodeURIComponent(cleanUser)}`);
+        if (res2.ok) {
+          const json = await res2.json();
+          if (Array.isArray(json) && json[0] && json[0].logo) {
+            const url = json[0].logo;
+            avatarCache.set(cleanUser, url);
+            return url;
+          }
+        }
+      } catch (e) {}
+
+      return null;
+    }
+
+    // =========================================================
+    // 7. EVENT LISTENER (StreamElements & Twitch IRC)
+    // =========================================================
+    window.addEventListener('onEventReceived', function (obj) {
+      if (!obj || !obj.detail) return;
+      if (obj.detail.listener === 'message') {
+        const d = obj.detail.event.data;
+        if (!d) return;
+
+        const text = (d.text || '').toLowerCase().trim();
+        const user = d.displayName || d.nick || 'Gentleman';
+        const avatar = d.avatar || null;
+
+        if (text.startsWith('!schuss') || text.startsWith('!shoot') || text.startsWith('!jagd')) {
+          handleShotCommand(user);
+        } else if (text.startsWith('!stash') || text.startsWith('!beute') || text.startsWith('!rang')) {
+          handleStashCommand(user, avatar);
+        }
+      }
+    });
+
+    // In OBS automatisch Preview-Leiste ausblenden (window.obsstudio ist von OBS gesetzt)
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelParam = urlParams.get('channel') || 'd0ppelxp';
+    if (window.obsstudio || urlParams.get('preview') === '0' || urlParams.get('hide_preview') === '1') {
+      document.body.classList.add('no-preview');
+    }
+
+    function connectTwitchIrc(channelName) {
+      if (window.StreamElements) return;
+      const targetChan = channelName.toLowerCase().replace('#', '');
+      const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+      ws.onopen = function () {
+        ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+        ws.send('PASS SCHMOOPIIE');
+        ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+        ws.send(`JOIN #${targetChan}`);
+        console.log(`[Twitch IRC Fasanenjagd] Verbunden mit #${targetChan}`);
+      };
+
+      ws.onmessage = function (event) {
+        const lines = event.data.split('\r\n');
+        for (let line of lines) {
+          if (!line) continue;
+          if (line.startsWith('PING')) {
+            ws.send('PONG :tmi.twitch.tv');
+            continue;
+          }
+
+          if (line.includes('PRIVMSG')) {
+            // Regex Match: @tags :user!user@user.tmi.twitch.tv PRIVMSG #chan :message
+            const match = line.match(/@([^ ]+) :([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)/);
+            let displayName = 'Gentleman';
+            let chatText = '';
+
+            if (match) {
+              const rawTags = match[1];
+              const username = match[2];
+              chatText = match[3].trim();
+
+              const tagMatch = rawTags.match(/display-name=([^;]+)/);
+              displayName = (tagMatch && tagMatch[1]) ? tagMatch[1] : username;
+            } else {
+              // Fallback Parsing
+              const matchUser = line.match(/display-name=([^;]+)/);
+              const matchNick = line.match(/:([^!]+)!/);
+              displayName = matchUser ? matchUser[1] : (matchNick ? matchNick[1] : 'Gentleman');
+
+              const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
+              if (textIdx !== -1) {
+                chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
+              }
+            }
+
+            if (!chatText) continue;
+            const cmd = chatText.toLowerCase();
+
+            if (cmd.startsWith('!schuss') || cmd.startsWith('!shoot') || cmd.startsWith('!jagd')) {
+              handleShotCommand(displayName);
+            } else if (cmd.startsWith('!stash') || cmd.startsWith('!rang') || cmd.startsWith('!beute')) {
+              handleStashCommand(displayName);
+            }
+          }
+        }
+      };
+
+      ws.onclose = function () {
+        setTimeout(() => connectTwitchIrc(channelName), 4000);
+      };
+    }
+
+    if (channelParam) {
+      connectTwitchIrc(channelParam);
+    }
+
+    // Erste Random-Runde einplanen
+    scheduleNextRandomHunt();
+
+    // =========================================================
+    // 8. TEST-FUNKTIONEN
+    // =========================================================
+    function simulateShot(user) {
+      handleShotCommand(user);
+      alert(`Schuss registriert für ${user}! (Teilnehmer: ${roundParticipants.size})`);
+    }
+
+    function simulateStash(user) {
+      handleStashCommand(user);
+    }
+
+    function resetAllStats() {
+      if (confirm("Wirklich alle Jagdbuch-Statistiken zurücksetzen?")) {
+        userDatabase = {};
+        saveDatabase();
+        alert("Jagdbuch zurückgesetzt!");
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>

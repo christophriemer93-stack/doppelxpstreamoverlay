@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gentlemen Darts - Oche Controller</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #070c08;
+            --panel-bg: #0d1710;
+            --gold-bright: #f0d57e;
+            --gold-metallic: #c8a84b;
+            --gold-dark: #826620;
+            --text-light: #f7f2e4;
+            --red-bust: #b71c1c;
+            --green-action: #1b5e20;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* Header mit Match-Status */
+        .controller-header {
+            background: var(--panel-bg);
+            border: 1.5px solid var(--gold-metallic);
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            letter-spacing: 1px;
+        }
+
+        .game-mode-toggle {
+            display: flex;
+            gap: 4px;
+        }
+
+        .toggle-btn {
+            background: #152418;
+            border: 1px solid var(--gold-dark);
+            color: var(--gold-metallic);
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 9px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background: var(--gold-metallic);
+            color: #000;
+            border-color: var(--gold-bright);
+            font-weight: 800;
+        }
+
+        /* Match Modus Wähler (SOLO vs 1v1 GAST) */
+        .mode-row {
+            display: flex;
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .mode-btn {
+            flex: 1;
+            background: #0d1710;
+            border: 1px solid rgba(200, 168, 75, 0.35);
+            border-radius: 4px;
+            padding: 6px;
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gold-metallic);
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            border-color: var(--gold-bright);
+            background: #182b1e;
+            color: var(--gold-bright);
+            box-shadow: 0 0 10px rgba(200, 168, 75, 0.25);
+        }
+
+        /* Spieler Anzeige */
+        .players-bar {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .players-bar.pvp-active {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .player-tab {
+            background: #0f1a12;
+            border: 1.5px solid rgba(200, 168, 75, 0.3);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .player-tab.active {
+            border-color: var(--gold-bright);
+            background: #182b1e;
+            box-shadow: 0 0 15px rgba(200, 168, 75, 0.25);
+        }
+
+        .player-tab-name {
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--gold-bright);
+        }
+
+        .player-tab-score {
+            font-family: 'Cinzel', serif;
+            font-size: 38px;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .player-tab-sub {
+            font-size: 10px;
+            color: rgba(247, 242, 228, 0.6);
+        }
+
+        /* Aktuelle Eingabe-Anzeige */
+        .input-display-card {
+            background: #09120b;
+            border: 2px solid var(--gold-metallic);
+            border-radius: 8px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .input-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gold-metallic);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-value {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 2px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Schnelltasten */
+        .quick-scores-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .quick-btn {
+            background: #132216;
+            border: 1px solid rgba(200, 168, 75, 0.35);
+            border-radius: 4px;
+            color: var(--gold-bright);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 10px 0;
+            cursor: pointer;
+            text-align: center;
+        }
+        .quick-btn:active {
+            background: var(--gold-metallic);
+            color: #000;
+        }
+
+        /* Numpad Tastenfeld */
+        .numpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .num-btn {
+            background: #111d14;
+            border: 1.5px solid rgba(200, 168, 75, 0.35);
+            border-radius: 6px;
+            color: #ffffff;
+            font-family: 'Cinzel', serif;
+            font-size: 26px;
+            font-weight: 800;
+            padding: 13px 0;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.1s;
+        }
+
+        .num-btn:active {
+            background: var(--gold-bright);
+            color: #000;
+            transform: scale(0.96);
+        }
+
+        .num-btn.btn-clear {
+            color: #ff8a80;
+            font-size: 18px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .num-btn.btn-enter {
+            background: linear-gradient(180deg, #c8a84b 0%, #9e7f2b 100%);
+            border-color: #ffd875;
+            color: #060a07;
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        /* Untere Aktionsleiste */
+        .bottom-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+        }
+
+        .action-btn {
+            background: #0f1912;
+            border: 1px solid rgba(200, 168, 75, 0.3);
+            border-radius: 4px;
+            color: var(--text-light);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 10px 4px;
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .action-btn.bust {
+            border-color: #ef5350;
+            color: #ff8a80;
+        }
+        .action-btn:active {
+            background: #1f3324;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header mit 501 / 301 Umschalter -->
+    <div class="controller-header">
+        <div>
+            <div class="header-title">❖ DARTS CONTROLLER ❖</div>
+            <div style="font-size: 9px; color: rgba(247,242,228,0.5);" id="matchLegInfo">LEG 1 • 501 D.O.</div>
+            <div style="font-size: 8px; color: #ffd54f; letter-spacing: 0.5px;" id="cloudStatusPill">VERBINDE CLOUD...</div>
+        </div>
+
+        <div class="game-mode-toggle">
+            <button class="toggle-btn active" id="btnMode501" onclick="setGameType(501)">501</button>
+            <button class="toggle-btn" id="btnMode301" onclick="setGameType(301)">301</button>
+            <button class="toggle-btn" onclick="resetMatch()">RESET</button>
+        </div>
+    </div>
+
+    <!-- Modus-Wähler: SOLO oder 1v1 -->
+    <div class="mode-row">
+        <button class="mode-btn active" id="btnModeSolo" onclick="setMatchMode(false)">👑 SOLO</button>
+        <button class="mode-btn" id="btnModePvP" onclick="setMatchMode(true)">👥 1v1 MATCH</button>
+    </div>
+
+    <!-- Spieler Übersicht -->
+    <div class="players-bar" id="playersBarContainer">
+        <!-- Spieler 1 (Chris) -->
+        <div class="player-tab active" id="tabP1" onclick="switchPlayer(0)">
+            <div class="player-tab-name" id="tabP1_name">D0PPELXP</div>
+            <div class="player-tab-score" id="tabP1_score">501</div>
+            <div class="player-tab-sub">LEGS: <span id="tabP1_legs">0</span> | AVG: <span id="tabP1_avg">0.0</span></div>
+        </div>
+
+        <!-- Spieler 2 (Gast) -->
+        <div class="player-tab" id="tabP2" style="display: none;" onclick="switchPlayer(1)">
+            <div class="player-tab-name" id="tabP2_name">GAST</div>
+            <div class="player-tab-score" id="tabP2_score">501</div>
+            <div class="player-tab-sub">LEGS: <span id="tabP2_legs">0</span> | AVG: <span id="tabP2_avg">0.0</span></div>
+        </div>
+    </div>
+
+    <!-- Aktuelle Eingabe -->
+    <div class="input-display-card">
+        <div class="input-label">AUFNAHME:</div>
+        <div class="input-value" id="inputScoreValue">-</div>
+    </div>
+
+    <!-- Schnelltasten -->
+    <div class="quick-scores-row">
+        <button class="quick-btn" onclick="quickScore(26)">26</button>
+        <button class="quick-btn" onclick="quickScore(60)">60</button>
+        <button class="quick-btn" onclick="quickScore(100)">100</button>
+        <button class="quick-btn" onclick="quickScore(140)">140</button>
+    </div>
+
+    <!-- Numpad -->
+    <div class="numpad-grid">
+        <button class="num-btn" onclick="pressDigit('1')">1</button>
+        <button class="num-btn" onclick="pressDigit('2')">2</button>
+        <button class="num-btn" onclick="pressDigit('3')">3</button>
+
+        <button class="num-btn" onclick="pressDigit('4')">4</button>
+        <button class="num-btn" onclick="pressDigit('5')">5</button>
+        <button class="num-btn" onclick="pressDigit('6')">6</button>
+
+        <button class="num-btn" onclick="pressDigit('7')">7</button>
+        <button class="num-btn" onclick="pressDigit('8')">8</button>
+        <button class="num-btn" onclick="pressDigit('9')">9</button>
+
+        <button class="num-btn btn-clear" onclick="clearInput()">⌫</button>
+        <button class="num-btn" onclick="pressDigit('0')">0</button>
+        <button class="num-btn btn-enter" onclick="submitScore()">OK</button>
+    </div>
+
+    <!-- Aktionen unten -->
+    <div class="bottom-actions">
+        <button class="action-btn bust" onclick="handleBust()">BUST (0)</button>
+        <button class="action-btn" onclick="undoLastScore()">UNDO ↩</button>
+        <button class="action-btn" onclick="quickScore(180)">180! 🎯</button>
+    </div>
+
+    <!-- MQTT Client Library für Firewall-freien Cloud Sync -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="darts_shared.js"></script>
+    <script>
+        let state = loadState();
+        let currentInputStr = "";
+
+        // Cloud-Verbindung für Handy & PC aufbauen
+        try {
+            window.mqttClient = mqtt.connect(MQTT_BROKER_WS, {
+                clientId: 'oche_ctrl_' + Math.random().toString(16).substr(2, 8),
+                clean: true
+            });
+
+            window.mqttClient.on('connect', () => {
+                console.log("MQTT Cloud Sync verbunden!");
+                const statusEl = document.getElementById('cloudStatusPill');
+                if (statusEl) {
+                    statusEl.innerText = "ONLINE (CLOUD)";
+                    statusEl.style.color = "#81c784";
+                }
+                window.mqttClient.subscribe(MQTT_TOPIC);
+            });
+
+            window.mqttClient.on('message', (topic, message) => {
+                try {
+                    const cloudState = JSON.parse(message.toString());
+                    state = cloudState;
+                    saveState(state, false); // lokal sichern ohne Loop
+                    syncUI();
+                } catch(e) {}
+            });
+        } catch(e) {
+            console.warn("MQTT Init Error:", e);
+        }
+
+        function syncUI() {
+            // P1
+            document.getElementById('tabP1_name').innerText = state.players[0].name;
+            document.getElementById('tabP1_score').innerText = state.players[0].score;
+            document.getElementById('tabP1_legs').innerText = state.players[0].legs;
+            document.getElementById('tabP1_avg').innerText = getAvg(state.players[0]);
+
+            // P2 & PvP Toggle
+            const p2Tab = document.getElementById('tabP2');
+            const playersBar = document.getElementById('playersBarContainer');
+            const btnSolo = document.getElementById('btnModeSolo');
+            const btnPvP = document.getElementById('btnModePvP');
+
+            if (state.isMatchPvP) {
+                p2Tab.style.display = 'block';
+                playersBar.classList.add('pvp-active');
+                btnPvP.classList.add('active');
+                btnSolo.classList.remove('active');
+
+                document.getElementById('tabP2_name').innerText = state.players[1].name;
+                document.getElementById('tabP2_score').innerText = state.players[1].score;
+                document.getElementById('tabP2_legs').innerText = state.players[1].legs;
+                document.getElementById('tabP2_avg').innerText = getAvg(state.players[1]);
+            } else {
+                p2Tab.style.display = 'none';
+                playersBar.classList.remove('pvp-active');
+                btnSolo.classList.add('active');
+                btnPvP.classList.remove('active');
+            }
+
+            // Active Tab
+            if (!state.isMatchPvP || state.activePlayer === 0) {
+                document.getElementById('tabP1').classList.add('active');
+                document.getElementById('tabP2').classList.remove('active');
+            } else {
+                document.getElementById('tabP1').classList.remove('active');
+                document.getElementById('tabP2').classList.add('active');
+            }
+
+            // Mode 501 / 301
+            document.getElementById('btnMode501').className = state.gameType === 501 ? 'toggle-btn active' : 'toggle-btn';
+            document.getElementById('btnMode301').className = state.gameType === 301 ? 'toggle-btn active' : 'toggle-btn';
+            document.getElementById('matchLegInfo').innerText = `LEG ${state.players[0].legs + 1} • ${state.gameType} D.O. ${state.isMatchPvP ? '(1v1)' : '(SOLO)'}`;
+        }
+
+        function getAvg(p) {
+            if (p.dartsThrown === 0) return "0.0";
+            return ((p.totalScored / p.dartsThrown) * 3).toFixed(1);
+        }
+
+        function setMatchMode(isPvP) {
+            state.isMatchPvP = isPvP;
+            if (!isPvP) {
+                state.activePlayer = 0;
+            }
+            saveState(state);
+            syncUI();
+        }
+
+        function setGameType(type) {
+            state.gameType = type;
+            state.players[0].score = type;
+            state.players[1].score = type;
+            state.players[0].dartsThrown = 0;
+            state.players[1].dartsThrown = 0;
+            state.players[0].totalScored = 0;
+            state.players[1].totalScored = 0;
+            state.players[0].history = [];
+            state.players[1].history = [];
+            state.players[0].lastScore = 0;
+            state.players[1].lastScore = 0;
+            state.activePlayer = 0;
+            saveState(state);
+            syncUI();
+        }
+
+        function pressDigit(d) {
+            if (currentInputStr.length >= 3) return;
+            currentInputStr += d;
+            document.getElementById('inputScoreValue').innerText = currentInputStr;
+        }
+
+        function clearInput() {
+            currentInputStr = currentInputStr.slice(0, -1);
+            document.getElementById('inputScoreValue').innerText = currentInputStr || "-";
+        }
+
+        function quickScore(val) {
+            currentInputStr = val.toString();
+            submitScore();
+        }
+
+        function submitScore() {
+            if (!currentInputStr) return;
+            const points = parseInt(currentInputStr, 10);
+            currentInputStr = "";
+            document.getElementById('inputScoreValue').innerText = "-";
+
+            if (isNaN(points) || points < 0 || points > 180) {
+                alert("Ungültige Punktzahl (0 - 180)");
+                return;
+            }
+
+            applyScore(points);
+        }
+
+        function applyScore(points) {
+            const player = state.players[state.activePlayer];
+            const remaining = player.score - points;
+
+            // Double Out Prüfungen
+            if (state.mode === 'double_out') {
+                if (remaining < 0 || remaining === 1) {
+                    recordTurn(player, 0, true);
+                    finishTurn();
+                    return;
+                } else if (remaining === 0) {
+                    recordTurn(player, points, false);
+                    legWon(player);
+                    return;
+                }
+            } else {
+                if (remaining < 0) {
+                    recordTurn(player, 0, true);
+                    finishTurn();
+                    return;
+                } else if (remaining === 0) {
+                    recordTurn(player, points, false);
+                    legWon(player);
+                    return;
+                }
+            }
+
+            recordTurn(player, points, false);
+
+            // Celebration Alert nur bei 180 (Maximum)
+            if (points === 180) {
+                state.lastAlert = {
+                    title: "MAXIMUM SCORE",
+                    score: "180",
+                    sub: `ONE HUNDRED AND EIGHTY!`
+                };
+            }
+
+            finishTurn();
+        }
+
+        function recordTurn(player, points, isBust) {
+            player.history.push({
+                prevScore: player.score,
+                points: points,
+                isBust: isBust
+            });
+
+            if (!isBust) {
+                player.score -= points;
+                player.totalScored += points;
+                player.lastScore = points;
+            } else {
+                player.lastScore = 0;
+            }
+            player.dartsThrown += 3;
+        }
+
+        function finishTurn() {
+            if (state.isMatchPvP) {
+                state.activePlayer = state.activePlayer === 0 ? 1 : 0;
+            } else {
+                state.activePlayer = 0;
+            }
+            saveState(state);
+            syncUI();
+        }
+
+        function legWon(player) {
+            player.legs += 1;
+            state.lastAlert = {
+                title: "GAME SHOT & THE LEG!",
+                score: `${player.name} GEWINNT!`,
+                sub: `LEGS GEWONNEN: ${player.legs}`
+            };
+
+            setTimeout(() => {
+                resetLeg();
+            }, 1000);
+        }
+
+        function resetLeg() {
+            state.players[0].score = state.gameType;
+            state.players[1].score = state.gameType;
+            state.players[0].dartsThrown = 0;
+            state.players[1].dartsThrown = 0;
+            state.players[0].lastScore = 0;
+            state.players[1].lastScore = 0;
+            state.players[0].history = [];
+            state.players[1].history = [];
+
+            if (state.isMatchPvP) {
+                state.activePlayer = (state.players[0].legs + state.players[1].legs) % 2;
+            } else {
+                state.activePlayer = 0;
+            }
+            saveState(state);
+            syncUI();
+        }
+
+        function handleBust() {
+            applyScore(999);
+        }
+
+        function undoLastScore() {
+            const playerIdx = state.isMatchPvP ? (state.activePlayer === 0 ? 1 : 0) : 0;
+            const player = state.players[playerIdx];
+            if (player.history.length === 0) return;
+
+            const last = player.history.pop();
+            player.score = last.prevScore;
+            if (!last.isBust) {
+                player.totalScored -= last.points;
+            }
+            player.dartsThrown = Math.max(0, player.dartsThrown - 3);
+            player.lastScore = player.history.length > 0 ? player.history[player.history.length - 1].points : 0;
+
+            if (state.isMatchPvP) {
+                state.activePlayer = playerIdx;
+            }
+            saveState(state);
+            syncUI();
+        }
+
+        function switchPlayer(idx) {
+            if (state.isMatchPvP) {
+                state.activePlayer = idx;
+                saveState(state);
+                syncUI();
+            }
+        }
+
+        function resetMatch() {
+            state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            state.players[0].score = state.gameType;
+            state.players[1].score = state.gameType;
+            saveState(state);
+            syncUI();
+        }
+
+        // Tastatur Event-Listener für Numpad am PC
+        window.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                pressDigit(e.key);
+            } else if (e.key === 'Enter') {
+                submitScore();
+            } else if (e.key === 'Backspace') {
+                clearInput();
+            }
+        });
+
+        // Init
+        syncUI();
+    </script>
+</body>
+</html>

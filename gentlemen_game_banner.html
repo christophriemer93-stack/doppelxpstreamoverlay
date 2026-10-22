@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen – Aktuelles Spiel (!spiel)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       THE GENTLEMEN – SPIELANZEIGE-WIDGET (!spiel)
+       ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Playfair Display', serif;
+      pointer-events: none;
+      position: relative;
+    }
+
+    /* ---------------------------------------------------------
+       DIE SPIEL-KARTE (FÄHRT VON LINKS REIN)
+       --------------------------------------------------------- */
+    .game-banner {
+      position: absolute;
+      top: 50%;
+      left: -480px;
+      transform: translateY(-50%);
+      width: 420px;
+      background: linear-gradient(135deg, rgba(13, 23, 14, 0.985) 0%, rgba(20, 34, 21, 0.985) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.5);
+      border-left: 4.5px solid #e5c96a;
+      border-radius: 4px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.85),
+        0 12px 40px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(229, 201, 106, 0.25),
+        0 0 25px rgba(200, 168, 75, 0.15);
+      opacity: 0;
+      transition: left 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease;
+      z-index: 100;
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .game-banner.show {
+      left: 35px;
+      opacity: 1;
+    }
+
+    /* Goldene Zierleiste oben */
+    .game-banner::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #c8a84b, #e5c96a 50%, transparent);
+    }
+
+    /* ---------------------------------------------------------
+       GAME COVER ART (HOCHFORMAT WIE TWITCH BOX ART)
+       --------------------------------------------------------- */
+    .cover-container {
+      width: 100px;
+      min-height: 135px;
+      background: #080e09;
+      position: relative;
+      flex-shrink: 0;
+      border-right: 1px solid rgba(200, 168, 75, 0.3);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cover-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: contrast(1.05) brightness(0.95);
+      transition: transform 0.3s ease;
+    }
+
+    /* Zarter Goldrahmen über Cover */
+    .cover-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.7);
+      pointer-events: none;
+    }
+
+    .cover-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #1a2c1b 0%, #0c140d 100%);
+      color: #e5c96a;
+      font-size: 28px;
+    }
+
+    /* ---------------------------------------------------------
+       CONTENT-RECHTS: TITEL, GENRE, CHANNEL
+       --------------------------------------------------------- */
+    .game-content {
+      flex: 1;
+      padding: 16px 18px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Wasserzeichen */
+    .game-content::before {
+      content: '✦';
+      position: absolute;
+      font-size: 140px;
+      color: rgba(200, 168, 75, 0.025);
+      top: 50%; right: 10px;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .game-tagline {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #c8a84b;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .game-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: #f3ebd6;
+      line-height: 1.25;
+      letter-spacing: 0.3px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+      margin-top: 2px;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Countdown-Balken */
+    .timer-wrap {
+      width: 100%;
+      height: 3px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 1.5px;
+      overflow: hidden;
+      border: 1px solid rgba(200,168,75,0.2);
+    }
+
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #c8a84b, #e5c96a);
+      transition: width 0.15s linear;
+    }
+
+    /* ---------------------------------------------------------
+       TESTBEDIENFELD
+       --------------------------------------------------------- */
+    .preview-bar {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(10, 16, 10, 0.95);
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #f3ebd6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      z-index: 9999;
+      display: none; /* Standardmäßig unsichtbar in OBS */
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: all;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      max-width: 440px;
+    }
+
+    body.show-preview .preview-bar {
+      display: flex !important;
+    }
+
+    .btn-test {
+      background: #172418;
+      color: #f3ebd6;
+      border: 1px solid #c8a84b;
+      padding: 5px 9px;
+      border-radius: 3px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-test:hover {
+      background: #c8a84b;
+      color: #0b110b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TESTBEDIENFELD -->
+  <div class="preview-bar" id="previewBar">
+    <div style="font-family:'Playfair Display',serif; font-weight:900; color:#e5c96a; font-size:13px;">
+      ✦ SPIEL-ANZEIGE (!spiel) • TEST-STATION
+    </div>
+    <div style="font-size:10px; color:#a4b8a5;">
+      Befehle: <strong style="color:#e5c96a;">!spiel</strong>, <strong style="color:#e5c96a;">!game</strong>, <strong style="color:#e5c96a;">!gameinfo</strong>
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      <button class="btn-test" onclick="showGameBanner()">▶ !spiel anzeigen (10s)</button>
+      <button class="btn-test" onclick="simulateGame('Project Zomboid', 'Überleben im Regen von Kentucky')">Zomboid</button>
+      <button class="btn-test" onclick="simulateGame('Gothic Remake', 'Das Minental ruft')">Gothic</button>
+      <button class="btn-test" onclick="simulateGame('Just Chatting', 'Whisky & Zigarren im Salon')">Chatting</button>
+    </div>
+  </div>
+
+  <!-- DIE SPIEL-KARTE -->
+  <div class="game-banner" id="gameBanner">
+    <!-- Cover Art -->
+    <div class="cover-container">
+      <img class="cover-img" id="gameCover" src="" alt="Game Box Art" onerror="showFallbackCover()">
+      <div class="cover-fallback" id="coverFallback" style="display: none;">✦</div>
+    </div>
+
+    <!-- Info Rechts -->
+    <div class="game-content">
+      <div class="game-tagline">
+        <span>✦</span>
+        <span>AKTUELLER TITEL // SALON</span>
+      </div>
+      <div class="game-title" id="gameName">Lade Spieldaten...</div>
+      <div class="timer-wrap">
+        <div class="timer-fill" id="timerFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // 1. EINSTELLUNGEN & KANAL
+    // =========================================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelParam = urlParams.get('channel') || 'd0ppelxp';
+    const DISPLAY_DURATION_MS = 10000; // 10 Sekunden im Bild
+
+    if (urlParams.get('preview') === '1' || urlParams.get('test') === '1') {
+      document.body.classList.add('show-preview');
+    }
+
+    // Cache für Spieldaten
+    let currentGameState = {
+      gameName: 'Lade Kategorie...',
+      streamTitle: 'DOPPEL XP LIVE',
+      boxArtUrl: ''
+    };
+
+    const banner = document.getElementById('gameBanner');
+    const gameCoverEl = document.getElementById('gameCover');
+    const coverFallbackEl = document.getElementById('coverFallback');
+    const gameNameEl = document.getElementById('gameName');
+    const streamTitleEl = document.getElementById('streamTitle');
+    const timerFillEl = document.getElementById('timerFill');
+
+    let isBannerShowing = false;
+    let bannerHideTimeout = null;
+
+    // =========================================================
+    // 2. TWITCH / DECAPI SPIELDATEN ABFRAGEN
+    // =========================================================
+    async function fetchTwitchGameData(channelName) {
+      const clean = channelName.toLowerCase().replace('#', '').trim();
+      const ts = Date.now(); // Cache-Buster verhindert veralteten Browser-Cache!
+
+      // 1. Spiel-Name via DecAPI abfragen mit Cache-Buster
+      try {
+        const resGame = await fetch(`https://decapi.me/twitch/game/${clean}?t=${ts}`, { cache: 'no-store' });
+        if (resGame.ok) {
+          const game = await resGame.text();
+          if (game && !game.toLowerCase().includes('user not found')) {
+            currentGameState.gameName = game.trim();
+          }
+        }
+      } catch (e) {}
+
+      // 2. Box Art URL zusammensetzen (Twitch CDN)
+      if (currentGameState.gameName) {
+        currentGameState.boxArtUrl = `https://static-cdn.jtvnw.net/ttv-boxart/${encodeURIComponent(currentGameState.gameName)}-285x380.jpg`;
+      }
+
+      updateUIElements();
+    }
+
+    function updateUIElements() {
+      gameNameEl.textContent = currentGameState.gameName || 'Unbekanntes Spiel';
+
+      if (currentGameState.boxArtUrl) {
+        coverFallbackEl.style.display = 'none';
+        gameCoverEl.style.display = 'block';
+        gameCoverEl.src = currentGameState.boxArtUrl;
+      } else {
+        showFallbackCover();
+      }
+    }
+
+    function showFallbackCover() {
+      gameCoverEl.style.display = 'none';
+      coverFallbackEl.style.display = 'flex';
+      coverFallbackEl.textContent = '✦';
+    }
+
+    // =========================================================
+    // 3. BANNER EINBLENDUNG & ANIMATION
+    // =========================================================
+    async function showGameBanner() {
+      if (isBannerShowing) return;
+      isBannerShowing = true;
+
+      // Vor dem Zeigen noch schnell frischeste Daten holen
+      await fetchTwitchGameData(channelParam);
+
+      timerFillEl.style.width = '100%';
+      banner.classList.add('show');
+
+      const start = Date.now();
+      const interval = setInterval(() => {
+        const left = (start + DISPLAY_DURATION_MS) - Date.now();
+        if (left <= 0) {
+          clearInterval(interval);
+        } else {
+          timerFillEl.style.width = `${(left / DISPLAY_DURATION_MS) * 100}%`;
+        }
+      }, 100);
+
+      bannerHideTimeout = setTimeout(() => {
+        banner.classList.remove('show');
+        setTimeout(() => { isBannerShowing = false; }, 700);
+      }, DISPLAY_DURATION_MS);
+    }
+
+    // =========================================================
+    // 4. TWITCH IRC CHAT LISTENER (!spiel)
+    // =========================================================
+    function connectTwitchIrc(channelName) {
+      const targetChan = channelName.toLowerCase().replace('#', '');
+      const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+      ws.onopen = function () {
+        ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+        ws.send('PASS SCHMOOPIIE');
+        ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+        ws.send(`JOIN #${targetChan}`);
+        console.log(`[Twitch IRC GameBanner] Verbunden mit #${targetChan}`);
+      };
+
+      ws.onmessage = function (event) {
+        const lines = event.data.split('\r\n');
+        for (let line of lines) {
+          if (!line) continue;
+          if (line.startsWith('PING')) {
+            ws.send('PONG :tmi.twitch.tv');
+            continue;
+          }
+
+          if (line.includes('PRIVMSG')) {
+            const match = line.match(/@([^ ]+) :([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)/);
+            let chatText = '';
+
+            if (match) {
+              chatText = match[3].trim();
+            } else {
+              const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
+              if (textIdx !== -1) {
+                chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
+              }
+            }
+
+            if (!chatText) continue;
+            const lower = chatText.toLowerCase();
+
+            // 1. Manuelles Setzen per Chat: z.B. "!spiel Star Citizen" oder "!game Gothic Remake"
+            if (lower.startsWith('!spiel ') || lower.startsWith('!game ')) {
+              const customGame = chatText.substring(chatText.indexOf(' ') + 1).trim();
+              if (customGame) {
+                currentGameState.gameName = customGame;
+                currentGameState.boxArtUrl = `https://static-cdn.jtvnw.net/ttv-boxart/${encodeURIComponent(customGame)}-285x380.jpg`;
+                updateUIElements();
+                showGameBanner();
+                continue;
+              }
+            }
+
+            // 2. Regulärer Aufruf: !spiel oder !game (zieht die Live-Twitch-Kategorie)
+            if (lower === '!spiel' || lower === '!game' || lower === '!titel' || lower === '!gameinfo') {
+              showGameBanner();
+            }
+          }
+        }
+      };
+
+      ws.onclose = function () {
+        setTimeout(() => connectTwitchIrc(channelName), 4000);
+      };
+    }
+
+    // StreamElements Event Fallback
+    window.addEventListener('onEventReceived', function (obj) {
+      if (!obj || !obj.detail) return;
+      if (obj.detail.listener === 'message') {
+        const d = obj.detail.event.data;
+        if (!d) return;
+        const text = (d.text || '').trim();
+        const lower = text.toLowerCase();
+        if (lower.startsWith('!spiel ') || lower.startsWith('!game ')) {
+          const customGame = text.substring(text.indexOf(' ') + 1).trim();
+          if (customGame) {
+            currentGameState.gameName = customGame;
+            currentGameState.boxArtUrl = `https://static-cdn.jtvnw.net/ttv-boxart/${encodeURIComponent(customGame)}-285x380.jpg`;
+            updateUIElements();
+            showGameBanner();
+          }
+        } else if (lower === '!spiel' || lower === '!game' || lower === '!titel') {
+          showGameBanner();
+        }
+      }
+    });
+
+    // Starten
+    connectTwitchIrc(channelParam);
+    fetchTwitchGameData(channelParam);
+
+    // Hintergrund-Aktualisierung: Alle 60 Sekunden prüft es automatisch, ob du die Kategorie gewechselt hast
+    setInterval(() => {
+      fetchTwitchGameData(channelParam);
+    }, 60000);
+
+    // =========================================================
+    // 5. TEST-FUNKTIONEN
+    // =========================================================
+    function simulateGame(name, title) {
+      currentGameState.gameName = name;
+      currentGameState.streamTitle = title;
+      currentGameState.boxArtUrl = `https://static-cdn.jtvnw.net/ttv-boxart/${encodeURIComponent(name)}-285x380.jpg`;
+      updateUIElements();
+      showGameBanner();
+    }
+  </script>
+</body>
+</html>

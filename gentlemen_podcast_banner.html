@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>DOPPEL XP - Spotify Podcast Dropdown Banner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,600&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Montserrat', sans-serif;
+      position: relative;
+    }
+
+    /* Top-Down Dropdown Container */
+    .top-dropdown-container {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(-135%);
+      transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Active State: Slides in smoothly from top */
+    .top-dropdown-container.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Main Luxury Banner Plaque */
+    .podcast-plaque {
+      width: 530px;
+      height: 108px;
+      background: linear-gradient(160deg, #0e170e 0%, #172717 50%, #0d160d 100%);
+      border: 1px solid rgba(200, 168, 75, 0.45);
+      border-top: none; /* Rests flush against the top screen bezel */
+      border-radius: 0 0 8px 8px;
+      box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.8),
+        0 0 25px rgba(200, 168, 75, 0.15),
+        inset 0 1px 0 rgba(229, 201, 106, 0.3);
+      display: flex;
+      align-items: center;
+      padding: 10px 18px 12px;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top Gold Accent Bar */
+    .podcast-plaque::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #c8a84b 15%, #e5c96a 50%, #c8a84b 85%, transparent);
+    }
+
+    /* Subtle Diagonal Light Shimmer Sweep */
+    .shimmer-sweep {
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 235, 170, 0.14), transparent);
+      transform: skewX(-25deg);
+      pointer-events: none;
+      animation: bannerShimmer 4s infinite ease-in-out;
+    }
+
+    @keyframes bannerShimmer {
+      0% { left: -120%; }
+      35% { left: 160%; }
+      100% { left: 160%; }
+    }
+
+    /* QR Code Box */
+    .qr-box-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .qr-frame {
+      width: 78px;
+      height: 78px;
+      background: #fbf8f0;
+      padding: 4px;
+      border: 1.5px solid #c8a84b;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .qr-frame img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    .qr-tag {
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #e5c96a;
+      text-transform: uppercase;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    /* Vertical Divider */
+    .vertical-sep {
+      width: 1px;
+      height: 65px;
+      background: linear-gradient(180deg, transparent, rgba(200, 168, 75, 0.5) 30%, rgba(200, 168, 75, 0.5) 70%, transparent);
+      flex-shrink: 0;
+    }
+
+    /* Podcast Details Text */
+    .podcast-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 3px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .podcast-eyebrow {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #b09446;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .podcast-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 19px;
+      color: #f3ebd6;
+      letter-spacing: 1px;
+      line-height: 1.2;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .podcast-title span {
+      color: #e5c96a;
+    }
+
+    .podcast-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    /* Spotify Badge */
+    .spotify-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(30, 215, 96, 0.12);
+      border: 1px solid rgba(30, 215, 96, 0.45);
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #1ed760;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .spotify-icon {
+      width: 11px;
+      height: 11px;
+      fill: #1ed760;
+    }
+
+    .podcast-slogan {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 11px;
+      color: rgba(200, 168, 75, 0.8);
+      white-space: nowrap;
+    }
+
+    /* Corner Ornaments */
+    .corner-dot {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #e5c96a;
+      border-radius: 50%;
+    }
+    .corner-bl { bottom: 6px; left: 8px; }
+    .corner-br { bottom: 6px; right: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top-Down Lower Third Plaque -->
+  <div id="topDropdown" class="top-dropdown-container">
+    <div class="podcast-plaque">
+      <div class="shimmer-sweep"></div>
+      <div class="corner-dot corner-bl"></div>
+      <div class="corner-dot corner-br"></div>
+
+      <!-- Scannable QR Code -->
+      <div class="qr-box-wrapper">
+        <div class="qr-frame">
+          <!-- Embedded High-Contrast QR Code directly targeting Spotify podcast URL -->
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQAQMAAAC6caSPAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAACl0lEQVR4nO2bPZKDMAyFxaRIyRE4CkeDo3EUjkBJwURr68fWJNkdYLbzUxMw/lK9kcSTIUK0HCN7LETTLmvDQfSUtTVtKDc5DiCtI7qLOl4ezDsxv4gewm++PD/Z5QUEyB1kyvrrZFe6ShsHzvBkalWkF00CAVIR1djW8fqQzaqxFECA/BNCuShS/5JamaJXXR66DATIR+GzCjek7PXk2Zb1nzSAALmBsIcXRZFlVutGlt7mX3t+IM0hH5GQErZv/rYPCJCTiMly7eyxVUjNY9lVIDEbrOdagLSOpKKW2m4zBngvOrKey22ovDaw5TEgQK4gtYHPsUvqWgX2WmlmQ1AykMYR1VgSkzwj8y3rG58t24sgECAXEdai2Nn8xXaNskvymKg18ysBAVI1lkPf+EpwCbl91MIHBMhphCgMWqy5GuR+1qtFZ8W9z/GAtI1oc0XDSzKa2VBssEsvXb3VSiBAziPsseiCDVpkyQTKb7IE0jBCxW8aRWPSjRd4rRaBDn4PIECuInljftaF2YqKcc5X3nPlCO4okHYRLXzkGa0mrMnq4eHN1VutBALkHEJUrE7xm4J90LMdbeJ4DBNI28goFoF14zm07R7VeVI7M+exLRQ+IEAuIhI+aPEuqvgLS3FAQ60E0jLiwxQur3YeqrpwQJeAALmD+OEU3bX5mRXWTw4WPRGuhtR4AGkcCWEHK19RR9JSzRT9AiBAriGji9D0V73xaQvulCCf7iiQ9pCP5ip04z5jIbfMCQiQO0jaWD+XEyMhzl+8VoY8BgTIWj9Bid34Kj+T2lDDN40BAXIVMVdhoeJOHSW9cZy/AGkWkSgffUffPByRo+5brQQC5ATilbA08GWhfJLJ9re/9vxAgPyBINqNH6ZNXed+QsoKAAAAAElFTkSuQmCC" alt="Spotify Podcast QR Code">
+        </div>
+        <div class="qr-tag">
+          <span>✦</span>
+          <span>SCAN MICH</span>
+          <span>✦</span>
+        </div>
+      </div>
+
+      <!-- Elegant Divider -->
+      <div class="vertical-sep"></div>
+
+      <!-- Podcast Branding & Information -->
+      <div class="podcast-content">
+        <div class="podcast-eyebrow">
+          <span>✦</span>
+          <span>DER SALON-PODCAST</span>
+          <span>✦</span>
+        </div>
+        <div class="podcast-title">DOPPEL XP <span>AUF DIE OHREN</span></div>
+        <div class="podcast-footer">
+          <div class="spotify-pill">
+            <svg class="spotify-icon" viewBox="0 0 24 24">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.508 17.302c-.216.354-.678.468-1.032.252-2.826-1.728-6.384-2.118-10.572-1.164-.404.094-.808-.16-.9-.564-.094-.404.16-.808.564-.9 4.588-1.048 8.52-.604 11.688 1.344.354.216.468.678.252 1.032zm1.468-3.266c-.272.442-.852.584-1.294.312-3.236-1.99-8.168-2.566-11.996-1.402-.498.152-1.026-.134-1.178-.632-.152-.498.134-1.026.632-1.178 4.38-1.33 9.808-.686 13.524 1.606.442.272.584.852.312 1.294zm.126-3.41c-3.88-2.304-10.28-2.516-13.99-1.39-.594.18-1.226-.154-1.406-.748-.18-.594.154-1.226.748-1.406 4.262-1.294 11.328-1.042 15.794 1.61.534.318.708 1.01.39 1.544-.318.534-1.01.708-1.544.39z"/>
+            </svg>
+            <span>Jetzt auf Spotify</span>
+          </div>
+          <span class="podcast-slogan">Überall, wo es gute Podcasts gibt</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // CONFIGURATION
+    // ==========================================
+    const INTERVAL_MINUTES = 25;     // Alle 25 Minuten
+    const DISPLAY_SECONDS  = 20;     // 20 Sekunden sichtbar (genug Zeit zum Handy zücken & QR-Code scannen)
+    const FIRST_RUN_DELAY  = 60;     // Erste Einblendung nach 60 Sekunden (1 Min.) Stream-Start
+
+    const dropdown = document.getElementById('topDropdown');
+
+    let secondsUntilNext = FIRST_RUN_DELAY;
+    let isCurrentlyVisible = false;
+
+    function triggerDropdown() {
+      if (isCurrentlyVisible) return;
+      isCurrentlyVisible = true;
+
+      // Slide in from top
+      dropdown.classList.add('visible');
+
+      // Stay for 10 seconds, then slide back up
+      setTimeout(() => {
+        dropdown.classList.remove('visible');
+        isCurrentlyVisible = false;
+        // Reset countdown for next full 20-minute cycle
+        secondsUntilNext = INTERVAL_MINUTES * 60;
+      }, DISPLAY_SECONDS * 1000);
+    }
+
+    // Interval Timer
+    setInterval(() => {
+      if (!isCurrentlyVisible) {
+        secondsUntilNext--;
+        if (secondsUntilNext <= 0) {
+          triggerDropdown();
+        }
+      }
+    }, 1000);
+
+    // Optional test: Klick irgendwo hin oder Leertaste / 'T'
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.key.toLowerCase() === 't') {
+        triggerDropdown();
+      }
+    });
+    window.addEventListener('click', () => {
+      triggerDropdown();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen - Erster Chat im Stream Widget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       THE GENTLEMEN - ERSTER CHAT DES TAGES (WIDGET CSS)
+       ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Playfair Display', serif;
+      position: relative;
+    }
+
+    /* Widget Container: Platziert in der unteren linken Ecke */
+    #first-chat-widget-container {
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    /* Optionale Ausrichtung über CSS oder URL-Parameter */
+    .pos-bottom-right {
+      left: auto !important;
+      right: 30px !important;
+    }
+
+    /* Hauptkarte der First-Chat-Einblendung */
+    .first-chat-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 330px;
+      max-width: 420px;
+      background: linear-gradient(135deg, rgba(13, 23, 14, 0.96) 0%, rgba(20, 34, 21, 0.96) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.45);
+      border-left: 4px solid #e5c96a;
+      border-radius: 4px;
+      padding: 10px 16px 10px 12px;
+      box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.85),
+        inset 0 1px 0 rgba(229, 201, 106, 0.25),
+        0 0 15px rgba(200, 168, 75, 0.15);
+      transform: translateY(30px);
+      opacity: 0;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Einblenden-Klasse */
+    .first-chat-card.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Ausblenden-Klasse */
+    .first-chat-card.hide {
+      transform: translateY(20px);
+      opacity: 0;
+      transition: transform 0.5s ease-in, opacity 0.5s ease-in;
+    }
+
+    /* Dezenter diagonaler Glanz beim Hereinfahren */
+    .first-chat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 235, 170, 0.2), transparent);
+      transform: skewX(-25deg);
+      pointer-events: none;
+    }
+
+    .first-chat-card.show::after {
+      animation: cardShine 1.2s ease-out 0.2s forwards;
+    }
+
+    @keyframes cardShine {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    /* Avatar-Bereich */
+    .fc-avatar-wrapper {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+    }
+
+    .fc-avatar-frame {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid #e5c96a;
+      box-shadow: 
+        0 0 0 2px rgba(10, 16, 10, 0.9),
+        0 0 0 3px rgba(200, 168, 75, 0.35),
+        0 4px 10px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      background: #0d170e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fc-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Fallback Monogramm, falls kein Bild geladen werden kann */
+    .fc-avatar-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #1a2c1b 0%, #0c140d 100%);
+      color: #e5c96a;
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 22px;
+      text-transform: uppercase;
+      text-shadow: 0 0 8px rgba(229, 201, 106, 0.5);
+    }
+
+    /* Badge oben rechts am Avatar (kleines goldenes DXP-Siegel / Stern) */
+    .fc-avatar-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 18px;
+      height: 18px;
+      background: #0a110a;
+      border: 1.5px solid #e5c96a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e5c96a;
+      font-size: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.7);
+    }
+
+    /* Text- und Inhaltsbereich */
+    .fc-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+
+    /* Oberer formaler Tag */
+    .fc-tag {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: #c8a84b;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .fc-tag-diamond {
+      font-size: 8px;
+      color: #e5c96a;
+    }
+
+    /* Username */
+    .fc-username {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 900;
+      color: #f3ebd6;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+      line-height: 1.2;
+    }
+
+    /* Subtext / Erste Nachricht */
+    .fc-message {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: #c4b99f;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+      max-width: 320px;
+    }
+
+    /* =========================================================
+       PREVIEW / TEST CONTROLS (Nur zum Testen im Browser)
+       ========================================================= */
+    .preview-bar {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: rgba(10, 16, 10, 0.94);
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #f3ebd6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+      max-width: 440px;
+    }
+
+    .preview-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      color: #e5c96a;
+      font-size: 14px;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preview-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .preview-btn {
+      background: #172418;
+      color: #f3ebd6;
+      border: 1px solid #c8a84b;
+      padding: 6px 10px;
+      border-radius: 3px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .preview-btn:hover {
+      background: #c8a84b;
+      color: #0b110b;
+    }
+
+    .preview-btn.btn-reset {
+      border-color: #8c3434;
+      background: #251212;
+      color: #fca5a5;
+    }
+    .preview-btn.btn-reset:hover {
+      background: #8c3434;
+      color: #fff;
+    }
+
+    .preview-hint {
+      color: #8a9c8b;
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
+
+    /* Im OBS Browser-Source automatisch Toolbar ausblenden via ?preview=0 */
+    body.no-preview .preview-bar {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       PREVIEW / TEST LEISTE (Klicken zum Testen)
+       ========================================================= -->
+  <div class="preview-bar" id="previewBar">
+    <div class="preview-title">
+      <span>✦ ERSTER CHAT DES TAGES &bull; TESTER</span>
+      <span style="font-size: 10px; color: #8a9c8b; cursor: pointer;" onclick="togglePreview()">[Ausblenden]</span>
+    </div>
+    <div class="preview-buttons">
+      <button class="preview-btn" onclick="testFirstChat('Lord Pearson', 'Einen vorzüglichen guten Abend, Gentlemen!', 'https://static-cdn.jtvnw.net/jtv_user_pictures/4HeBHtKdjlWtfh7a76U110-profile_image-300x300.png')">
+        ▶ Test User 1
+      </button>
+      <button class="preview-btn" onclick="testFirstChat('Bobby Glass', 'Wer hat mein Anwesen betreten?', '')">
+        ▶ Test User 2 (Fallback)
+      </button>
+      <button class="preview-btn" onclick="testQueue()">
+        ▶ Test Queue (3 User)
+      </button>
+      <button class="preview-btn btn-reset" onclick="resetSeenUsers()">
+        ↺ Reset Liste (<span id="userCount">0</span>)
+      </button>
+    </div>
+    <div class="preview-hint">
+      Verbindet sich in StreamElements automatisch oder via <code>?channel=DEIN_KANAL</code> direkt mit deinem Twitch Chat!
+    </div>
+  </div>
+
+  <!-- =========================================================
+       WIDGET HTML CONTAINER
+       ========================================================= -->
+  <div id="first-chat-widget-container">
+    <div class="first-chat-card" id="chatCard">
+      <!-- Avatar -->
+      <div class="fc-avatar-wrapper">
+        <div class="fc-avatar-frame" id="avatarFrame">
+          <img class="fc-avatar-img" id="avatarImg" src="" alt="Avatar" onerror="showFallbackAvatar()">
+          <div class="fc-avatar-fallback" id="avatarFallback" style="display: none;">D</div>
+        </div>
+        <div class="fc-avatar-badge">✦</div>
+      </div>
+
+      <!-- Content -->
+      <div class="fc-content">
+        <div class="fc-tag">
+          <span class="fc-tag-diamond">✦</span>
+          <span>ERSTER CHAT DES TAGES</span>
+        </div>
+        <div class="fc-username" id="fcUsername">Lord Pearson</div>
+        <div class="fc-message" id="fcMessage">Guten Abend die Herren!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       WIDGET LOGIK (StreamElements + tmi.js Fallback + Avatar Fetch)
+       ========================================================= -->
+  <script>
+    // 1. Konfiguration
+    const CONFIG = {
+      displayDurationMs: 6500, // Bleibt 6,5 Sekunden sichtbar
+      ignoreBots: ['nightbot', 'streamelements', 'streamlabs', 'moobot', 'wizebot', 'fossabot', 'soundalerts', 'botrix'],
+      defaultChannel: 'doppelxp'
+    };
+
+    // Tracking-Set für bereits gesehene Chatter im aktuellen Stream
+    const seenUsers = new Set();
+
+    // Alert Queue System
+    const alertQueue = [];
+    let isAlertPlaying = false;
+
+    const card = document.getElementById('chatCard');
+    const fcUsername = document.getElementById('fcUsername');
+    const fcMessage = document.getElementById('fcMessage');
+    const avatarImg = document.getElementById('avatarImg');
+    const avatarFallback = document.getElementById('avatarFallback');
+    const userCountEl = document.getElementById('userCount');
+
+    // 2. URL-Parameter prüfen (z.B. ?channel=doppelxp, ?pos=bottom-right, ?preview=0)
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelParam = urlParams.get('channel') || CONFIG.defaultChannel;
+    const posParam = urlParams.get('pos');
+    if (posParam === 'bottom-right' || posParam === 'right') {
+      document.getElementById('first-chat-widget-container').classList.add('pos-bottom-right');
+    }
+    if (urlParams.get('preview') === '0' || urlParams.get('hide_preview') === '1') {
+      document.body.classList.add('no-preview');
+    }
+
+    // 3. Fallback-Avatar (Monogramm mit erstem Buchstaben)
+    function showFallbackAvatar(letter) {
+      avatarImg.style.display = 'none';
+      avatarFallback.style.display = 'flex';
+      if (letter) {
+        avatarFallback.textContent = letter.toUpperCase();
+      }
+    }
+
+    function showImageAvatar(url) {
+      avatarFallback.style.display = 'none';
+      avatarImg.style.display = 'block';
+      avatarImg.src = url;
+    }
+
+    // Avatar Cache (verhindert doppelte Abfragen)
+    const avatarCache = new Map();
+
+    // 4. Avatar zuverlässig von Twitch ermitteln (DecAPI -> IVR API -> Cache)
+    async function fetchTwitchAvatar(username) {
+      const cleanUser = username.toLowerCase().trim();
+      if (avatarCache.has(cleanUser)) {
+        return avatarCache.get(cleanUser);
+      }
+
+      // Priorität 1: DecAPI (schneller direkter CDN-Link)
+      try {
+        const response = await fetch(`https://decapi.me/twitch/avatar/${encodeURIComponent(cleanUser)}`);
+        if (response.ok) {
+          const text = await response.text();
+          if (text && text.startsWith('http')) {
+            const url = text.trim();
+            avatarCache.set(cleanUser, url);
+            return url;
+          }
+        }
+      } catch (err) {
+        // Fallback greift
+      }
+
+      // Priorität 2: IVR API (beliebte Ausweich-API mit User-Logo)
+      try {
+        const resIvr = await fetch(`https://api.ivr.fi/v2/twitch/user?login=${encodeURIComponent(cleanUser)}`);
+        if (resIvr.ok) {
+          const json = await resIvr.json();
+          if (Array.isArray(json) && json[0] && json[0].logo) {
+            const url = json[0].logo;
+            avatarCache.set(cleanUser, url);
+            return url;
+          }
+        }
+      } catch (err) {
+        // Fallback Monogramm greift
+      }
+
+      return null;
+    }
+
+    // 5. Neuer Chat-Event Verarbeiter
+    async function handleChatMessage(username, messageText, directAvatarUrl = null) {
+      if (!username) return;
+      const cleanUser = username.toLowerCase().trim();
+
+      // Bots ignorieren
+      if (CONFIG.ignoreBots.includes(cleanUser)) return;
+
+      // Wurde der User heute im Stream schon gesehen?
+      if (seenUsers.has(cleanUser)) return;
+
+      // Als gesehen markieren
+      seenUsers.add(cleanUser);
+      updateUserCount();
+
+      // Avatar ermitteln
+      let avatar = directAvatarUrl;
+      if (!avatar) {
+        avatar = await fetchTwitchAvatar(cleanUser);
+      }
+
+      // In die Anzeige-Queue einreihen
+      enqueueAlert({
+        username: username,
+        message: messageText || 'Willkommen im Salon!',
+        avatarUrl: avatar,
+        initial: username.charAt(0) || '✦'
+      });
+    }
+
+    // 6. Queue System
+    function enqueueAlert(data) {
+      alertQueue.push(data);
+      if (!isAlertPlaying) {
+        playNextAlert();
+      }
+    }
+
+    function playNextAlert() {
+      if (alertQueue.length === 0) {
+        isAlertPlaying = false;
+        return;
+      }
+
+      isAlertPlaying = true;
+      const current = alertQueue.shift();
+
+      // Daten in DOM schreiben
+      fcUsername.textContent = current.username;
+      fcMessage.textContent = current.message;
+
+      if (current.avatarUrl) {
+        showImageAvatar(current.avatarUrl);
+      } else {
+        showFallbackAvatar(current.initial);
+      }
+
+      // Einblenden
+      card.classList.remove('hide');
+      card.classList.add('show');
+
+      // Nach eingestellter Dauer ausblenden
+      setTimeout(() => {
+        card.classList.remove('show');
+        card.classList.add('hide');
+
+        // Nach Ausblend-Animation nächsten Alert abspielen
+        setTimeout(() => {
+          card.classList.remove('hide');
+          playNextAlert();
+        }, 600);
+      }, CONFIG.displayDurationMs);
+    }
+
+    function updateUserCount() {
+      if (userCountEl) {
+        userCountEl.textContent = seenUsers.size;
+      }
+    }
+
+    function resetSeenUsers() {
+      seenUsers.clear();
+      updateUserCount();
+    }
+
+    function togglePreview() {
+      document.body.classList.toggle('no-preview');
+    }
+
+    // 7. Manuelle Test-Trigger
+    function testFirstChat(name, msg, avatar) {
+      const clean = name.toLowerCase().trim();
+      seenUsers.delete(clean); // für Testzwecke entfernen
+      handleChatMessage(name, msg, avatar);
+    }
+
+    function testQueue() {
+      testFirstChat('Lord Pearson', 'Einen vorzüglichen Abend allerseits!', 'https://static-cdn.jtvnw.net/jtv_user_pictures/4HeBHtKdjlWtfh7a76U110-profile_image-300x300.png');
+      setTimeout(() => {
+        testFirstChat('Lady Genevieve', 'Prächtiger Stream heute!', null);
+      }, 300);
+      setTimeout(() => {
+        testFirstChat('Bobby Glass', 'Wer hat die Kiste geöffnet?', null);
+      }, 600);
+    }
+
+    // 8. StreamElements Integration
+    window.addEventListener('onEventReceived', function (obj) {
+      if (!obj || !obj.detail) return;
+      if (obj.detail.listener === 'message') {
+        const data = obj.detail.event.data;
+        if (!data) return;
+        const name = data.displayName || data.nick;
+        const text = data.text || '';
+        const avatar = data.avatar || null;
+        handleChatMessage(name, text, avatar);
+      }
+    });
+
+    // 9. Direkte Twitch IRC Anbindung via WebSocket (falls außerhalb von StreamElements genutzt)
+    function connectTwitchIrc(channelName) {
+      if (window.StreamElements) return; // Wenn StreamElements läuft, kein Extra-Socket nötig
+      
+      const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+      ws.onopen = function () {
+        ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+        ws.send('PASS oauth:dummy');
+        ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+        ws.send(`JOIN #${channelName.toLowerCase()}`);
+        console.log(`[Twitch IRC] Verbunden mit #${channelName}`);
+      };
+
+      ws.onmessage = function (event) {
+        const msg = event.data;
+        if (msg.startsWith('PING')) {
+          ws.send('PONG :tmi.twitch.tv');
+          return;
+        }
+
+        if (msg.includes('PRIVMSG')) {
+          // Parse Twitch Tags & DisplayName
+          const matchUser = msg.match(/display-name=([^;]+)/);
+          const matchNick = msg.match(/:([^!]+)!/);
+          const displayName = matchUser ? matchUser[1] : (matchNick ? matchNick[1] : null);
+
+          // Parse Message Text
+          const textIndex = msg.indexOf(`PRIVMSG #${channelName.toLowerCase()} :`);
+          let messageText = '';
+          if (textIndex !== -1) {
+            messageText = msg.substring(textIndex + (`PRIVMSG #${channelName.toLowerCase()} :`).length).trim();
+          }
+
+          if (displayName) {
+            handleChatMessage(displayName, messageText);
+          }
+        }
+      };
+
+      ws.onclose = function () {
+        console.warn('[Twitch IRC] Getrennt. Reconnect in 5s...');
+        setTimeout(() => connectTwitchIrc(channelName), 5000);
+      };
+    }
+
+    // Starte automatische Twitch-Verbindung, falls ein Kanal definiert ist
+    if (channelParam) {
+      connectTwitchIrc(channelParam);
+    }
+  </script>
+</body>
+</html>

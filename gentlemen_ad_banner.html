@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen – Werbepausen-Vorwarnung & Countdown (!ad)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       THE GENTLEMEN – COURTOISIE-PAUSE // AD-WARNUNG & TIMER
+       ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Playfair Display', serif;
+      pointer-events: none;
+      position: relative;
+    }
+
+    /* ---------------------------------------------------------
+       DIE AD-KARTE: SITZT BÜNDIG AUF DER CAM & FÄHRT NACH OBEN
+       --------------------------------------------------------- */
+    .ad-wrapper {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 420px;
+      overflow: hidden;
+      padding-bottom: 2px;
+    }
+
+    .ad-card {
+      width: 100%;
+      background: linear-gradient(145deg, rgba(13, 23, 14, 0.985) 0%, rgba(20, 34, 21, 0.985) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.5);
+      border-bottom: 2.5px solid #e5c96a; /* Schließt bündig mit Camrahmen ab */
+      border-radius: 4px 4px 0 0;
+      box-shadow:
+        0 -8px 25px rgba(0, 0, 0, 0.85),
+        0 0 15px rgba(200, 168, 75, 0.15),
+        inset 0 1px 0 rgba(229, 201, 106, 0.3);
+      padding: 8px 14px 7px;
+      position: relative;
+      transform: translateY(105%); /* Unterhalb der Kante versteckt */
+      transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+      opacity: 0;
+    }
+
+    .ad-card.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Goldene Zierleiste oben */
+    .ad-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c8a84b 30%, #f3ebd6 50%, #c8a84b 70%, transparent);
+    }
+
+    .ad-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .ad-tagline {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #c8a84b;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ad-duration-pill {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 8.5px;
+      font-weight: 700;
+      color: #e5c96a;
+      background: rgba(8, 14, 9, 0.85);
+      border: 1px solid rgba(200, 168, 75, 0.35);
+      padding: 1px 6px;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .ad-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 13.5px;
+      font-weight: 900;
+      color: #f3ebd6;
+      text-align: center;
+      letter-spacing: 0.3px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      margin-bottom: 2px;
+    }
+
+    .ad-desc {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 11px;
+      color: #d8cdb4;
+      text-align: center;
+      line-height: 1.25;
+      margin-bottom: 5px;
+    }
+
+    /* ---------------------------------------------------------
+       ZWEI-PHASEN COUNTDOWN BALKEN
+       --------------------------------------------------------- */
+    .ad-timer-wrap {
+      width: 100%;
+      height: 3px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 2px;
+      overflow: hidden;
+      border: 1px solid rgba(200,168,75,0.25);
+      position: relative;
+    }
+
+    .ad-timer-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #c8a84b, #e5c96a);
+      transition: width 0.1s linear, background 0.3s ease;
+    }
+
+    .ad-timer-fill.active-ad {
+      background: linear-gradient(90deg, #1b3d21, #4ade80);
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+    }
+
+    /* ---------------------------------------------------------
+       TESTBEDIENFELD
+       --------------------------------------------------------- */
+    .preview-bar {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(10, 16, 10, 0.95);
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #f3ebd6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: all;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      max-width: 440px;
+    }
+
+    body.show-preview .preview-bar {
+      display: flex !important;
+    }
+
+    .btn-test {
+      background: #172418;
+      color: #f3ebd6;
+      border: 1px solid #c8a84b;
+      padding: 5px 9px;
+      border-radius: 3px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-test:hover {
+      background: #c8a84b;
+      color: #0b110b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TESTBEDIENFELD -->
+  <div class="preview-bar" id="previewBar">
+    <div style="font-family:'Playfair Display',serif; font-weight:900; color:#e5c96a; font-size:13px;">
+      ✦ AD-VORWARNUNG (!ad / !werbung) • TEST-STATION
+    </div>
+    <div style="font-size:10px; color:#a4b8a5;">
+      Befehl: <strong style="color:#e5c96a;">!ad [Sekunden]</strong> (z.B. <strong style="color:#e5c96a;">!ad 90</strong>, <strong style="color:#e5c96a;">!ad 60</strong> oder <strong style="color:#e5c96a;">!ad 30</strong>)
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      <button class="btn-test" onclick="triggerAdSequence(90)">▶ 90s Werbung (mit 20s Vorwarnung)</button>
+      <button class="btn-test" onclick="triggerAdSequence(60)">▶ 60s Werbung</button>
+      <button class="btn-test" onclick="triggerAdSequence(30)">▶ 30s Werbung</button>
+      <button class="btn-test" onclick="cancelAdSequence()" style="border-color:#8c3434; color:#fca5a5;">⚡ Sofort abbrechen</button>
+    </div>
+  </div>
+
+  <!-- DIE AD-KARTE (SITZT AUF DER CAM) -->
+  <div class="ad-wrapper">
+    <div class="ad-card" id="adCard">
+      <div class="ad-header">
+        <div class="ad-tagline" id="adTagline">
+          <span>✦</span>
+          <span>DIE COURTOISIE-PAUSE</span>
+        </div>
+        <div class="ad-duration-pill" id="adDurationBadge">
+          <span>⏱</span>
+          <span id="adDurationText">Dauer: 90s</span>
+        </div>
+      </div>
+
+      <div class="ad-title" id="adTitle">WERBUNG IN 20 SEKUNDEN</div>
+      <div class="ad-desc" id="adDesc">
+        Eine kurze Pause für Nicht-Mitglieder. Salon-Mitglieder (Subs) bleiben ungestört.
+      </div>
+
+      <div class="ad-timer-wrap">
+        <div class="ad-timer-fill" id="adTimerFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // 1. EINSTELLUNGEN & KANAL
+    // =========================================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelParam = urlParams.get('channel') || 'd0ppelxp';
+    const WARN_DURATION_SEC = 20; // Genau 20 Sekunden Vorwarnung!
+
+    if (urlParams.get('preview') === '1' || urlParams.get('test') === '1') {
+      document.body.classList.add('show-preview');
+    }
+
+    const card = document.getElementById('adCard');
+    const adTagline = document.getElementById('adTagline');
+    const adDurationBadge = document.getElementById('adDurationBadge');
+    const adDurationText = document.getElementById('adDurationText');
+    const adTitle = document.getElementById('adTitle');
+    const adDesc = document.getElementById('adDesc');
+    const timerFill = document.getElementById('adTimerFill');
+
+    let isAdRunning = false;
+    let warnInterval = null;
+    let adInterval = null;
+    let sequenceTimeout = null;
+
+    // =========================================================
+    // 2. AD-SEQUENZ: 20s VORWARNUNG -> LAUFENDE WERBUNG
+    // =========================================================
+    function triggerAdSequence(adSeconds = 90, warnSeconds = WARN_DURATION_SEC) {
+      if (isAdRunning) cancelAdSequence();
+      isAdRunning = true;
+
+      const currentWarnSec = warnSeconds || WARN_DURATION_SEC;
+
+      // -------------------------------------------------------
+      // PHASE 1: DIE VORWARNUNG
+      // -------------------------------------------------------
+      adDurationText.textContent = `Dauer: ${adSeconds}s`;
+      adTitle.textContent = `WERBUNG IN ${currentWarnSec} SEKUNDEN`;
+      adDesc.textContent = 'Zeit für einen schnellen Drink. Salon-Mitglieder (Subs) bleiben ungestört!';
+      
+      timerFill.className = 'ad-timer-fill';
+      timerFill.style.width = '100%';
+
+      card.classList.add('show');
+
+      const warnStart = Date.now();
+      const warnTotalMs = currentWarnSec * 1000;
+
+      if (warnInterval) clearInterval(warnInterval);
+      warnInterval = setInterval(() => {
+        const remaining = (warnStart + warnTotalMs) - Date.now();
+        if (remaining <= 0) {
+          clearInterval(warnInterval);
+          startActiveAdPhase(adSeconds);
+        } else {
+          const sec = Math.ceil(remaining / 1000);
+          adTitle.textContent = `WERBUNG IN ${sec} SEKUNDEN`;
+          timerFill.style.width = `${(remaining / warnTotalMs) * 100}%`;
+        }
+      }, 100);
+    }
+
+    // ---------------------------------------------------------
+    // PHASE 2: DIE WERBUNG LÄUFT GERADE (Restdauer)
+    // ---------------------------------------------------------
+    function startActiveAdPhase(adSeconds) {
+      adTitle.textContent = '✦ WERBUNG AKTIV ✦';
+      adDesc.textContent = 'Die Werbepause läuft. Für Subs geht das Programm unterdessen weiter!';
+      timerFill.className = 'ad-timer-fill active-ad';
+      timerFill.style.width = '100%';
+
+      const adTotalMs = adSeconds * 1000;
+      const adStart = Date.now();
+
+      if (adInterval) clearInterval(adInterval);
+      adInterval = setInterval(() => {
+        const remaining = (adStart + adTotalMs) - Date.now();
+        if (remaining <= 0) {
+          clearInterval(adInterval);
+          endAdSequence();
+        } else {
+          const secLeft = Math.ceil(remaining / 1000);
+          const mins = Math.floor(secLeft / 60);
+          const secs = secLeft % 60;
+          const timeStr = mins > 0 ? `0${mins}:${secs < 10 ? '0' : ''}${secs} Min` : `${secs}s`;
+          
+          adDurationText.textContent = `Rest: ${timeStr}`;
+          timerFill.style.width = `${(remaining / adTotalMs) * 100}%`;
+        }
+      }, 100);
+    }
+
+    function endAdSequence() {
+      adTitle.textContent = '✦ WILLKOMMEN ZURÜCK ✦';
+      adDesc.textContent = 'Die Werbepause ist beendet. Der Salon setzt das Programm fort.';
+      adDurationText.textContent = 'Beendet';
+      timerFill.style.width = '100%';
+
+      setTimeout(() => {
+        card.classList.remove('show');
+        setTimeout(() => { isAdRunning = false; }, 600);
+      }, 3500);
+    }
+
+    function cancelAdSequence() {
+      if (warnInterval) clearInterval(warnInterval);
+      if (adInterval) clearInterval(adInterval);
+      if (sequenceTimeout) clearTimeout(sequenceTimeout);
+      card.classList.remove('show');
+      isAdRunning = false;
+    }
+
+    // =========================================================
+    // 3. TWITCH IRC CHAT LISTENER & BOT HOOKS
+    // =========================================================
+    function connectTwitchIrc(channelName) {
+      const targetChan = channelName.toLowerCase().replace('#', '');
+      const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+      ws.onopen = function () {
+        ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+        ws.send('PASS SCHMOOPIIE');
+        ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+        ws.send(`JOIN #${targetChan}`);
+        console.log(`[Twitch IRC AdBanner] Verbunden mit #${targetChan}`);
+      };
+
+      ws.onmessage = function (event) {
+        const lines = event.data.split('\r\n');
+        for (let line of lines) {
+          if (!line) continue;
+          if (line.startsWith('PING')) {
+            ws.send('PONG :tmi.twitch.tv');
+            continue;
+          }
+
+          if (line.includes('PRIVMSG')) {
+            const match = line.match(/@([^ ]+) :([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)/);
+            let chatText = '';
+            let displayName = '';
+
+            if (match) {
+              chatText = match[3].trim();
+              const tagMatch = match[1].match(/display-name=([^;]+)/);
+              displayName = (tagMatch && tagMatch[1]) ? tagMatch[1] : match[2];
+            } else {
+              const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
+              if (textIdx !== -1) {
+                chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
+              }
+            }
+
+            if (!chatText) continue;
+            const lower = chatText.toLowerCase();
+
+            // 1. Befehl im Chat: !ad [Sekunden] oder !werbung [Sekunden]
+            if (lower.startsWith('!ad') || lower.startsWith('!werbung') || lower.startsWith('!commercial')) {
+              // Sekunden extrahieren, default = 90
+              const parts = chatText.split(/\s+/);
+              let seconds = 90;
+              if (parts.length >= 2 && !isNaN(parseInt(parts[1], 10))) {
+                seconds = parseInt(parts[1], 10);
+              }
+              triggerAdSequence(seconds);
+            }
+          }
+        }
+      };
+
+      ws.onclose = function () {
+        setTimeout(() => connectTwitchIrc(channelName), 4000);
+      };
+    }
+
+    // StreamElements / Twitch EventSub Listener
+    window.addEventListener('onEventReceived', function (obj) {
+      if (!obj || !obj.detail) return;
+      
+      // Twitch Commercial / Ad Event (falls über StreamElements gesendet)
+      if (obj.detail.listener === 'commercial' || (obj.detail.event && obj.detail.event.type === 'commercial')) {
+        const len = obj.detail.event.length || 90;
+        triggerAdSequence(len);
+      }
+
+      // Chat Befehl
+      if (obj.detail.listener === 'message') {
+        const d = obj.detail.event.data;
+        if (!d) return;
+        const text = (d.text || '').toLowerCase().trim();
+        if (text.startsWith('!ad') || text.startsWith('!werbung')) {
+          const parts = text.split(/\s+/);
+          let sec = 90;
+          if (parts.length >= 2 && !isNaN(parseInt(parts[1], 10))) {
+            sec = parseInt(parts[1], 10);
+          }
+          triggerAdSequence(sec);
+        }
+      }
+    });
+
+    connectTwitchIrc(channelParam);
+  </script>
+</body>
+</html>

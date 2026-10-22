@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen – Stream Deck Icon Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #060d07;
+      color: #f3ebd6;
+      font-family: 'Playfair Display', serif;
+      min-height: 100vh;
+      padding: 30px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .brand-sub {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: #c8a84b;
+      margin-bottom: 6px;
+    }
+    .title {
+      font-size: 32px;
+      font-weight: 900;
+      color: #f3ebd6;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: rgba(200, 168, 75, 0.85);
+    }
+
+    .folder-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(200, 168, 75, 0.12);
+      border: 1px solid rgba(200, 168, 75, 0.35);
+      border-radius: 20px;
+      padding: 8px 18px;
+      margin-top: 15px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      color: #e5c96a;
+    }
+
+    /* DEVICE PREVIEW */
+    .deck-frame {
+      background: #111411;
+      border: 3px solid #283329;
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.95), inset 0 2px 5px rgba(255,255,255,0.08);
+      margin-bottom: 40px;
+      max-width: 1000px;
+      width: 100%;
+    }
+
+    .deck-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(200, 168, 75, 0.2);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+    .deck-title {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: #c8a84b;
+    }
+    .deck-count {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      color: #8c8269;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 18px;
+    }
+
+    .icon-card {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(200, 168, 75, 0.2);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    .icon-card:hover {
+      border-color: rgba(229, 201, 106, 0.7);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.7), 0 0 15px rgba(200, 168, 75, 0.2);
+    }
+
+    .icon-thumb {
+      width: 96px;
+      height: 96px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      margin-bottom: 10px;
+      object-fit: cover;
+    }
+
+    .icon-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #f3ebd6;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+    .icon-action {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      color: #c8a84b;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .icon-dl-btn {
+      margin-top: auto;
+      background: rgba(200, 168, 75, 0.15);
+      border: 1px solid rgba(200, 168, 75, 0.35);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: #e5c96a;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .icon-dl-btn:hover {
+      background: #c8a84b;
+      color: #070d08;
+    }
+
+    /* CATEGORY SECTIONS */
+    .category-section {
+      width: 100%;
+      max-width: 1000px;
+      margin-bottom: 30px;
+    }
+    .category-title {
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #e5c96a;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .category-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(200, 168, 75, 0.4), transparent);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="brand-sub">THE GENTLEMEN · STREAM DECK CONTROLS</div>
+    <h1 class="title">Das Manor Regiepult</h1>
+    <p class="subtitle">21 maßgeschneiderte Stream Deck Tasten für OBS-Szenen, Kameras, Herd-Timer & Chat-Spiele</p>
+    
+    <div class="folder-pill">
+      <span>📁 PNG-Speicherort:</span>
+      <strong>C:\Users\chris\.gemini\antigravity\scratch\streamdeck_icons</strong>
+    </div>
+  </header>
+
+  <!-- KATEGORIE 1: OBS SZENEN -->
+  <section class="category-section">
+    <h2 class="category-title">❖ 1. OBS Studio Szenenwechsel</h2>
+    <div class="grid-container">
+      
+      <div class="icon-card">
+        <img src="streamdeck_icons/scene_starting_soon.png" class="icon-thumb" alt="Starting Soon">
+        <div class="icon-name">Starting Soon</div>
+        <div class="icon-action">OBS: Szene "Starting Soon"</div>
+        <a href="streamdeck_icons/scene_starting_soon.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/scene_kitchen.png" class="icon-thumb" alt="Estate Kitchen">
+        <div class="icon-name">Estate Kitchen</div>
+        <div class="icon-action">OBS: Szene "Cooking / Kitchen"</div>
+        <a href="streamdeck_icons/scene_kitchen.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/scene_salon.png" class="icon-thumb" alt="Salon Talk">
+        <div class="icon-name">Salon Talk</div>
+        <div class="icon-action">OBS: Szene "Just Chatting"</div>
+        <a href="streamdeck_icons/scene_salon.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/scene_gaming.png" class="icon-thumb" alt="Gaming">
+        <div class="icon-name">Gaming</div>
+        <div class="icon-action">OBS: Szene "Game / Capture"</div>
+        <a href="streamdeck_icons/scene_gaming.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/scene_brb.png" class="icon-thumb" alt="Pause">
+        <div class="icon-name">Pause (BRB)</div>
+        <div class="icon-action">OBS: Szene "Pause"</div>
+        <a href="streamdeck_icons/scene_brb.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/scene_end.png" class="icon-thumb" alt="End Screen">
+        <div class="icon-name">Salon Abschluss</div>
+        <div class="icon-action">OBS: Szene "End Screen"</div>
+        <a href="streamdeck_icons/scene_end.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- KATEGORIE 2: KAMERA-REGIE -->
+  <section class="category-section">
+    <h2 class="category-title">❖ 2. Kamera-Regie & Schnitte</h2>
+    <div class="grid-container">
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/cam_chef_main.png" class="icon-thumb" alt="Cam 1">
+        <div class="icon-name">Cam 1: Total</div>
+        <div class="icon-action">Quelle: Hauptkamera Groß</div>
+        <a href="streamdeck_icons/cam_chef_main.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/cam_board_cutting.png" class="icon-thumb" alt="Cam 2">
+        <div class="icon-name">Cam 2: Board</div>
+        <div class="icon-action">Quelle: Schneidebrett Groß</div>
+        <a href="streamdeck_icons/cam_board_cutting.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/cam_dual_view.png" class="icon-thumb" alt="Dual Cam">
+        <div class="icon-name">Dual Stage</div>
+        <div class="icon-action">Quelle: Beide Kameras aktiv</div>
+        <a href="streamdeck_icons/cam_dual_view.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- KATEGORIE 3: KÜCHE & TIMER -->
+  <section class="category-section">
+    <h2 class="category-title">❖ 3. Hands-free am Herd (Timer & Schritte)</h2>
+    <div class="grid-container">
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/kitchen_step_next.png" class="icon-thumb" alt="Next Step">
+        <div class="icon-name">Schritt abhaken</div>
+        <div class="icon-action">Chat: <code>!step</code></div>
+        <a href="streamdeck_icons/kitchen_step_next.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/kitchen_step_prev.png" class="icon-thumb" alt="Prev Step">
+        <div class="icon-name">Schritt zurück</div>
+        <div class="icon-action">Chat: <code>!step zurueck</code></div>
+        <a href="streamdeck_icons/kitchen_step_prev.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/kitchen_timer_10m.png" class="icon-thumb" alt="10 Min">
+        <div class="icon-name">10 Min Garzeit</div>
+        <div class="icon-action">Chat: <code>!timer 10 Garzeit</code></div>
+        <a href="streamdeck_icons/kitchen_timer_10m.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/kitchen_timer_5m.png" class="icon-thumb" alt="5 Min">
+        <div class="icon-name">5 Min Anbraten</div>
+        <div class="icon-action">Chat: <code>!timer 5 Anbraten</code></div>
+        <a href="streamdeck_icons/kitchen_timer_5m.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/kitchen_timer_3m.png" class="icon-thumb" alt="3 Min">
+        <div class="icon-name">3 Min Ruhen</div>
+        <div class="icon-action">Chat: <code>!timer 3 Steak ruhen</code></div>
+        <a href="streamdeck_icons/kitchen_timer_3m.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/kitchen_timer_stop.png" class="icon-thumb" alt="Timer Stop">
+        <div class="icon-name">Timer Stopp</div>
+        <div class="icon-action">Chat: <code>!stoptimer</code></div>
+        <a href="streamdeck_icons/kitchen_timer_stop.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- KATEGORIE 4: AUDIO & MUTE -->
+  <section class="category-section">
+    <h2 class="category-title">❖ 4. Audio & Mikrofon</h2>
+    <div class="grid-container">
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/audio_mic_mute.png" class="icon-thumb" alt="Mic Mute">
+        <div class="icon-name">Mikrofon Stumm</div>
+        <div class="icon-action">OBS: Mic Mute Toggle</div>
+        <a href="streamdeck_icons/audio_mic_mute.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/audio_music_toggle.png" class="icon-thumb" alt="Music Toggle">
+        <div class="icon-name">Salon Musik</div>
+        <div class="icon-action">Medien Play / Pause</div>
+        <a href="streamdeck_icons/audio_music_toggle.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- KATEGORIE 5: CHAT-GAMES -->
+  <section class="category-section">
+    <h2 class="category-title">❖ 5. Chat-Spiele & Interaktion</h2>
+    <div class="grid-container">
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/game_watch_pull.png" class="icon-thumb" alt="Watch Gacha">
+        <div class="icon-name">Uhr ziehen</div>
+        <div class="icon-action">Chat: <code>!uhr</code></div>
+        <a href="streamdeck_icons/game_watch_pull.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/game_safe_collection.png" class="icon-thumb" alt="Watch Safe">
+        <div class="icon-name">Uhren-Tresor</div>
+        <div class="icon-action">Chat: <code>!tresor</code></div>
+        <a href="streamdeck_icons/game_safe_collection.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/game_pheasant_hunt.png" class="icon-thumb" alt="Hunt">
+        <div class="icon-name">Fasanenjagd</div>
+        <div class="icon-action">Chat: <code>!schuss</code></div>
+        <a href="streamdeck_icons/game_pheasant_hunt.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+      <div class="icon-card">
+        <img src="streamdeck_icons/game_wordle.png" class="icon-thumb" alt="Wordle">
+        <div class="icon-name">Salon Wordle</div>
+        <div class="icon-action">Chat: <code>!lexikon</code></div>
+        <a href="streamdeck_icons/game_wordle.png" download class="icon-dl-btn">Download</a>
+      </div>
+
+    </div>
+  </section>
+
+</body>
+</html>

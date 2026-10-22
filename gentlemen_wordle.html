@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen – Das Worträtsel des Gentleman's Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       THE GENTLEMEN – DAS WORTRÄTSEL DES GENTLEMAN'S CLUB
+       ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Playfair Display', serif;
+      pointer-events: none;
+      position: relative;
+    }
+
+    /* ---------------------------------------------------------
+       1. HAUPTKARTE (UNTEN RECHTS) – KOMPAKT & EDEL
+       --------------------------------------------------------- */
+    .wordle-card {
+      position: absolute;
+      bottom: -650px;
+      right: 35px;
+      width: 390px;
+      background: linear-gradient(145deg, rgba(13, 23, 14, 0.98) 0%, rgba(20, 34, 21, 0.98) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.45);
+      border-radius: 4px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.8),
+        0 0 0 2px rgba(200, 168, 75, 0.2),
+        0 12px 40px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(229, 201, 106, 0.25);
+      opacity: 0;
+      transition: bottom 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .wordle-card.show {
+      bottom: 30px;
+      opacity: 1;
+    }
+
+    /* Goldene Zierleisten oben & unten */
+    .wordle-card::before,
+    .wordle-card::after {
+      content: '';
+      display: block;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c8a84b 30%, #f3ebd6 50%, #c8a84b 70%, transparent);
+    }
+
+    .wordle-card-inner {
+      padding: 14px 18px 12px;
+      position: relative;
+    }
+
+    /* Wasserzeichen */
+    .wordle-card-inner::before {
+      content: '✦';
+      position: absolute;
+      font-size: 140px;
+      color: rgba(200, 168, 75, 0.02);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200,168,75,0.5));
+    }
+    .divider-line.right {
+      background: linear-gradient(90deg, rgba(200,168,75,0.5), transparent);
+    }
+    .divider-ornament {
+      font-size: 10px;
+      color: #e5c96a;
+    }
+
+    .wordle-tagline {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #c8a84b;
+      text-align: center;
+      margin-bottom: 2px;
+    }
+
+    .wordle-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 900;
+      color: #f3ebd6;
+      text-align: center;
+      letter-spacing: 0.3px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      margin-bottom: 2px;
+    }
+
+    .wordle-desc {
+      font-family: 'IM Fell English', serif;
+      font-size: 12.5px;
+      color: #d8cdb4;
+      text-align: center;
+      line-height: 1.35;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }
+
+    /* Countdown-Balken */
+    .wordle-timer-bar-wrapper {
+      width: 100%;
+      height: 3px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 8px;
+      border: 1px solid rgba(200,168,75,0.2);
+    }
+    .wordle-timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #c8a84b, #e5c96a);
+      transition: width 0.25s linear;
+    }
+
+    /* ---------------------------------------------------------
+       WORDLE GRID (KOMPAKT & PLATZSPAREND)
+       --------------------------------------------------------- */
+    .wordle-grid-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 260px;
+      margin: 6px auto 2px;
+    }
+
+    .grid-row-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .grid-row-letters {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+
+    .grid-row-author {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 8.5px;
+      font-weight: 700;
+      color: #e5c96a;
+      letter-spacing: 0.3px;
+      text-align: right;
+      padding-right: 2px;
+      min-height: 10px;
+      line-height: 10px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .grid-row-author.show {
+      opacity: 1;
+    }
+
+    .tile {
+      aspect-ratio: 1;
+      perspective: 500px;
+    }
+
+    .tile-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .tile.flip .tile-inner {
+      transform: rotateX(180deg);
+    }
+
+    .front, .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 900;
+      text-transform: uppercase;
+      border-radius: 2px;
+    }
+
+    .front {
+      background: rgba(8, 14, 9, 0.65);
+      border: 1px solid rgba(200, 168, 75, 0.2);
+      color: rgba(243, 235, 214, 0.25);
+    }
+
+    .front.filled {
+      color: #f3ebd6;
+      border-color: rgba(200, 168, 75, 0.5);
+    }
+
+    .back {
+      transform: rotateX(180deg);
+      border: none;
+      color: #0d170e;
+      font-weight: 900;
+    }
+
+    /* Treffer-Farben nach Gentlemen-Farbpalette */
+    .tile.correct .back {
+      background: linear-gradient(145deg, #c8a84b, #e5c96a);
+      box-shadow: 0 0 12px rgba(200, 168, 75, 0.5);
+      color: #0d170e;
+    }
+    .tile.present .back {
+      background: linear-gradient(145deg, #1b3d21, #2e6636);
+      box-shadow: 0 0 10px rgba(46, 102, 54, 0.5);
+      color: #d6f5db;
+      border: 1px solid rgba(74, 222, 128, 0.5);
+    }
+    .tile.absent .back {
+      background: rgba(20, 28, 22, 0.88);
+      border: 1px solid rgba(120, 120, 120, 0.25);
+      color: rgba(180, 175, 160, 0.45);
+    }
+
+    /* Statusanzeige für den gesamten Chat */
+    .chat-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(8, 14, 9, 0.7);
+      border: 1px solid rgba(200, 168, 75, 0.2);
+      border-radius: 3px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9.5px;
+    }
+
+    .chat-status-left {
+      color: #d8cdb4;
+    }
+    .chat-status-left strong {
+      color: #e5c96a;
+    }
+
+    .chat-status-right {
+      color: #8a9c8b;
+      font-size: 9px;
+    }
+
+    /* Ergebnis-Übersicht */
+    .wordle-results {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 180px;
+      overflow-y: hidden;
+      margin: 8px 0 2px;
+    }
+
+    .wordle-result-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8, 14, 9, 0.7);
+      border: 1px solid rgba(200, 168, 75, 0.2);
+      border-left: 2.5px solid #c8a84b;
+      padding: 4px 8px;
+      border-radius: 2px;
+      font-size: 11.5px;
+    }
+
+    .result-user {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      color: #f3ebd6;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .result-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-solved {
+      background: rgba(229, 201, 106, 0.2);
+      color: #e5c96a;
+      border: 1px solid #e5c96a;
+    }
+    .badge-contributed {
+      background: rgba(74, 222, 128, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(74, 222, 128, 0.5);
+    }
+    .badge-fail {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    /* ---------------------------------------------------------
+       2. LEXIKON-KARTE (LINKS MITTIG REINFAHREND)
+       --------------------------------------------------------- */
+    .lexikon-card {
+      position: absolute;
+      top: 50%;
+      left: -480px;
+      transform: translateY(-50%);
+      width: 420px;
+      background: linear-gradient(135deg, rgba(13, 23, 14, 0.98) 0%, rgba(20, 34, 21, 0.98) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.45);
+      border-left: 5px solid #e5c96a;
+      border-radius: 4px;
+      box-shadow:
+        0 15px 45px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(229, 201, 106, 0.25),
+        0 0 20px rgba(200, 168, 75, 0.15);
+      opacity: 0;
+      transition: left 0.7s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .lexikon-card.show {
+      left: 35px;
+      opacity: 1;
+    }
+
+    .lexikon-inner {
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lexikon-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid rgba(200, 168, 75, 0.25);
+      padding-bottom: 12px;
+    }
+
+    .lexikon-avatar-wrapper {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 2px solid #e5c96a;
+      box-shadow: 0 0 0 2px rgba(10, 16, 10, 0.9), 0 0 10px rgba(200, 168, 75, 0.3);
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #0d170e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lexikon-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .lexikon-avatar-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #1a2c1b 0%, #0c140d 100%);
+      color: #e5c96a;
+      font-weight: 900;
+      font-size: 24px;
+    }
+
+    .lexikon-user-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .lexikon-tag {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: #c8a84b;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .lexikon-username {
+      font-size: 19px;
+      font-weight: 900;
+      color: #f3ebd6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    .lexikon-rank-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      color: #e5c96a;
+      letter-spacing: 0.8px;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Lexikon Stats Grid */
+    .lexikon-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .lexikon-stat-box {
+      background: rgba(8, 14, 9, 0.7);
+      border: 1px solid rgba(200, 168, 75, 0.2);
+      border-radius: 3px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      color: #c8a84b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .stat-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 900;
+      color: #f3ebd6;
+    }
+
+    /* Progress Bar */
+    .lexikon-progress-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lexikon-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      color: #a0b2a1;
+      font-weight: 600;
+    }
+
+    .lexikon-progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(200, 168, 75, 0.3);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .lexikon-progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c8a84b, #e5c96a);
+      width: 0%;
+      transition: width 0.6s ease;
+    }
+
+    /* ---------------------------------------------------------
+       3. PREVIEW & TEST CONTROLS
+       --------------------------------------------------------- */
+    .preview-bar {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(10, 16, 10, 0.95);
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #f3ebd6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: all;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      max-width: 480px;
+    }
+
+    .preview-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      color: #e5c96a;
+      font-size: 13px;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preview-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .btn-test {
+      background: #172418;
+      color: #f3ebd6;
+      border: 1px solid #c8a84b;
+      padding: 5px 9px;
+      border-radius: 3px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-test:hover {
+      background: #c8a84b;
+      color: #0b110b;
+    }
+    .btn-danger {
+      border-color: #8c3434;
+      background: #251212;
+      color: #fca5a5;
+    }
+    .btn-danger:hover {
+      background: #8c3434;
+      color: #fff;
+    }
+
+    body.no-preview .preview-bar {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       TEST-BEDIENFELD (Browser-Vorschau)
+       ========================================================= -->
+  <div class="preview-bar" id="previewBar">
+    <div class="preview-title">
+      <span>✦ WORTRÄTSEL • TEST-STATION</span>
+      <span style="font-size: 10px; color: #8a9c8b; cursor: pointer;" onclick="document.body.classList.toggle('no-preview')">[Ausblenden]</span>
+    </div>
+    <div style="font-size: 10.5px; color: #a4b8a5;">
+      Nächstes Rätsel in: <strong id="nextWordleCountdown" style="color:#e5c96a;">--:--</strong>
+      | Status: <strong id="wordleStatus" style="color:#4ade80;">Bereit</strong>
+      | Aktuelles Wort: <strong id="currentWordDisplay" style="color:#f87171;">—</strong>
+    </div>
+    <div class="preview-btns">
+      <button class="btn-test" onclick="triggerWordleStart()">▶ Rätsel sofort starten</button>
+      <button class="btn-test" onclick="simulateGuess('Lord_Pearson', 'SALON')">Tipp: SALON (Pearson)</button>
+      <button class="btn-test" onclick="simulateGuess('Bobby_Glass', 'BRIEF')">Tipp: BRIEF (Bobby)</button>
+      <button class="btn-test" onclick="simulateGuess('Lady_Genevieve', getCurrentWord())">Tipp: RICHTIG! (Genevieve)</button>
+      <button class="btn-test" onclick="endWordleNow()">⚡ Sofort beenden</button>
+      <button class="btn-test" onclick="simulateLexikon('Lord_Pearson')">!stash / !lexikon (Pearson)</button>
+      <button class="btn-test btn-danger" onclick="resetAllWordleStats()">↺ Reset Lexikon</button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       1. WORDLE-KARTE (OBEN ZENTRIERT)
+       ========================================================= -->
+  <div class="wordle-card" id="wordleCard">
+    <div class="wordle-card-inner">
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-ornament">✦</div>
+        <div class="divider-line right"></div>
+      </div>
+      <div class="wordle-tagline" id="wordleTagline">DOPPEL XP // DAS WORTRÄTSEL</div>
+      <div class="wordle-title" id="wordleTitle">DAS WORTRÄTSEL BEGINNT!</div>
+      <div class="wordle-desc" id="wordleDesc">
+        Ein 5-Buchstaben-Wort wird gesucht!<br>
+        Der Chat hat zusammen <strong>6 Versuche</strong>. Schreibt einfach das Wort in den Chat!
+      </div>
+
+      <!-- Grid für 6 gemeinsame Chat-Versuche -->
+      <div class="wordle-grid-container" id="wordleGrid"></div>
+
+      <!-- Chat Status-Leiste -->
+      <div class="chat-status-bar" id="statusBar">
+        <div class="chat-status-left">
+          Verbleibende Versuche: <strong id="attemptsLeft">6 / 6</strong>
+        </div>
+        <div class="chat-status-right">
+          Einfach 5-Buchstaben-Wort in den Chat tippen
+        </div>
+      </div>
+
+      <!-- Timer-Balken -->
+      <div class="wordle-timer-bar-wrapper" id="wordleTimerWrap">
+        <div class="wordle-timer-bar" id="wordleTimerBar"></div>
+      </div>
+
+      <!-- Ergebnis-Liste -->
+      <div class="wordle-results" id="wordleResults" style="display: none;"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       2. LEXIKON-KARTE (LINKS MITTIG)
+       ========================================================= -->
+  <div class="lexikon-card" id="lexikonCard">
+    <div class="lexikon-inner">
+      <div class="lexikon-header">
+        <div class="lexikon-avatar-wrapper">
+          <img class="lexikon-avatar-img" id="lexikonAvatarImg" src="" alt="Avatar" onerror="showFallbackLexikonAvatar()">
+          <div class="lexikon-avatar-fallback" id="lexikonAvatarFallback" style="display: none;">D</div>
+        </div>
+        <div class="lexikon-user-info">
+          <div class="lexikon-tag">✦ DAS GENTLEMAN'S LEXIKON ✦</div>
+          <div class="lexikon-username" id="lexikonUsername">Gentleman</div>
+          <div class="lexikon-rank-badge" id="lexikonRankBadge">
+            <span>✦</span> <span id="lexikonRankName">Rang 1: Analphabetischer Stallknecht</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="lexikon-grid">
+        <div class="lexikon-stat-box">
+          <span class="stat-label">Wörter Gelöst</span>
+          <span class="stat-val" id="lexikonSolved">0</span>
+        </div>
+        <div class="lexikon-stat-box">
+          <span class="stat-label">Erfolgs-Tipps</span>
+          <span class="stat-val" style="color: #e5c96a;" id="lexikonClues">0</span>
+        </div>
+        <div class="lexikon-stat-box">
+          <span class="stat-label">Versuche Gesamt</span>
+          <span class="stat-val" id="lexikonAttempts">0</span>
+        </div>
+        <div class="lexikon-stat-box">
+          <span class="stat-label">Trefferquote</span>
+          <span class="stat-val" style="color: #4ade80;" id="lexikonAccuracy">0%</span>
+        </div>
+      </div>
+
+      <!-- Rang Fortschritt -->
+      <div class="lexikon-progress-section">
+        <div class="lexikon-progress-label">
+          <span id="lexikonNextRankLabel">Fortschritt zum nächsten Rang</span>
+          <span id="lexikonProgressCount">0 / 3</span>
+        </div>
+        <div class="lexikon-progress-bar-bg">
+          <div class="lexikon-progress-bar-fill" id="lexikonProgressFill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       LOGIK & SPIELMECHANIK
+       ========================================================= -->
+  <script>
+    // =========================================================
+    // 0. CROSS-GAME COORDINATION (BroadcastChannel + LocalStorage)
+    //    Verhindert dass Fasanenjagd und Wordle parallel laufen!
+    // =========================================================
+    const gameChannel = new BroadcastChannel('gentlemen_games');
+    let huntGameActive = false;
+
+    gameChannel.onmessage = (e) => {
+      if (e.data && e.data.type === 'hunt_start') {
+        huntGameActive = true;
+      } else if (e.data && e.data.type === 'hunt_end') {
+        huntGameActive = false;
+      }
+    };
+
+    function broadcastWordleState(active) {
+      try {
+        gameChannel.postMessage({ type: active ? 'wordle_start' : 'wordle_end' });
+      } catch (e) {}
+    }
+
+    function isOtherGameRunning() {
+      if (huntGameActive) return true;
+      const huntUntil = parseInt(localStorage.getItem('gentlemen_hunt_running_until') || '0', 10);
+      return Date.now() < huntUntil;
+    }
+
+    // =========================================================
+    // 1. DIE 15 RÄNGE DES GENTLEMAN'S LEXIKONS
+    // =========================================================
+    const RANKS = [
+      { rank: 1,  name: "Analphabetischer Stallknecht",        minSolved: 0   },
+      { rank: 2,  name: "Buchstabierlehrling",                 minSolved: 2   },
+      { rank: 3,  name: "Kreuzworträtsel-Novize",             minSolved: 5   },
+      { rank: 4,  name: "Lesezirkel-Anwärter",                minSolved: 9   },
+      { rank: 5,  name: "Salon-Linguist",                     minSolved: 14  },
+      { rank: 6,  name: "Bibliothekar des Ostflügels",        minSolved: 20  },
+      { rank: 7,  name: "Etymologe des Gentleman's Club",     minSolved: 28  },
+      { rank: 8,  name: "Meisterwortschmied von DoppelXP",    minSolved: 38  },
+      { rank: 9,  name: "Hofpoet der Krone",                  minSolved: 50  },
+      { rank: 10, name: "Königlicher Archivar",               minSolved: 65  },
+      { rank: 11, name: "Freiherr der feinen Feder",          minSolved: 82  },
+      { rank: 12, name: "Graf von Wortgewandt",               minSolved: 102 },
+      { rank: 13, name: "Fürstlicher Chefredakteur",          minSolved: 125 },
+      { rank: 14, name: "Herzog des Literaturpalastes",       minSolved: 155 },
+      { rank: 15, name: "Großlexikograph der Krone",          minSolved: 200 }
+    ];
+
+    function getRankInfo(totalSolved) {
+      for (let i = RANKS.length - 1; i >= 0; i--) {
+        if (totalSolved >= RANKS[i].minSolved) {
+          const cur = RANKS[i];
+          const next = RANKS[i + 1] || null;
+          return { current: cur, next: next };
+        }
+      }
+      return { current: RANKS[0], next: RANKS[1] };
+    }
+
+    // =========================================================
+    // 2. WORTLISTE: Bunte Mischung aus leichten & anspruchsvollen Begriffen
+    //    (Gentlemen-, Genuss-, Kultur- und Alltagsbegriffe)
+    // =========================================================
+    const WORDLIST = [
+      // Leicht & Alltäglich
+      "APFEL", "ADLER", "BRIEF", "BLUME", "BUCHE", "DAMPF", "DURST", "ENGEL", 
+      "ERNTE", "FEUER", "FISCH", "FORST", "FUCHS", "GLANZ", "HONIG", "INSEL",
+      "KRAFT", "KRONE", "KERZE", "LAMPE", "LICHT", "MILCH", "NACHT", "ONKEL",
+      "PFEIL", "RASEN", "RAUCH", "SONNE", "STERN", "STURM", "TIGER", "TRAUM",
+      "VOGEL", "WOLKE", "WELLE", "ZEBRA", "ZWERG", "STUFE", "STUHL", "TISCH",
+
+      // Mittel (Gentlemen & Ambiente)
+      "SALON", "BARON", "HOTEL", "JACHT", "FALKE", "FLORP", "PIQUE", "POKER",
+      "SEIDE", "SAMTL", "TABAK", "HAVAN", "WETTE", "CHAMP", "ORDEN", "EHREN",
+      "DUELL", "WESTE", "SCHAL", "KAMIN", "KRAUS", "KUTTE", "LANZE", "MANOR",
+      "MOTTO", "NOTAR", "PRIOR", "ROYAL", "SMART", "TITLE", "VILLA", "WACHS",
+
+      // Anspruchsvoll & Kniffelig (Interessante Buchstabenkombinationen)
+      "QUARZ", "FJORD", "CHINT", "GLYPH", "SPHIN", "YACHT", "LYRIK", "MYRRE",
+      "OASIS", "VIGOR", "PIQUE", "KODEX", "INDEX", "KAPUT", "KUPON", "ZIRKA",
+      "GICHT", "FURCH", "KLUFT", "KNOSP", "SCHUB", "SPALT", "TOPAS", "UMBRA",
+      "ZUNFT", "WAAGE", "GRIFF", "SCHUR", "KNICK", "ZUGIG", "BLANK", "STRIZ"
+    ].filter(w => w.length === 5);
+
+    // =========================================================
+    // 3. EINSTELLUNGEN & PERSISTENTER SPEICHER
+    // =========================================================
+    const CONFIG = {
+      minIntervalMinutes: 28,
+      maxIntervalMinutes: 45,
+      startBannerDurationMs: 20000,
+      roundDurationMs: 180000, // 3 Minuten Zeit für den Chat
+      resultsDurationMs: 16000,
+      lexikonDurationMs: 9000,
+      maxAttempts: 6 // 6 Versuche für den GESAMTEN Chat
+    };
+
+    let userDatabase = {};
+    try {
+      const saved = localStorage.getItem('gentlemen_wordle_shared_v1');
+      if (saved) userDatabase = JSON.parse(saved);
+    } catch (e) {}
+
+    function saveDatabase() {
+      try {
+        localStorage.setItem('gentlemen_wordle_shared_v1', JSON.stringify(userDatabase));
+      } catch (e) {}
+    }
+
+    function getUserRecord(username) {
+      const key = username.toLowerCase().trim();
+      if (!userDatabase[key]) {
+        userDatabase[key] = {
+          displayName: username,
+          totalSolved: 0,      // Hat das entscheidende Sieger-Wort gelöst
+          goodClues: 0,        // Hat einen Versuch beigesteuert der grüne/gelbe Buchstaben brachte
+          totalAttempts: 0,    // Alle Versuche
+          lastSeen: Date.now()
+        };
+      }
+      return userDatabase[key];
+    }
+
+    // =========================================================
+    // 4. SPIELSTATUS
+    // =========================================================
+    let isGameActive = false;
+    let isAnimatingGuess = false;
+    let currentWord = '';
+    let currentAttempt = 0; // 0 bis 5 (max 6)
+    let roundEndTimeout = null;
+    let roundContributors = new Map(); // username -> { attempts: number, solved: boolean, goodClues: number }
+    let guessedWords = new Set(); // Doppel-Wörter verhindern
+
+    const card = document.getElementById('wordleCard');
+    const tagline = document.getElementById('wordleTagline');
+    const title = document.getElementById('wordleTitle');
+    const desc = document.getElementById('wordleDesc');
+    const grid = document.getElementById('wordleGrid');
+    const timerWrap = document.getElementById('wordleTimerWrap');
+    const timerBar = document.getElementById('wordleTimerBar');
+    const results = document.getElementById('wordleResults');
+    const statusBar = document.getElementById('statusBar');
+    const attemptsLeftEl = document.getElementById('attemptsLeft');
+    const statusEl = document.getElementById('wordleStatus');
+    const countdownEl = document.getElementById('nextWordleCountdown');
+    const currentWordDisplay = document.getElementById('currentWordDisplay');
+
+    function getCurrentWord() { return currentWord; }
+
+    function buildGrid() {
+      grid.innerHTML = '';
+      for (let r = 0; r < CONFIG.maxAttempts; r++) {
+        let rowHtml = `<div class="grid-row-wrapper" id="row-wrap-${r}">`;
+        rowHtml += `<div class="grid-row-letters">`;
+        for (let c = 0; c < 5; c++) {
+          rowHtml += `
+            <div class="tile" id="tile-${r}-${c}">
+              <div class="tile-inner">
+                <div class="front"></div>
+                <div class="back"></div>
+              </div>
+            </div>`;
+        }
+        rowHtml += `</div>`;
+        rowHtml += `<div class="grid-row-author" id="author-${r}"></div>`;
+        rowHtml += `</div>`;
+        grid.innerHTML += rowHtml;
+      }
+    }
+
+    // ---------------------------------------------------------
+    // Phase 1: Worträtsel startet (Random oder Test-Button)
+    // ---------------------------------------------------------
+    function triggerWordleStart() {
+      if (isGameActive) return;
+
+      // Check ob die Fasanenjagd gerade aktiv ist!
+      if (isOtherGameRunning()) {
+        scheduleNextRandomWordle(120); // 2 Min verschieben
+        return;
+      }
+
+      currentWord = WORDLIST[Math.floor(Math.random() * WORDLIST.length)].toUpperCase();
+      if (currentWordDisplay) currentWordDisplay.textContent = currentWord;
+
+      isGameActive = true;
+      isAnimatingGuess = false;
+      currentAttempt = 0;
+      roundContributors.clear();
+      guessedWords.clear();
+
+      // Sperre & Broadcast setzen
+      localStorage.setItem('gentlemen_wordle_running_until', (Date.now() + CONFIG.roundDurationMs + CONFIG.resultsDurationMs).toString());
+      broadcastWordleState(true);
+
+      if (statusEl) statusEl.textContent = 'Rätsel aktiv (3 Min)!';
+      attemptsLeftEl.textContent = `${CONFIG.maxAttempts - currentAttempt} / ${CONFIG.maxAttempts}`;
+
+      tagline.textContent = 'DOPPEL XP // DAS GENTLEMAN\'S WORTRÄTSEL';
+      title.textContent = 'DAS WORTRÄTSEL BEGINNT!';
+      desc.style.display = 'block';
+      desc.innerHTML = `
+        Ein 5-Buchstaben-Wort wird gesucht!<br>
+        Der Chat hat zusammen <strong>6 Versuche</strong>. Tippt einfach euer 5-Buchstaben-Wort!<br>
+        <span style="font-size: 13px; color: #e5c96a;">✦ Zeit: 3 Minuten • Kein Befehl nötig ✦</span>
+      `;
+
+      buildGrid();
+      results.style.display = 'none';
+      grid.style.display = 'flex';
+      statusBar.style.display = 'flex';
+      timerWrap.style.display = 'block';
+      timerBar.style.width = '100%';
+
+      card.classList.add('show');
+
+      // Start-Banner Timer: Nach 12s Intro wird die Beschreibung ausgeblendet für maximale Kompaktheit
+      const bannerEnd = Date.now() + 12000;
+      const bannerInterval = setInterval(() => {
+        const remaining = bannerEnd - Date.now();
+        if (remaining <= 0) {
+          clearInterval(bannerInterval);
+          desc.style.display = 'none';
+          title.textContent = 'GENTLEMAN\'S WORTRÄTSEL';
+        } else {
+          timerBar.style.width = `${(remaining / 12000) * 100}%`;
+        }
+      }, 100);
+
+      // Nach 3 Minuten: Zeit abgelaufen
+      roundEndTimeout = setTimeout(() => {
+        endWordleRound(false, null);
+      }, CONFIG.roundDurationMs);
+    }
+
+    // ---------------------------------------------------------
+    // Phase 2: Chat tippt ein 5-Buchstaben-Wort (OHNE BEFEHL!)
+    // ---------------------------------------------------------
+    function handleChatWord(username, rawWord) {
+      if (!isGameActive || isAnimatingGuess) return;
+
+      const cleanWord = rawWord.toUpperCase().replace(/[^A-ZÄÖÜ]/g, '').trim();
+      if (cleanWord.length !== 5) return;
+
+      // Wort schon mal in dieser Runde versucht?
+      if (guessedWords.has(cleanWord)) return;
+      guessedWords.add(cleanWord);
+
+      if (currentAttempt >= CONFIG.maxAttempts) return;
+
+      isAnimatingGuess = true;
+      const thisRow = currentAttempt;
+      currentAttempt++;
+
+      attemptsLeftEl.textContent = `${CONFIG.maxAttempts - currentAttempt} / ${CONFIG.maxAttempts}`;
+
+      // User-Tracking
+      const key = username.toLowerCase().trim();
+      if (!roundContributors.has(key)) {
+        roundContributors.set(key, { displayName: username, attempts: 0, solved: false, clues: 0 });
+      }
+      const contrib = roundContributors.get(key);
+      contrib.attempts++;
+
+      // Wordle Evaluierung
+      let targetArr = currentWord.split('');
+      let guessArr = cleanWord.split('');
+      let tileResults = ['absent', 'absent', 'absent', 'absent', 'absent'];
+
+      // 1. Pass: Volltreffer (Gold)
+      for (let i = 0; i < 5; i++) {
+        if (guessArr[i] === targetArr[i]) {
+          tileResults[i] = 'correct';
+          targetArr[i] = null;
+        }
+      }
+
+      // 2. Pass: Falscher Platz (Moosgrün)
+      for (let i = 0; i < 5; i++) {
+        if (tileResults[i] === 'correct') continue;
+        const idx = targetArr.indexOf(guessArr[i]);
+        if (idx !== -1) {
+          tileResults[i] = 'present';
+          targetArr[idx] = null;
+        }
+      }
+
+      // Vorab Front/Back befüllen
+      for (let i = 0; i < 5; i++) {
+        const tile = document.getElementById(`tile-${thisRow}-${i}`);
+        tile.querySelector('.front').textContent = guessArr[i];
+        tile.querySelector('.front').classList.add('filled');
+        tile.querySelector('.back').textContent = guessArr[i];
+      }
+
+      // Autor unter Zeile setzen
+      const authorEl = document.getElementById(`author-${thisRow}`);
+      if (authorEl) {
+        authorEl.textContent = `✦ ${username}`;
+        authorEl.classList.add('show');
+      }
+
+      // Flip-Animation Kachel für Kachel
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const tile = document.getElementById(`tile-${thisRow}-${i}`);
+          tile.classList.add(tileResults[i], 'flip');
+        }, i * 220);
+      }
+
+      // Prüfen ob Treffer dabei waren
+      const hasClues = tileResults.some(r => r === 'correct' || r === 'present');
+      if (hasClues) contrib.clues++;
+
+      // Nach Flip-Animation auswerten
+      setTimeout(() => {
+        isAnimatingGuess = false;
+
+        if (cleanWord === currentWord) {
+          // CHAT HAT GEWONNEN!
+          contrib.solved = true;
+          endWordleRound(true, username);
+        } else if (currentAttempt >= CONFIG.maxAttempts) {
+          // Alle 6 Versuche aufgebraucht
+          endWordleRound(false, null);
+        }
+      }, 5 * 220 + 500);
+    }
+
+    // ---------------------------------------------------------
+    // Phase 3: Rundenende & Ergebnisverkündung
+    // ---------------------------------------------------------
+    function endWordleRound(solved, winnerUsername) {
+      if (!isGameActive) return;
+      isGameActive = false;
+      if (roundEndTimeout) clearTimeout(roundEndTimeout);
+      if (statusEl) statusEl.textContent = 'Bereit';
+
+      results.innerHTML = '';
+
+      if (solved && winnerUsername) {
+        tagline.textContent = 'ERGEBNIS // DAS WORTRÄTSEL WURDE GELÖST!';
+        title.textContent = `BRAVO! GELÖST VON @${winnerUsername.toUpperCase()}!`;
+        desc.innerHTML = `Das gesuchte Wort war: <strong style="color: #e5c96a; font-size: 19px; letter-spacing: 3px;">${currentWord}</strong><br>
+          Gelöst in <strong>${currentAttempt} von 6</strong> Versuchen.`;
+      } else {
+        tagline.textContent = 'ERGEBNIS // DIE VERSUCHE SIND ERSCHÖPFT';
+        title.textContent = 'DAS GEHEIMNIS BLEIBT UNGELÖST';
+        desc.innerHTML = `Das gesuchte Wort war: <strong style="color: #e5c96a; font-size: 19px; letter-spacing: 3px;">${currentWord}</strong><br>
+          Der Club verneigt sich vor den Bemühungen des Chats.`;
+      }
+
+      // Teilnehmer in der Ergebnisliste anzeigen & Stats speichern
+      roundContributors.forEach((data, key) => {
+        const userRec = getUserRecord(data.displayName);
+        userRec.totalAttempts += data.attempts;
+
+        const row = document.createElement('div');
+        row.className = 'wordle-result-row';
+
+        if (data.solved) {
+          userRec.totalSolved++;
+          row.innerHTML = `
+            <span class="result-user">✦ ${escapeHtml(data.displayName)}</span>
+            <span class="result-badge badge-solved">Rätselmeister (+1 Sieg)</span>
+          `;
+        } else if (data.clues > 0) {
+          userRec.goodClues += data.clues;
+          row.innerHTML = `
+            <span class="result-user">${escapeHtml(data.displayName)}</span>
+            <span class="result-badge badge-contributed">${data.attempts} Versuche &bull; Wertvolle Hinweise</span>
+          `;
+        } else {
+          row.innerHTML = `
+            <span class="result-user" style="opacity: 0.7;">${escapeHtml(data.displayName)}</span>
+            <span class="result-badge badge-fail">${data.attempts} Versuche</span>
+          `;
+        }
+        results.appendChild(row);
+      });
+
+      saveDatabase();
+
+      grid.style.display = 'none';
+      statusBar.style.display = 'none';
+      timerWrap.style.display = 'none';
+      results.style.display = 'flex';
+      card.classList.add('show');
+
+      // Nach Ergebnis ausblenden, Lock freigeben & nächsten Timer setzen
+      setTimeout(() => {
+        card.classList.remove('show');
+        localStorage.removeItem('gentlemen_wordle_running_until');
+        broadcastWordleState(false);
+        scheduleNextRandomWordle();
+      }, CONFIG.resultsDurationMs);
+    }
+
+    function endWordleNow() {
+      if (roundEndTimeout) clearTimeout(roundEndTimeout);
+      endWordleRound(false, null);
+    }
+
+    // ---------------------------------------------------------
+    // Phase 4: !stash / !lexikon Befehl (Stats einblenden)
+    // ---------------------------------------------------------
+    const lexikonQueue = [];
+    let isLexikonDisplaying = false;
+
+    const lexikonCard = document.getElementById('lexikonCard');
+    const lexikonUsername = document.getElementById('lexikonUsername');
+    const lexikonRankName = document.getElementById('lexikonRankName');
+    const lexikonSolved = document.getElementById('lexikonSolved');
+    const lexikonClues = document.getElementById('lexikonClues');
+    const lexikonAttempts = document.getElementById('lexikonAttempts');
+    const lexikonAccuracy = document.getElementById('lexikonAccuracy');
+    const lexikonNextRankLabel = document.getElementById('lexikonNextRankLabel');
+    const lexikonProgressCount = document.getElementById('lexikonProgressCount');
+    const lexikonProgressFill = document.getElementById('lexikonProgressFill');
+    const lexikonAvatarImg = document.getElementById('lexikonAvatarImg');
+    const lexikonAvatarFallback = document.getElementById('lexikonAvatarFallback');
+
+    function handleLexikonCommand(username, directAvatar = null) {
+      lexikonQueue.push({ username, directAvatar });
+      processLexikonQueue();
+    }
+
+    function processLexikonQueue() {
+      if (isLexikonDisplaying || lexikonQueue.length === 0) return;
+      isLexikonDisplaying = true;
+      const current = lexikonQueue.shift();
+      showLexikonCard(current.username, current.directAvatar);
+    }
+
+    async function showLexikonCard(username, directAvatar) {
+      const userRec = getUserRecord(username);
+      const rankInfo = getRankInfo(userRec.totalSolved);
+
+      lexikonUsername.textContent = userRec.displayName || username;
+      lexikonRankName.textContent = `Rang ${rankInfo.current.rank}: ${rankInfo.current.name}`;
+      lexikonSolved.textContent = userRec.totalSolved;
+      lexikonClues.textContent = userRec.goodClues;
+      lexikonAttempts.textContent = userRec.totalAttempts;
+
+      const rate = userRec.totalAttempts > 0 
+        ? Math.round((userRec.totalSolved / userRec.totalAttempts) * 100) 
+        : 0;
+      lexikonAccuracy.textContent = `${rate}%`;
+
+      if (rankInfo.next) {
+        const needed = rankInfo.next.minSolved;
+        const currentInRank = userRec.totalSolved;
+        const range = needed - rankInfo.current.minSolved;
+        const progress = Math.min(range, currentInRank - rankInfo.current.minSolved);
+        const pct = Math.min(100, Math.max(0, Math.round((progress / range) * 100)));
+
+        lexikonNextRankLabel.textContent = `Ziel: Rang ${rankInfo.next.rank} (${rankInfo.next.name})`;
+        lexikonProgressCount.textContent = `${userRec.totalSolved} / ${needed} Wörter`;
+        lexikonProgressFill.style.width = `${pct}%`;
+      } else {
+        lexikonNextRankLabel.textContent = 'Höchster Rang erreicht!';
+        lexikonProgressCount.textContent = 'MAXIMUM';
+        lexikonProgressFill.style.width = '100%';
+      }
+
+      let avatar = directAvatar || await fetchTwitchAvatar(username);
+      if (avatar) {
+        lexikonAvatarFallback.style.display = 'none';
+        lexikonAvatarImg.style.display = 'block';
+        lexikonAvatarImg.src = avatar;
+      } else {
+        showFallbackLexikonAvatar(username.charAt(0));
+      }
+
+      lexikonCard.classList.add('show');
+
+      setTimeout(() => {
+        lexikonCard.classList.remove('show');
+        setTimeout(() => {
+          isLexikonDisplaying = false;
+          processLexikonQueue();
+        }, 750);
+      }, CONFIG.lexikonDurationMs);
+    }
+
+    function showFallbackLexikonAvatar(initial) {
+      lexikonAvatarImg.style.display = 'none';
+      lexikonAvatarFallback.style.display = 'flex';
+      lexikonAvatarFallback.textContent = (initial || '✦').toUpperCase();
+    }
+
+    // =========================================================
+    // 5. RANDOM TIMER SYSTEM (Gegen Überlappung abgesichert)
+    // =========================================================
+    let nextWordleTimestamp = 0;
+    let randomTimerInterval = null;
+
+    function scheduleNextRandomWordle(delaySecOverride = null) {
+      let waitMs = 0;
+      if (delaySecOverride) {
+        waitMs = delaySecOverride * 1000;
+      } else {
+        const minMs = CONFIG.minIntervalMinutes * 60 * 1000;
+        const maxMs = CONFIG.maxIntervalMinutes * 60 * 1000;
+        waitMs = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+      }
+
+      nextWordleTimestamp = Date.now() + waitMs;
+
+      if (randomTimerInterval) clearInterval(randomTimerInterval);
+      randomTimerInterval = setInterval(() => {
+        const diff = nextWordleTimestamp - Date.now();
+        if (diff <= 0) {
+          clearInterval(randomTimerInterval);
+          triggerWordleStart();
+        } else {
+          updateCountdownDisplay(diff);
+        }
+      }, 1000);
+    }
+
+    function updateCountdownDisplay(diffMs) {
+      if (!countdownEl) return;
+      const totalSec = Math.floor(diffMs / 1000);
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+      countdownEl.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // =========================================================
+    // 6. AVATAR FETCHING
+    // =========================================================
+    const avatarCache = new Map();
+
+    async function fetchTwitchAvatar(username) {
+      const cleanUser = username.toLowerCase().trim();
+      if (avatarCache.has(cleanUser)) return avatarCache.get(cleanUser);
+
+      try {
+        const res = await fetch(`https://decapi.me/twitch/avatar/${encodeURIComponent(cleanUser)}`);
+        if (res.ok) {
+          const text = await res.text();
+          if (text && text.startsWith('http')) {
+            const url = text.trim();
+            avatarCache.set(cleanUser, url);
+            return url;
+          }
+        }
+      } catch (e) {}
+
+      try {
+        const res2 = await fetch(`https://api.ivr.fi/v2/twitch/user?login=${encodeURIComponent(cleanUser)}`);
+        if (res2.ok) {
+          const json = await res2.json();
+          if (Array.isArray(json) && json[0] && json[0].logo) {
+            const url = json[0].logo;
+            avatarCache.set(cleanUser, url);
+            return url;
+          }
+        }
+      } catch (e) {}
+
+      return null;
+    }
+
+    // =========================================================
+    // 7. EVENT LISTENER (StreamElements & Native Twitch IRC)
+    // =========================================================
+    window.addEventListener('onEventReceived', function (obj) {
+      if (!obj || !obj.detail) return;
+      if (obj.detail.listener === 'message') {
+        const d = obj.detail.event.data;
+        if (!d) return;
+
+        const text = (d.text || '').trim();
+        const user = d.displayName || d.nick || 'Gentleman';
+        const avatar = d.avatar || null;
+
+        const lower = text.toLowerCase();
+        if (lower.startsWith('!lexikon') || lower.startsWith('!wörterbuch')) {
+          handleLexikonCommand(user, avatar);
+        } else if (isGameActive && !isAnimatingGuess) {
+          // Genau ein 5-Buchstaben-Wort ohne Sonderzeichen
+          const parts = text.split(/\s+/);
+          if (parts.length === 1 && /^[A-Za-zÄÖÜäöüß]{5}$/.test(parts[0])) {
+            handleChatWord(user, parts[0]);
+          }
+        }
+      }
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelParam = urlParams.get('channel') || 'd0ppelxp';
+    if (window.obsstudio || urlParams.get('preview') === '0' || urlParams.get('hide_preview') === '1') {
+      document.body.classList.add('no-preview');
+    }
+
+    function connectTwitchIrc(channelName) {
+      if (window.StreamElements) return;
+      const targetChan = channelName.toLowerCase().replace('#', '');
+      const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+      ws.onopen = function () {
+        ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+        ws.send('PASS SCHMOOPIIE');
+        ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+        ws.send(`JOIN #${targetChan}`);
+        console.log(`[Twitch IRC Worträtsel] Verbunden mit #${targetChan}`);
+      };
+
+      ws.onmessage = function (event) {
+        const lines = event.data.split('\r\n');
+        for (let line of lines) {
+          if (!line) continue;
+          if (line.startsWith('PING')) {
+            ws.send('PONG :tmi.twitch.tv');
+            continue;
+          }
+
+          if (line.includes('PRIVMSG')) {
+            // Regex Match: @tags :user!user@user.tmi.twitch.tv PRIVMSG #chan :message
+            const match = line.match(/@([^ ]+) :([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)/);
+            let displayName = 'Gentleman';
+            let chatText = '';
+
+            if (match) {
+              const rawTags = match[1];
+              const username = match[2];
+              chatText = match[3].trim();
+
+              const tagMatch = rawTags.match(/display-name=([^;]+)/);
+              displayName = (tagMatch && tagMatch[1]) ? tagMatch[1] : username;
+            } else {
+              // Fallback Parsing
+              const matchUser = line.match(/display-name=([^;]+)/);
+              const matchNick = line.match(/:([^!]+)!/);
+              displayName = matchUser ? matchUser[1] : (matchNick ? matchNick[1] : 'Gentleman');
+
+              const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
+              if (textIdx !== -1) {
+                chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
+              }
+            }
+
+            if (!chatText) continue;
+            const lower = chatText.toLowerCase();
+
+            if (lower.startsWith('!lexikon') || lower.startsWith('!wörterbuch')) {
+              handleLexikonCommand(displayName);
+            } else if (isGameActive && !isAnimatingGuess) {
+              const parts = chatText.split(/\s+/);
+              if (parts.length === 1 && /^[A-Za-zÄÖÜäöüß]{5}$/.test(parts[0])) {
+                handleChatWord(displayName, parts[0]);
+              }
+            }
+          }
+        }
+      };
+
+      ws.onclose = function () {
+        setTimeout(() => connectTwitchIrc(channelName), 4000);
+      };
+    }
+
+    if (channelParam) {
+      connectTwitchIrc(channelParam);
+    }
+
+    // Start-Verzögerung für das erste Rätsel (damit nicht beide Games beim Overlay-Start gleichzeitig triggern)
+    scheduleNextRandomWordle(15 * 60); // Erste Runde in ca. 15 Minuten
+
+    // =========================================================
+    // 8. TEST-FUNKTIONEN
+    // =========================================================
+    function simulateGuess(user, word) {
+      handleChatWord(user, word);
+    }
+
+    function simulateLexikon(user) {
+      handleLexikonCommand(user);
+    }
+
+    function resetAllWordleStats() {
+      if (confirm('Wirklich alle Lexikon-Statistiken zurücksetzen?')) {
+        userDatabase = {};
+        saveDatabase();
+        alert('Lexikon zurückgesetzt!');
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>

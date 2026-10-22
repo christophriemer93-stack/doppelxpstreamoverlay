@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen - Alerts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        /* StreamElements CSS start */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: transparent;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Main alert card - looks like a printed formal note/card */
+        .alert-card {
+            position: absolute;
+            top: -260px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 480px;
+            background: linear-gradient(160deg, #1c2a1c 0%, #243220 40%, #1c2a1c 100%);
+            border: 1px solid rgba(180, 140, 60, 0.4);
+            box-shadow:
+                0 0 0 1px rgba(0,0,0,0.5),
+                0 0 0 3px rgba(180,140,60,0.15),
+                0 8px 40px rgba(0,0,0,0.8),
+                inset 0 1px 0 rgba(180,140,60,0.2);
+            opacity: 0;
+            transition: top 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+        }
+
+        .alert-card.show {
+            top: 30px;
+            opacity: 1;
+        }
+
+        /* Special Raid Alert Styling */
+        .alert-card.raid-alert {
+            width: 560px;
+            background: linear-gradient(160deg, #172417 0%, #2a3d24 45%, #182617 100%);
+            border: 1px solid rgba(229, 201, 106, 0.7);
+            box-shadow:
+                0 0 0 1px rgba(0,0,0,0.8),
+                0 0 0 3px rgba(200,168,75,0.4),
+                0 0 35px rgba(200,168,75,0.35),
+                0 15px 50px rgba(0,0,0,0.9);
+            animation: raidAuraPulse 2.4s infinite alternate ease-in-out;
+        }
+
+        @keyframes raidAuraPulse {
+            0% {
+                box-shadow: 0 0 0 1px rgba(0,0,0,0.8), 0 0 0 3px rgba(200,168,75,0.3), 0 0 25px rgba(200,168,75,0.25), 0 15px 50px rgba(0,0,0,0.9);
+            }
+            100% {
+                box-shadow: 0 0 0 1px rgba(0,0,0,0.8), 0 0 0 4px rgba(229,201,106,0.6), 0 0 45px rgba(229,201,106,0.5), 0 15px 50px rgba(0,0,0,0.9);
+            }
+        }
+
+        /* Gold Foil Light Shimmer across Raid Card */
+        .raid-shimmer {
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 235, 170, 0.22), transparent);
+            transform: skewX(-25deg);
+            pointer-events: none;
+            display: none;
+        }
+        .alert-card.raid-alert .raid-shimmer {
+            display: block;
+            animation: raidShimmerSweep 3s infinite ease-in-out;
+        }
+        @keyframes raidShimmerSweep {
+            0% { left: -100%; }
+            45% { left: 160%; }
+            100% { left: 160%; }
+        }
+
+        /* Viewer Pill for Raid */
+        .raid-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(10, 16, 10, 0.88);
+            border: 1px solid rgba(229, 201, 106, 0.6);
+            border-radius: 20px;
+            padding: 6px 18px;
+            margin-top: 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .raid-pill-num {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 22px;
+            color: #e5c96a;
+            text-shadow: 0 0 12px rgba(229,201,106,0.6);
+        }
+        .raid-pill-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #f3ebd6;
+            text-transform: uppercase;
+        }
+
+        /* Golden top accent line */
+        .alert-card::before {
+            content: '';
+            display: block;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(200,168,75,0.3) 10%, #c8a84b 30%, #d4a843 50%, #c8a84b 70%, rgba(200,168,75,0.3) 90%, transparent);
+        }
+
+        /* Golden bottom accent line */
+        .alert-card::after {
+            content: '';
+            display: block;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(200,168,75,0.3) 10%, #c8a84b 30%, #d4a843 50%, #c8a84b 70%, rgba(200,168,75,0.3) 90%, transparent);
+            position: absolute;
+            bottom: 0;
+            left: 0; right: 0;
+        }
+
+        .alert-inner {
+            padding: 20px 28px 22px;
+            position: relative;
+        }
+
+        /* Watermark crest in background */
+        .alert-inner::before {
+            content: '✦';
+            position: absolute;
+            font-size: 120px;
+            color: rgba(200,168,75,0.04);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            font-family: serif;
+        }
+
+        /* Top divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(200,168,75,0.5));
+        }
+        .divider-line.right {
+            background: linear-gradient(90deg, rgba(200,168,75,0.5), transparent);
+        }
+        .divider-ornament {
+            font-size: 14px;
+            color: rgba(200,168,75,0.7);
+        }
+
+        /* Alert type label */
+        .alert-type {
+            font-family: 'Playfair Display', serif;
+            font-size: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.7);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        /* Main message */
+        .alert-message {
+            font-family: 'IM Fell English', serif;
+            font-size: 22px;
+            color: #e8dcc0;
+            text-align: center;
+            line-height: 1.4;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        .alert-name {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 26px;
+            color: #c8a84b;
+            display: block;
+            text-shadow: 0 0 15px rgba(200,168,75,0.3);
+        }
+
+        /* Bottom signature area */
+        .alert-footer {
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .footer-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(200,168,75,0.2);
+        }
+        .alert-signature {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 12px;
+            color: rgba(200,168,75,0.5);
+            white-space: nowrap;
+        }
+        /* StreamElements CSS end */
+
+        /* --- Preview buttons --- */
+        .preview-controls {
+            position: fixed;
+            bottom: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: flex; gap: 8px;
+            z-index: 999;
+        }
+        .preview-controls button {
+            padding: 6px 12px; cursor: pointer;
+            background: #243220; color: #c8a84b; border: 1px solid #c8a84b;
+            font-family: 'Playfair Display', serif;
+            font-size: 12px;
+        }
+        html { background: #111; }
+    </style>
+</head>
+<body>
+    <!-- Preview controls (not for StreamElements) -->
+    <div class="preview-controls">
+        <button onclick="simulateEvent('follower-latest', {name: 'Lord Pearson'})">Follower (5s)</button>
+        <button onclick="simulateEvent('subscriber-latest', {name: 'Bobby Glass', amount: 1})">Normal Sub (8s)</button>
+        <button onclick="simulateEvent('subscriber-latest', {name: 'Bobby Glass', amount: 7})">Resub (8s / 7 Mo.)</button>
+        <button onclick="simulateEvent('subscriber-latest', {sender: 'Lord Pearson', name: 'Arthur', gifted: true})">Gift Sub (8s)</button>
+        <button onclick="simulateEvent('subscriber-latest', {sender: 'Lord Pearson', amount: 10, bulkGifted: true})">Sub-Bombe 10x (8s)</button>
+        <button onclick="simulateEvent('raid-latest', {name: 'Lady Danbury', amount: 48})">Raid (11s & FX)</button>
+    </div>
+
+    <!-- StreamElements HTML start -->
+    <div id="alert-card" class="alert-card">
+        <div class="raid-shimmer"></div>
+        <div class="alert-inner">
+            <div class="divider">
+                <div class="divider-line"></div>
+                <div class="divider-ornament">✦</div>
+                <div class="divider-line right"></div>
+            </div>
+            <div id="alert-type" class="alert-type">DOPPEL XP &bull; The Gentlemen</div>
+            <div id="alert-message" class="alert-message">...</div>
+            <div class="alert-footer">
+                <div class="footer-line"></div>
+                <span id="alert-signature" class="alert-signature">With compliments</span>
+                <div class="footer-line"></div>
+            </div>
+        </div>
+    </div>
+    <!-- StreamElements HTML end -->
+
+    <script>
+        // StreamElements JS start
+        let alertQueue = [];
+        let isPlaying = false;
+        let fieldData = {};
+
+        // StreamElements lädt die eingestellten Sounds aus den Widget-Settings
+        window.addEventListener('onWidgetLoad', function (obj) {
+            fieldData = (obj.detail && obj.detail.fieldData) ? obj.detail.fieldData : {};
+            console.log('[Gentlemen Alerts] Settings geladen (fieldData):', fieldData);
+        });
+
+        function extractSoundUrl(val) {
+            if (!val) return '';
+            if (typeof val === 'string') return val.trim();
+            if (typeof val === 'object') return (val.url || val.src || val.link || '').trim();
+            return '';
+        }
+
+        function playAlertSound(type) {
+            let soundUrl = '';
+            if (type.includes('follower')) soundUrl = extractSoundUrl(fieldData.followerSound);
+            else if (type.includes('sub')) soundUrl = extractSoundUrl(fieldData.subscriberSound);
+            else if (type.includes('tip')) soundUrl = extractSoundUrl(fieldData.tipSound);
+            else if (type.includes('raid')) soundUrl = extractSoundUrl(fieldData.raidSound);
+            else if (type.includes('cheer')) soundUrl = extractSoundUrl(fieldData.cheerSound);
+
+            console.log(`[Gentlemen Alerts] Alert-Sound für "${type}":`, soundUrl);
+
+            const volumePercent = (fieldData.soundVolume !== undefined) ? fieldData.soundVolume : 60;
+            const volume = Math.max(0, Math.min(1, volumePercent / 100));
+
+            if (soundUrl) {
+                try {
+                    const audio = new Audio(soundUrl);
+                    audio.volume = volume;
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise
+                            .then(() => console.log('[Gentlemen Alerts] Sound erfolgreich abgespielt'))
+                            .catch(err => {
+                                console.warn('[Gentlemen Alerts] Autoplay wurde vom Browser blockiert. Klicke einmal in das Vorschaufenster:', err);
+                            });
+                    }
+                } catch (err) {
+                    console.error('[Gentlemen Alerts] Fehler beim Laden des Audio-Objekts:', err);
+                }
+            } else {
+                console.log('[Gentlemen Alerts] Kein Sound für diesen Alert-Typ im Menü ausgewählt.');
+            }
+        }
+
+        window.addEventListener('onEventReceived', function (obj) {
+            if (!obj.detail || !obj.detail.event) return;
+            const listener = obj.detail.listener || '';
+            const eventData = obj.detail.event || {};
+            console.log('[Gentlemen Alerts] Event empfangen:', listener, eventData);
+
+            // Einzelne Benachrichtigungen aus Sub-Bomben ignorieren, da die Sub-Bombe bereits gefeiert wird
+            if (listener.includes('sub') && eventData.isCommunityGift && !eventData.bulkGifted) {
+                console.log('[Gentlemen Alerts] Überspringe einzelnes Gift-Sub aus laufender Sub-Bombe.');
+                return;
+            }
+
+            if (['follower', 'subscriber', 'sub', 'tip', 'donation', 'raid', 'cheer', 'bits'].some(k => listener.includes(k))) {
+                alertQueue.push({ type: listener, data: eventData });
+                processQueue();
+            }
+        });
+
+        function processQueue() {
+            if (isPlaying || alertQueue.length === 0) return;
+            isPlaying = true;
+            showAlert(alertQueue.shift());
+        }
+
+        function recordHistoryEvent(type, data) {
+            try {
+                const key = 'gentlemen_history_v1';
+                let hist = { subs: [], followers: [] };
+                const saved = localStorage.getItem(key);
+                if (saved) hist = JSON.parse(saved);
+
+                const cutoff = Date.now() - (30 * 24 * 60 * 60 * 1000);
+                hist.subs = (hist.subs || []).filter(s => (s.timestamp || 0) >= cutoff);
+                hist.followers = (hist.followers || []).filter(f => (f.timestamp || 0) >= cutoff);
+
+                if (type.includes('follower')) {
+                    const name = data.name || data.username;
+                    if (name) {
+                        const idx = hist.followers.findIndex(f => f.name.toLowerCase() === name.toLowerCase());
+                        const entry = { name: name, timestamp: Date.now(), tag: 'Neuer Gefährte' };
+                        if (idx >= 0) hist.followers[idx] = entry;
+                        else hist.followers.unshift(entry);
+                    }
+                } else if (type.includes('sub')) {
+                    const subName = data.recipient || data.name || data.username;
+                    const months = data.amount || data.months || data.streak || 1;
+                    const isGift = data.gifted === true;
+                    if (subName) {
+                        const idx = hist.subs.findIndex(s => s.name.toLowerCase() === subName.toLowerCase());
+                        let tag = isGift ? 'Gift-Abo' : (months > 1 ? `Monat ${months}` : 'Abonnent');
+                        const entry = { name: subName, timestamp: Date.now(), tag: tag, months: months };
+                        if (idx >= 0) hist.subs[idx] = entry;
+                        else hist.subs.unshift(entry);
+                    }
+                }
+                localStorage.setItem(key, JSON.stringify(hist));
+            } catch (e) {}
+        }
+
+        function showAlert(alert) {
+            const card       = document.getElementById('alert-card');
+            const typeEl     = document.getElementById('alert-type');
+            const messageEl  = document.getElementById('alert-message');
+            const sigEl      = document.getElementById('alert-signature');
+            const data       = alert.data || {};
+            const name       = data.name || data.username || 'A Gentleman';
+
+            // In 30-Tage Register für Endscreen eintragen
+            recordHistoryEvent(alert.type, data);
+
+            // Raid Klasse vor jedem Alert bereinigen
+            card.classList.remove('raid-alert');
+
+            // Individuelle Anzeigedauern nach Sound-Länge
+            let duration = 6000;
+            if (alert.type.includes('follower')) {
+                duration = 5000; // 5 Sekunden
+            }
+            else if (alert.type.includes('sub')) {
+                duration = 8000; // 8 Sekunden für alle Sub-Arten (Normal, Resub, Gift, Sub-Bombe)
+            }
+            else if (alert.type.includes('cheer') || alert.type.includes('bits')) {
+                duration = 5000; // 5 Sekunden
+            }
+            else if (alert.type.includes('raid')) {
+                duration = 11000; // 11 Sekunden
+                card.classList.add('raid-alert'); // Spezial-Optik für Raids
+            }
+            else if (alert.type.includes('tip') || alert.type.includes('donation')) {
+                duration = 7000; // 7 Sekunden
+            }
+
+            // Sound abspielen (spielt bei allen Sub-Varianten den gleichen subscriberSound ab)
+            playAlertSound(alert.type);
+
+            if (alert.type.includes('follower')) {
+                typeEl.innerText = 'Ein neuer Verbündeter tritt auf den Plan';
+                messageEl.innerHTML = `<span class="alert-name">${name}</span> betritt den inneren Kreis.`;
+                sigEl.innerText = 'Herzlich willkommen im Salon.';
+            }
+            else if (alert.type.includes('sub')) {
+                const gifter = data.sender || data.gifter || 'Ein nobler Spender';
+                const recipient = data.name || data.recipient || 'Ein Mitglied';
+                const months = data.amount || data.months || data.streak || 1;
+
+                // 1. Sub-Bombe (Community Gift Bomb)
+                if (data.bulkGifted === true || data.isCommunityGiftBomb === true) {
+                    const count = data.amount || data.count || 5;
+                    typeEl.innerText = '✦   GROSSZÜGIGE RUNDE FÜR DEN SALON   ✦';
+                    messageEl.innerHTML = `
+                        <span class="alert-name">${gifter}</span>
+                        <span style="font-size: 19px; display:block; margin: 4px 0 6px;">spendiert eine Runde für alle:</span>
+                        <div class="raid-pill">
+                            <span class="raid-pill-num">${count}</span>
+                            <span class="raid-pill-label">GIFT-ABOS VERTEILT</span>
+                        </div>
+                    `;
+                    sigEl.innerText = 'Höchst generös, mein Bester. Champagner für alle!';
+                }
+                // 2. Einzelnes verschenktes Abo (Single Gift Sub)
+                else if (data.gifted === true) {
+                    typeEl.innerText = 'EIN NOBLER AKTIONÄR ZEIGT SICH GENERÖS';
+                    messageEl.innerHTML = `
+                        <span class="alert-name">${gifter}</span>
+                        <span style="font-size: 19px; display:block; margin: 4px 0 6px;">schenkt ein Salon-Abo an:</span>
+                        <span class="alert-name" style="font-size: 22px; color: #f3ebd6;">${recipient}</span>
+                    `;
+                    sigEl.innerText = 'Höflichkeit ist die Kunst der wahren Aristokratie.';
+                }
+                // 3. Resub (Wiederkehrendes Abo mit Monatsanzahl)
+                else if (months > 1) {
+                    typeEl.innerText = `ERNEUERTE TREUE &bull; MONAT ${months}`;
+                    messageEl.innerHTML = `
+                        <span class="alert-name">${name}</span>
+                        <span style="font-size: 19px; display:block; margin: 4px 0 6px;">verlängert das Abkommen:</span>
+                        <span style="font-size: 21px; color: #e5c96a; font-weight: bold;">${months} Monate in Folge!</span>
+                    `;
+                    sigEl.innerText = 'Beständigkeit ist das wahre Zeichen von Klasse.';
+                }
+                // 4. Normaler Erst-Sub
+                else {
+                    typeEl.innerText = 'EIN NEUER GÖNNER IM SALON';
+                    messageEl.innerHTML = `<span class="alert-name">${name}</span> besiegelt die Partnerschaft.`;
+                    sigEl.innerText = 'Geschäfte sind Geschäfte. Willkommen an Bord.';
+                }
+            }
+            else if (alert.type.includes('tip') || alert.type.includes('donation')) {
+                const amount = alert.data.amount || 0;
+                typeEl.innerText = 'Eine Zuwendung ist eingegangen';
+                messageEl.innerHTML = `<span class="alert-name">${name}</span> steuert ${amount}€ bei.`;
+                sigEl.innerText = 'Höchst generös. Höchst weise.';
+            }
+            else if (alert.type.includes('raid')) {
+                const viewers = alert.data.amount || alert.data.viewers || '10+';
+                typeEl.innerText = '✦   HOCHKARÄTIGER BESUCH IM SALON   ✦';
+                messageEl.innerHTML = `
+                    <span class="alert-name">${name}</span>
+                    <span style="font-size: 19px; display:block; margin: 4px 0 6px;">erscheint mit Gefolge:</span>
+                    <div class="raid-pill">
+                        <span class="raid-pill-num">${viewers}</span>
+                        <span class="raid-pill-label">GENTLEMEN IM GEFOLGE</span>
+                    </div>
+                `;
+                sigEl.innerText = 'Bereiten Sie den besten Jahrgang vor.';
+            }
+            else if (alert.type.includes('cheer') || alert.type.includes('bits')) {
+                const bits = alert.data.amount || 0;
+                typeEl.innerText = 'Ein Zeichen der Anerkennung';
+                messageEl.innerHTML = `<span class="alert-name">${name}</span> entbietet ${bits} Bits.`;
+                sigEl.innerText = 'Wohl bekomm\'s, mein Bester.';
+            }
+
+            card.classList.add('show');
+
+            setTimeout(() => {
+                card.classList.remove('show');
+                setTimeout(() => {
+                    card.classList.remove('raid-alert');
+                    isPlaying = false;
+                    processQueue();
+                }, 800);
+            }, duration);
+        }
+        // StreamElements JS end
+
+        // Preview simulator
+        function simulateEvent(listener, eventData) {
+            window.dispatchEvent(new CustomEvent('onEventReceived', {
+                detail: { listener, event: eventData }
+            }));
+        }
+    </script>
+</body>
+</html>

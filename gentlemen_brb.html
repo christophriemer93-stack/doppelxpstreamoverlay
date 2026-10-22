@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen – Be Right Back (BRB)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background: #0d160d;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* === HINTERGRUND === */
+        #bg-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1920px; height: 1080px;
+            z-index: 0;
+        }
+
+        .vignette {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.85) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* === GOLDENE RAHMENLINIEN === */
+        .frame-top, .frame-bottom {
+            position: absolute;
+            left: 0; right: 0;
+            height: 3px;
+            z-index: 20;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(200,168,75,0.4) 10%,
+                #c8a84b 30%,
+                #d4a843 50%,
+                #c8a84b 70%,
+                rgba(200,168,75,0.4) 90%,
+                transparent 100%
+            );
+        }
+        .frame-top { top: 0; }
+        .frame-bottom { bottom: 0; }
+
+        /* === ECK-ORNAMENTE === */
+        .corner { position: absolute; width: 60px; height: 60px; z-index: 21; }
+        .corner svg { width: 100%; height: 100%; }
+        .corner-tl { top: 3px; left: 0; }
+        .corner-tr { top: 3px; right: 0; transform: scaleX(-1); }
+        .corner-bl { bottom: 3px; left: 0; transform: scaleY(-1); }
+        .corner-br { bottom: 3px; right: 0; transform: scale(-1,-1); }
+
+        /* === HAUPT-LAYOUT (3-SPALTIG) === */
+        .layout {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1920px; height: 1080px;
+            display: flex;
+            z-index: 10;
+        }
+
+        /* --- 1. LINKE SPALTE: STATUS & INFOS (360px) --- */
+        .left-col {
+            width: 360px;
+            height: 100%;
+            padding: 60px 30px 50px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .estate-tag {
+            font-size: 10px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .estate-tag::before {
+            content: '';
+            width: 25px; height: 1px;
+            background: rgba(200,168,75,0.4);
+        }
+
+        .brb-headline {
+            font-weight: 900;
+            font-size: 54px;
+            line-height: 1.05;
+            color: #e8dcc0;
+            text-shadow: 0 4px 25px rgba(0,0,0,0.8);
+            margin: 20px 0 10px 0;
+        }
+
+        .brb-subline {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 17px;
+            color: rgba(200,168,75,0.7);
+            line-height: 1.4;
+            margin-bottom: 30px;
+        }
+
+        .status-box {
+            background: linear-gradient(135deg, rgba(20,35,20,0.85) 0%, rgba(30,48,22,0.85) 100%);
+            border: 1px solid rgba(180,140,60,0.3);
+            border-left: 3px solid #c8a84b;
+            padding: 16px 20px;
+            box-shadow: 2px 2px 15px rgba(0,0,0,0.6);
+        }
+
+        .status-eyebrow {
+            font-size: 9px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.5);
+            margin-bottom: 6px;
+        }
+
+        .status-message {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 18px;
+            color: #e0d4b8;
+            min-height: 48px;
+            transition: opacity 0.5s ease;
+        }
+        .status-message.fade { opacity: 0; }
+
+        .live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(180,140,60,0.25);
+            padding: 6px 14px;
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.8);
+        }
+
+        .pulse-dot {
+            width: 7px; height: 7px;
+            background: #d4a843;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #d4a843;
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.85); }
+        }
+
+        /* --- 2. MITTLERE SPALTE: 16:9 CLIP-FENSTER (1200px) --- */
+        .center-col {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* 16:9 Clip-Container (1152px x 648px) */
+        .clip-frame-container {
+            width: 1152px;
+            height: 648px;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9), 0 0 0 1px rgba(180,140,60,0.4);
+            border: 2px solid rgba(200,168,75,0.6);
+            /* Absolut transparent, damit Clips aus OBS hindurchscheinen */
+            background: transparent !important;
+        }
+
+        /* Header-Leiste über dem Clip-Fenster */
+        .clip-header-bar {
+            position: absolute;
+            top: -36px;
+            left: 0; right: 0;
+            height: 36px;
+            background: linear-gradient(135deg, rgba(20,32,20,0.95) 0%, rgba(32,46,26,0.95) 100%);
+            border: 1px solid rgba(180,140,60,0.4);
+            border-bottom: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+
+        .clip-header-title {
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #c8a84b;
+            font-weight: 700;
+        }
+
+        .clip-header-meta {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 13px;
+            color: rgba(200,168,75,0.6);
+        }
+
+        /* Footer-Leiste unter dem Clip-Fenster */
+        .clip-footer-bar {
+            position: absolute;
+            bottom: -32px;
+            left: 0; right: 0;
+            height: 32px;
+            background: linear-gradient(135deg, rgba(20,32,20,0.95) 0%, rgba(28,40,22,0.95) 100%);
+            border: 1px solid rgba(180,140,60,0.3);
+            border-top: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.5);
+        }
+
+        /* Eck-Zierden direkt am Clip-Rahmen */
+        .c-corner {
+            position: absolute;
+            width: 26px; height: 26px;
+            border: 2px solid #c8a84b;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .c-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .c-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .c-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .c-br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        /* Subtiler Innen-Schatten & Fadenkreuz-Markierung */
+        .clip-inner-border {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+            pointer-events: none;
+        }
+
+        /* --- 3. RECHTE SPALTE: CHAT (360px) --- */
+        .right-col {
+            width: 360px;
+            height: 100%;
+            padding: 60px 50px 50px 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            font-size: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.5);
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(200,168,75,0.2);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .chat-card {
+            background: linear-gradient(135deg, rgba(22,36,22,0.92) 0%, rgba(30,46,24,0.92) 100%);
+            border: 1px solid rgba(180,140,60,0.2);
+            border-left: 3px solid #c8a84b;
+            padding: 8px 12px;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            animation: slide-in 0.35s ease forwards;
+        }
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateX(15px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .chat-card.fade {
+            transition: opacity 0.6s ease;
+            opacity: 0;
+        }
+
+        .chat-user {
+            font-weight: 900;
+            font-size: 12px;
+            color: #c8a84b;
+            margin-bottom: 2px;
+        }
+
+        .chat-text {
+            font-family: 'IM Fell English', serif;
+            font-size: 14px;
+            color: #e0d4b8;
+            line-height: 1.35;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="frame-top"></div>
+    <div class="frame-bottom"></div>
+
+    <!-- Ecken -->
+    <div class="corner corner-tl">
+        <svg viewBox="0 0 60 60" fill="none">
+            <path d="M4 56 L4 4 L56 4" stroke="rgba(200,168,75,0.7)" stroke-width="2"/>
+            <path d="M4 4 L12 12" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="4" cy="4" r="2.5" fill="rgba(200,168,75,0.8)"/>
+        </svg>
+    </div>
+    <div class="corner corner-tr">
+        <svg viewBox="0 0 60 60" fill="none">
+            <path d="M4 56 L4 4 L56 4" stroke="rgba(200,168,75,0.7)" stroke-width="2"/>
+            <path d="M4 4 L12 12" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="4" cy="4" r="2.5" fill="rgba(200,168,75,0.8)"/>
+        </svg>
+    </div>
+    <div class="corner corner-bl">
+        <svg viewBox="0 0 60 60" fill="none">
+            <path d="M4 56 L4 4 L56 4" stroke="rgba(200,168,75,0.7)" stroke-width="2"/>
+            <path d="M4 4 L12 12" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="4" cy="4" r="2.5" fill="rgba(200,168,75,0.8)"/>
+        </svg>
+    </div>
+    <div class="corner corner-br">
+        <svg viewBox="0 0 60 60" fill="none">
+            <path d="M4 56 L4 4 L56 4" stroke="rgba(200,168,75,0.7)" stroke-width="2"/>
+            <path d="M4 4 L12 12" stroke="rgba(200,168,75,0.4)" stroke-width="1"/>
+            <circle cx="4" cy="4" r="2.5" fill="rgba(200,168,75,0.8)"/>
+        </svg>
+    </div>
+
+    <!-- Canvas Partikel Hintergrund -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+
+    <div class="layout">
+
+        <!-- 1. LINKS: STATUS & ANKÜNDIGUNG -->
+        <div class="left-col">
+            <div>
+                <div class="estate-tag">Halstead Estate</div>
+                <div class="brb-headline">Gleich<br>zurück.</div>
+                <div class="brb-subline">Diskrete Verhandlungen im Hinterzimmer. Bitte bedienen Sie sich an der Bar.</div>
+
+                <div class="status-box">
+                    <div class="status-eyebrow">✦ &nbsp; Unterbrechungsgrund</div>
+                    <div class="status-message" id="status-msg">Ein Glas Scotch wird eingeschenkt...</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="live-pill">
+                    <div class="pulse-dot"></div>
+                    <span>Pause im Salon</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. MITTE: 16:9 CLIP-FENSTER -->
+        <div class="center-col">
+            <div class="clip-frame-container">
+                <!-- Header -->
+                <div class="clip-header-bar">
+                    <div class="clip-header-title">✦ &nbsp; Archiv des Hauses &nbsp; // &nbsp; Höhepunkte</div>
+                    <div class="clip-header-meta">Feed 16:9 • Stereo</div>
+                </div>
+
+                <!-- Goldene Ecken -->
+                <div class="c-corner c-tl"></div>
+                <div class="c-corner c-tr"></div>
+                <div class="c-corner c-bl"></div>
+                <div class="c-corner c-br"></div>
+
+                <!-- Transparenter Bereich für Clips -->
+                <div class="clip-inner-border"></div>
+
+                <!-- Footer -->
+                <div class="clip-footer-bar">
+                    <span>Halstead Estate Broadcasting</span>
+                    <span>Wiedergabe aktiv</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. RECHTS: CHAT -->
+        <div class="right-col">
+            <div class="chat-header">
+                <span>✦</span> Salon-Gespräche
+            </div>
+            <div id="chat-container"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // === 1. HINTERGRUND-PARTIKEL ===
+        const canvas = document.getElementById('bg-canvas');
+        canvas.width = 1920;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
+
+        const bgGrad = ctx.createRadialGradient(960, 540, 100, 960, 540, 1000);
+        bgGrad.addColorStop(0, '#192818');
+        bgGrad.addColorStop(0.6, '#101a0f');
+        bgGrad.addColorStop(1, '#091008');
+
+        const particles = Array.from({ length: 65 }, () => ({
+            x: Math.random() * 1920,
+            y: Math.random() * 1080,
+            r: Math.random() * 1.6 + 0.3,
+            speed: Math.random() * 0.22 + 0.05,
+            drift: (Math.random() - 0.5) * 0.12,
+            phase: Math.random() * Math.PI * 2,
+        }));
+
+        function draw() {
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 1920, 1080);
+            const now = Date.now() * 0.001;
+
+            particles.forEach(p => {
+                const alpha = 0.08 + Math.abs(Math.sin(now * 0.5 + p.phase)) * 0.22;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(200,168,75,${alpha.toFixed(2)})`;
+                ctx.fill();
+
+                p.y -= p.speed;
+                p.x += p.drift;
+                if (p.y < -4) { p.y = 1084; p.x = Math.random() * 1920; }
+                if (p.x < 0) p.x = 1920;
+                if (p.x > 1920) p.x = 0;
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+
+        // === 2. STATUS-WECHSLER (THE GENTLEMEN HUMOR) ===
+        const statusMsgs = [
+            "Ein Glas Scotch wird eingeschenkt...",
+            "Eine kubanische Zigarre wird entfacht...",
+            "Diskrete Verhandlungen mit den Partnern...",
+            "Eine Lieferung wird im Gewächshaus geprüft...",
+            "Der Maßanzug wird gerichtet...",
+            "Kurze Rücksprache mit der Familie...",
+            "Gleich wieder zu Ihren Diensten."
+        ];
+
+        let sIndex = 0;
+        const msgEl = document.getElementById('status-msg');
+
+        setInterval(() => {
+            msgEl.classList.add('fade');
+            setTimeout(() => {
+                sIndex = (sIndex + 1) % statusMsgs.length;
+                msgEl.innerText = statusMsgs[sIndex];
+                msgEl.classList.remove('fade');
+            }, 500);
+        }, 12000);
+
+        // === 3. CHAT-LOGIK ===
+        const chatContainer = document.getElementById('chat-container');
+        const MAX_CHAT = 8;
+
+        window.addEventListener('onEventReceived', function (obj) {
+            if (!obj.detail || !obj.detail.event) return;
+            if (obj.detail.listener !== 'message') return;
+            const d = obj.detail.event.data;
+            if (!d) return;
+
+            addMsg(d.displayName || 'Gast', d.text || '');
+        });
+
+        function addMsg(user, txt) {
+            while (chatContainer.children.length >= MAX_CHAT) {
+                chatContainer.removeChild(chatContainer.firstChild);
+            }
+
+            const card = document.createElement('div');
+            card.className = 'chat-card';
+            card.innerHTML = `
+                <div class="chat-user">${esc(user)}</div>
+                <div class="chat-text">${esc(txt)}</div>
+            `;
+            chatContainer.appendChild(card);
+
+            setTimeout(() => {
+                card.classList.add('fade');
+                setTimeout(() => card.parentNode && card.parentNode.removeChild(card), 600);
+            }, 60000);
+        }
+
+        function esc(s) {
+            return String(s)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+    </script>
+</body>
+</html>

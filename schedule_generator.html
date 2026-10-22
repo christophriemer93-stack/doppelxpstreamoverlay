@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gentlemen - Wochenprogramm Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400;1,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- html2canvas für 1-Klick HD Export als PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --manor-black: #060a07;
+            --manor-green-deep: #0b140d;
+            --manor-green: #132216;
+            --gold-bright: #f0d57e;
+            --gold-metallic: #c8a84b;
+            --gold-dark: #826620;
+            --text-light: #f7f2e4;
+            --text-muted: rgba(247, 242, 228, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #040705;
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar / Editor Controls */
+        .editor-sidebar {
+            width: 400px;
+            background: #09100a;
+            border-right: 2px solid rgba(200, 168, 75, 0.35);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            max-height: 100vh;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.8);
+            z-index: 20;
+        }
+
+        .editor-title {
+            font-family: 'Cinzel', serif;
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(200, 168, 75, 0.3);
+            padding-bottom: 12px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-label {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--gold-metallic);
+            text-transform: uppercase;
+        }
+
+        .format-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .format-btn {
+            background: #111a13;
+            border: 1px solid rgba(200, 168, 75, 0.3);
+            border-radius: 4px;
+            color: var(--text-light);
+            font-size: 11px;
+            padding: 8px 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .format-btn.active, .format-btn:hover {
+            border-color: var(--gold-bright);
+            background: #1e3323;
+            color: var(--gold-bright);
+            font-weight: 600;
+        }
+
+        /* Dynamische Liste der Tage */
+        .days-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .day-editor-card {
+            background: #0f1912;
+            border: 1px solid rgba(200, 168, 75, 0.25);
+            border-radius: 6px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+        }
+
+        .day-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+
+        .day-num-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--gold-bright);
+            text-transform: uppercase;
+        }
+
+        .btn-delete-day {
+            background: transparent;
+            border: none;
+            color: rgba(255, 100, 100, 0.7);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 4px;
+            transition: color 0.2s;
+        }
+        .btn-delete-day:hover {
+            color: #ff4d4d;
+        }
+
+        .input-field {
+            background: #080d09;
+            border: 1px solid rgba(200, 168, 75, 0.3);
+            border-radius: 4px;
+            padding: 6px 10px;
+            color: #fff;
+            font-size: 12px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--gold-bright);
+            box-shadow: 0 0 8px rgba(200, 168, 75, 0.3);
+        }
+
+        .btn-add-day {
+            background: #132216;
+            border: 1px dashed var(--gold-metallic);
+            border-radius: 6px;
+            color: var(--gold-bright);
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn-add-day:hover {
+            background: #1c3221;
+            border-color: var(--gold-bright);
+            box-shadow: 0 0 10px rgba(200, 168, 75, 0.2);
+        }
+
+        .export-btn {
+            background: linear-gradient(180deg, #c8a84b 0%, #9e7f2b 100%);
+            border: 1px solid #ffd875;
+            border-radius: 6px;
+            color: #060a07;
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .export-btn:hover {
+            background: linear-gradient(180deg, #e7ca6d 0%, #b89332 100%);
+            box-shadow: 0 0 20px rgba(231, 202, 109, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Haupt-Arbeitsfläche / Canvas Preview */
+        .preview-workspace {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow: auto;
+            background: radial-gradient(circle at center, #101a12 0%, #030604 100%);
+        }
+
+        /* Das eigentliche Programmheft */
+        .schedule-card {
+            position: relative;
+            background: linear-gradient(180deg, #09120b 0%, #050806 100%);
+            border: 2px solid var(--gold-metallic);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95),
+                        inset 0 0 50px rgba(200, 168, 75, 0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Formate */
+        .format-portrait {
+            width: 580px;
+            min-height: 725px; /* Proportion 4:5 wie Instagram / Discord */
+            padding: 45px 45px 35px 45px;
+        }
+        .format-square {
+            width: 620px;
+            min-height: 620px; /* 1:1 */
+            padding: 35px 40px;
+        }
+        .format-story {
+            width: 440px;
+            min-height: 780px; /* 9:16 Story */
+            padding: 45px 35px 35px 35px;
+        }
+
+        /* Edle Rahmen-Ornamente */
+        .card-inner-border {
+            position: absolute;
+            inset: 12px;
+            border: 1px solid rgba(200, 168, 75, 0.35);
+            pointer-events: none;
+        }
+
+        .card-corner {
+            position: absolute;
+            font-size: 16px;
+            color: var(--gold-bright);
+            opacity: 0.85;
+            text-shadow: 0 0 8px var(--gold-bright);
+        }
+        .card-corner.tl { top: 16px; left: 16px; }
+        .card-corner.tr { top: 16px; right: 16px; }
+        .card-corner.bl { bottom: 16px; left: 16px; }
+        .card-corner.br { bottom: 16px; right: 16px; }
+
+        /* Header des Spielplans */
+        .schedule-header {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-main-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 34px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 1px;
+            line-height: 1.1;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+        }
+
+        .header-week-pill {
+            display: inline-block;
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            letter-spacing: 2.5px;
+            color: var(--gold-bright);
+            background: rgba(20, 34, 23, 0.85);
+            border: 1px solid var(--gold-metallic);
+            padding: 4px 18px;
+            border-radius: 20px;
+            margin-top: 10px;
+            box-shadow: 0 0 15px rgba(200, 168, 75, 0.2);
+        }
+
+        .divider-line {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(200, 168, 75, 0.5) 50%, transparent 100%);
+            margin: 18px 0 14px 0;
+            position: relative;
+        }
+        .divider-diamond {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+            color: var(--gold-bright);
+            background: #08100a;
+            padding: 0 8px;
+        }
+
+        /* Programm-Punkte (Liste) */
+        .schedule-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+            margin: 10px 0;
+        }
+
+        .schedule-row {
+            display: flex;
+            align-items: center;
+            background: rgba(14, 24, 16, 0.65);
+            border: 1px solid rgba(200, 168, 75, 0.25);
+            border-radius: 6px;
+            padding: 10px 14px;
+            transition: all 0.2s;
+        }
+
+        .row-day-col {
+            width: 85px;
+            border-right: 1px solid rgba(200, 168, 75, 0.3);
+            padding-right: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row-day-name {
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            letter-spacing: 1px;
+        }
+
+        .row-time {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            margin-top: 1px;
+        }
+
+        .row-content-col {
+            flex: 1;
+            padding-left: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .row-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        .row-badge {
+            font-family: 'Cinzel', serif;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(200, 168, 75, 0.4);
+            background: rgba(200, 168, 75, 0.1);
+            color: var(--gold-bright);
+            white-space: nowrap;
+        }
+
+        /* Footer mit Social Links */
+        .schedule-footer {
+            border-top: 1px solid rgba(200, 168, 75, 0.3);
+            padding-top: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-channel-name {
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #ffffff;
+        }
+
+        .footer-url {
+            font-size: 11px;
+            color: var(--gold-metallic);
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Linke Bearbeitungs-Leiste -->
+    <div class="editor-sidebar">
+        <div class="editor-title">
+            <span>📜</span>
+            <span>Programmheft-Editor</span>
+        </div>
+
+        <!-- Format-Wähler -->
+        <div class="control-group">
+            <div class="control-label">Format wählen</div>
+            <div class="format-selector">
+                <div class="format-btn active" onclick="setFormat('portrait', this)">Post (4:5)</div>
+                <div class="format-btn" onclick="setFormat('square', this)">Quadrat (1:1)</div>
+                <div class="format-btn" onclick="setFormat('story', this)">Story (9:16)</div>
+            </div>
+        </div>
+
+        <!-- Woche / Datum -->
+        <div class="control-group">
+            <div class="control-label">Kalenderwoche / Zeitraum</div>
+            <input type="text" id="inputWeek" class="input-field" value="WOCHE VOM 20. – 26. OKTOBER" oninput="renderCard()">
+        </div>
+
+        <!-- Programmtage -->
+        <div class="control-label" style="margin-top: 6px;">Sendetermine dieser Woche</div>
+
+        <!-- Container für dynamische Tage -->
+        <div class="days-container" id="daysEditorContainer"></div>
+
+        <!-- Tag hinzufügen Button -->
+        <button class="btn-add-day" onclick="addNewDay()">
+            <span>➕</span>
+            <span>Weiteren Stream-Tag hinzufügen</span>
+        </button>
+
+        <!-- Export Button -->
+        <button class="export-btn" onclick="exportSchedulePng()">
+            <span>💾</span>
+            <span>Als HD-Bild herunterladen</span>
+        </button>
+        <p style="font-size: 10px; color: rgba(247,242,228,0.5); text-align: center;">
+            Perfekt fertig gerechnet für Instagram-Feed, Story, Discord & Twitter!
+        </p>
+    </div>
+
+    <!-- Mittlerer Vorschau-Bereich -->
+    <div class="preview-workspace">
+        <div class="schedule-card format-portrait" id="scheduleCard">
+            <!-- Rahmen & Ecken -->
+            <div class="card-inner-border"></div>
+            <div class="card-corner tl">❖</div>
+            <div class="card-corner tr">❖</div>
+            <div class="card-corner bl">❖</div>
+            <div class="card-corner br">❖</div>
+
+            <!-- Header -->
+            <div class="schedule-header">
+                <h1 class="header-main-title">Wochenprogramm</h1>
+                <div class="header-week-pill" id="cardWeek">WOCHE VOM 20. – 26. OKTOBER</div>
+
+                <div class="divider-line">
+                    <span class="divider-diamond">❖</span>
+                </div>
+            </div>
+
+            <!-- Liste der Tage (dynamisch) -->
+            <div class="schedule-list" id="scheduleListContainer"></div>
+
+            <!-- Footer -->
+            <div class="schedule-footer">
+                <div class="footer-channel">
+                    <div>
+                        <div class="footer-channel-name">D0PPELXP</div>
+                    </div>
+                </div>
+                <div class="footer-url">twitch.tv/d0ppelxp</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initiale Daten
+        let daysData = [
+            {
+                day: "DIENSTAG",
+                time: "19:00 UHR",
+                badge: "GAMING",
+                title: "Gentlemen's Gaming Reserve",
+                sub: "Story-Abenteuer & Community-Taktik"
+            },
+            {
+                day: "DONNERSTAG",
+                time: "19:00 UHR",
+                badge: "VARIETY",
+                title: "Der Zigarrenclub & Talk",
+                sub: "Deep Dive Talk, Memes & Chat-Duell"
+            },
+            {
+                day: "SAMSTAG",
+                time: "20:00 UHR",
+                badge: "SALON SPECIAL",
+                title: "Großer Salon-Galaabend",
+                sub: "Uhren-Ziehung, Fasanenjagd & Community-Games"
+            },
+            {
+                day: "SONNTAG",
+                time: "SPONTAN",
+                badge: "RESERVE",
+                title: "Sonntags-Depesche & Entspannung",
+                sub: "Gemütlicher Ausklang der Woche"
+            }
+        ];
+
+        function renderEditor() {
+            const container = document.getElementById('daysEditorContainer');
+            container.innerHTML = '';
+
+            daysData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'day-editor-card';
+                card.innerHTML = `
+                    <div class="day-card-header">
+                        <span class="day-num-label">Tag ${index + 1}</span>
+                        <button class="btn-delete-day" onclick="removeDay(${index})" title="Diesen Tag entfernen">✕</button>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" class="input-field" style="width: 80px;" value="${item.day}" oninput="updateItem(${index}, 'day', this.value)" placeholder="Wochentag">
+                        <input type="text" class="input-field" style="width: 85px;" value="${item.time}" oninput="updateItem(${index}, 'time', this.value)" placeholder="Uhrzeit">
+                        <input type="text" class="input-field" style="flex: 1;" value="${item.badge}" oninput="updateItem(${index}, 'badge', this.value)" placeholder="Kategorie / Badge">
+                    </div>
+                    <input type="text" class="input-field" value="${item.title}" oninput="updateItem(${index}, 'title', this.value)" placeholder="Stream Titel / Thema">
+                    <input type="text" class="input-field" value="${item.sub}" oninput="updateItem(${index}, 'sub', this.value)" placeholder="Beschreibung / Details">
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderCard() {
+            document.getElementById('cardWeek').innerText = document.getElementById('inputWeek').value;
+            const listContainer = document.getElementById('scheduleListContainer');
+            listContainer.innerHTML = '';
+
+            daysData.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'schedule-row';
+                row.innerHTML = `
+                    <div class="row-day-col">
+                        <span class="row-day-name">${item.day}</span>
+                        <span class="row-time">${item.time}</span>
+                    </div>
+                    <div class="row-content-col">
+                        <span class="row-title">${item.title}</span>
+                        <span class="row-sub">${item.sub}</span>
+                    </div>
+                    <span class="row-badge">${item.badge}</span>
+                `;
+                listContainer.appendChild(row);
+            });
+        }
+
+        function updateItem(index, field, value) {
+            daysData[index][field] = value;
+            renderCard();
+        }
+
+        function addNewDay() {
+            const nextDayNames = ["MONTAG", "DIENSTAG", "MITTWOCH", "DONNERSTAG", "FREITAG", "SAMSTAG", "SONNTAG"];
+            const nextName = nextDayNames[daysData.length % nextDayNames.length] || "STREAM";
+
+            daysData.push({
+                day: nextName,
+                time: "19:00 UHR",
+                badge: "SPECIAL",
+                title: "Neuer Stream",
+                sub: "Thema & Programm eintragen"
+            });
+            renderEditor();
+            renderCard();
+        }
+
+        function removeDay(index) {
+            if (daysData.length <= 1) {
+                alert("Es muss mindestens 1 Tag im Plan bleiben.");
+                return;
+            }
+            daysData.splice(index, 1);
+            renderEditor();
+            renderCard();
+        }
+
+        function setFormat(fmt, el) {
+            const card = document.getElementById('scheduleCard');
+            card.className = 'schedule-card format-' + fmt;
+            document.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function exportSchedulePng() {
+            const card = document.getElementById('scheduleCard');
+            const scale = 2; // HD Qualität
+
+            html2canvas(card, {
+                scale: scale,
+                backgroundColor: null,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'd0ppelxp_wochenprogramm.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        // Init
+        renderEditor();
+        renderCard();
+    </script>
+</body>
+</html>

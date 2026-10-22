@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen – Goldener Partikelregen (Hype Train)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background: transparent;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* === PARTIKEL-CANVAS (TRANSPARENT ÜBER DEM STREAM) === */
+        #particle-rain-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1920px;
+            height: 1080px;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 1.8s ease-in-out;
+        }
+
+        #particle-rain-canvas.active {
+            opacity: 1;
+        }
+
+        /* === DEZENTES VIGNETTEN-GLIMMEN AN DEN RÄNDERN BEI AKTIVEM HYPE TRAIN === */
+        .ambient-glow {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 5;
+            background: radial-gradient(circle at 50% 0%, rgba(200, 168, 75, 0.12) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        .ambient-glow.active {
+            opacity: 1;
+        }
+
+        /* === OPTIONALE EDLE BANNER-ANZEIGE (OBEN ZENTRIERT) === */
+        .hype-banner-wrapper {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-60px);
+            opacity: 0;
+            z-index: 20;
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .hype-banner-wrapper.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .hype-banner {
+            background: linear-gradient(135deg, rgba(14,24,14,0.96) 0%, rgba(22,34,20,0.96) 50%, rgba(12,20,12,0.96) 100%);
+            border: 1px solid rgba(200, 168, 75, 0.55);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.85), 0 0 25px rgba(200, 168, 75, 0.2);
+            border-radius: 4px;
+            padding: 10px 32px 12px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+        }
+
+        .hype-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #c8a84b 30%, #f3ebd6 50%, #c8a84b 70%, transparent);
+        }
+
+        .hype-tagline {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(200, 168, 75, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .hype-tagline::before, .hype-tagline::after {
+            content: '';
+            width: 30px;
+            height: 1px;
+            background: rgba(200, 168, 75, 0.4);
+        }
+
+        .hype-title-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .hype-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 21px;
+            font-weight: 900;
+            color: #f3ebd6;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+        }
+
+        .hype-level-badge {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            color: #10190f;
+            background: linear-gradient(135deg, #e5c96a 0%, #c8a84b 100%);
+            padding: 3px 10px;
+            border-radius: 3px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+
+        /* === TEST-BEDIENLEISTE (?preview=1 oder ?test=1) === */
+        .test-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 16, 10, 0.95);
+            border: 1px solid rgba(200, 168, 75, 0.5);
+            border-radius: 6px;
+            padding: 12px 20px;
+            color: #f3ebd6;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            z-index: 9999;
+            display: none;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+        }
+
+        body.show-preview .test-panel {
+            display: flex !important;
+        }
+
+        .btn-test {
+            background: #172418;
+            color: #f3ebd6;
+            border: 1px solid #c8a84b;
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-test:hover {
+            background: #c8a84b;
+            color: #0b110b;
+        }
+
+        .btn-stop {
+            border-color: #8c3434;
+            color: #fca5a5;
+        }
+
+        .btn-stop:hover {
+            background: #8c3434;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Umgebungs-Glimmen oben -->
+    <div class="ambient-glow" id="ambientGlow"></div>
+
+    <!-- Sanfter Goldregen Canvas -->
+    <canvas id="particle-rain-canvas"></canvas>
+
+    <!-- Optionales dezentes Gentlemen-Banner -->
+    <div class="hype-banner-wrapper" id="hypeBanner">
+        <div class="hype-banner">
+            <div class="hype-tagline">✦ DER SALON IM AUSNAHMEZUSTAND ✦</div>
+            <div class="hype-title-row">
+                <span class="hype-title">Hype Train des Adels</span>
+                <span class="hype-level-badge" id="hypeLevelText">STUFE 1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testpanel für den Browser -->
+    <div class="test-panel" id="testPanel">
+        <span style="font-weight:800; color:#e5c96a;">✦ HYPE TRAIN TEST-STATION:</span>
+        <button class="btn-test" onclick="triggerHypeTrain(1)">Stufe 1 (Sanfter Dunst)</button>
+        <button class="btn-test" onclick="triggerHypeTrain(3)">Stufe 3 (Goldregen)</button>
+        <button class="btn-test" onclick="triggerHypeTrain(5)">Stufe 5 (Exklusiv-Schauer)</button>
+        <button class="btn-test btn-stop" onclick="stopHypeTrain()">⏹ Stoppen</button>
+    </div>
+
+    <script>
+        // =========================================================
+        // 1. PARAMETER & EINSTELLUNGEN
+        // =========================================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const showBanner = urlParams.get('banner') !== '0'; // ?banner=0 blendet das obere Schild aus
+        if (urlParams.get('preview') === '1' || urlParams.get('test') === '1') {
+            document.body.classList.add('show-preview');
+        }
+
+        const canvas = document.getElementById('particle-rain-canvas');
+        canvas.width = 1920;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
+
+        const ambientGlow = document.getElementById('ambientGlow');
+        const hypeBanner = document.getElementById('hypeBanner');
+        const hypeLevelText = document.getElementById('hypeLevelText');
+
+        // =========================================================
+        // 2. PARTIKEL-ENGINE (SANFTER GOLDREGEN)
+        // =========================================================
+        let isHypeActive = false;
+        let currentLevel = 1;
+        let animationFrameId = null;
+
+        // Partikel-Anzahl skaliert edel mit dem Hype-Level:
+        // Stufe 1: 70 Partikel | Stufe 5: 220 Partikel
+        function getParticleCount(level) {
+            return Math.min(240, 50 + level * 35);
+        }
+
+        let particles = [];
+
+        function createParticle(randomY = false) {
+            return {
+                x: Math.random() * 1920,
+                y: randomY ? Math.random() * 1080 : -15 - Math.random() * 40,
+                r: Math.random() * 2.2 + 0.6,                    // Größe: feiner Staub bis 2.8px
+                speed: Math.random() * 0.9 + 0.45 + (currentLevel * 0.15), // Sanft fallend
+                drift: (Math.random() - 0.5) * 0.35,            // Leichtes Schweben nach links/rechts
+                phase: Math.random() * Math.PI * 2,
+                swayFreq: Math.random() * 0.8 + 0.4,
+                sparkleSpeed: Math.random() * 0.8 + 0.5,
+                colorType: Math.random() // 0-0.5: Gold, 0.5-0.85: Champagne, 0.85-1.0: Strahlend
+            };
+        }
+
+        function initParticles() {
+            const count = getParticleCount(currentLevel);
+            particles = [];
+            for (let i = 0; i < count; i++) {
+                particles.push(createParticle(true));
+            }
+        }
+
+        function renderFrame() {
+            if (!isHypeActive && particles.length === 0) {
+                ctx.clearRect(0, 0, 1920, 1080);
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+                return;
+            }
+
+            ctx.clearRect(0, 0, 1920, 1080);
+            const now = Date.now() * 0.001;
+
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+
+                // Sanftes Glitzern und Schimmern
+                const sparkle = 0.20 + Math.abs(Math.sin(now * p.sparkleSpeed + p.phase)) * 0.55;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+
+                if (p.colorType > 0.85) {
+                    // Strahlendes Diamant-Champagner
+                    ctx.fillStyle = `rgba(255, 248, 220, ${sparkle.toFixed(2)})`;
+                    ctx.shadowColor = 'rgba(255, 248, 220, 0.6)';
+                } else if (p.colorType > 0.45) {
+                    // Helles The-Gentlemen Antik-Gold
+                    ctx.fillStyle = `rgba(229, 201, 106, ${sparkle.toFixed(2)})`;
+                    ctx.shadowColor = 'rgba(229, 201, 106, 0.45)';
+                } else {
+                    // Sattes Schloss-Gold
+                    ctx.fillStyle = `rgba(200, 168, 75, ${sparkle.toFixed(2)})`;
+                    ctx.shadowColor = 'rgba(200, 168, 75, 0.35)';
+                }
+
+                ctx.shadowBlur = p.r * 2.8;
+                ctx.fill();
+
+                // Bewegung nach unten (Goldregen) mit feinem Schwingen
+                p.y += p.speed;
+                p.x += p.drift + Math.sin(now * p.swayFreq + p.phase) * 0.25;
+
+                // Wenn Partikel unten den Schirm verlässt
+                if (p.y > 1095) {
+                    if (isHypeActive) {
+                        // Oben wieder neu spawnen
+                        Object.assign(p, createParticle(false));
+                    } else {
+                        // Wenn der Hype Train vorbei ist: Partikel auslaufen lassen
+                        particles.splice(i, 1);
+                        i--;
+                    }
+                }
+
+                // Horizontale Ränder einbinden
+                if (p.x < -10) p.x = 1930;
+                if (p.x > 1930) p.x = -10;
+            }
+
+            animationFrameId = requestAnimationFrame(renderFrame);
+        }
+
+        // =========================================================
+        // 3. HYPE TRAIN STEUERUNG
+        // =========================================================
+        function triggerHypeTrain(level = 1) {
+            isHypeActive = true;
+            currentLevel = Math.max(1, Math.min(5, level));
+
+            hypeLevelText.textContent = `STUFE ${currentLevel}`;
+
+            canvas.classList.add('active');
+            ambientGlow.classList.add('active');
+
+            if (showBanner) {
+                hypeBanner.classList.add('active');
+            }
+
+            // Zielanzahl anpassen
+            const targetCount = getParticleCount(currentLevel);
+            while (particles.length < targetCount) {
+                particles.push(createParticle(true));
+            }
+
+            if (!animationFrameId) {
+                renderFrame();
+            }
+        }
+
+        function stopHypeTrain() {
+            isHypeActive = false;
+            canvas.classList.remove('active');
+            ambientGlow.classList.remove('active');
+            hypeBanner.classList.remove('active');
+            // Die existierenden Partikel regnen noch sanft zu Ende und verschwinden dann.
+        }
+
+        // =========================================================
+        // 4. STREAMELEMENTS INTEGRATION
+        // =========================================================
+        function handleHypeData(hypeTrain) {
+            if (!hypeTrain) return;
+
+            // StreamElements session object liefert active (true/false) und level (1-5)
+            if (hypeTrain.active) {
+                const lvl = hypeTrain.level || 1;
+                triggerHypeTrain(lvl);
+            } else {
+                if (isHypeActive) {
+                    stopHypeTrain();
+                }
+            }
+        }
+
+        // Aufruf beim Start des Widgets (falls bereits ein Hype Train läuft)
+        window.addEventListener('onWidgetLoad', function (obj) {
+            if (obj && obj.detail && obj.detail.session) {
+                const hypeTrain = obj.detail.session['hypetrain-latest'];
+                handleHypeData(hypeTrain);
+            }
+        });
+
+        // Laufende Session-Updates von StreamElements (Echtzeit-Hype-Train)
+        window.addEventListener('onSessionUpdate', function (obj) {
+            if (obj && obj.detail && obj.detail.session) {
+                const hypeTrain = obj.detail.session['hypetrain-latest'];
+                handleHypeData(hypeTrain);
+            }
+        });
+
+        // Event-Listener Fallback
+        window.addEventListener('onEventReceived', function (obj) {
+            if (!obj || !obj.detail) return;
+            const listener = obj.detail.listener;
+            const event = obj.detail.event;
+
+            if (listener === 'hypetrain-start' || listener === 'hypetrain-level') {
+                const lvl = (event && event.level) ? event.level : 1;
+                triggerHypeTrain(lvl);
+            } else if (listener === 'hypetrain-end') {
+                stopHypeTrain();
+            }
+        });
+    </script>
+</body>
+</html>
