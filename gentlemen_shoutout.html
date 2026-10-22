@@ -23,7 +23,7 @@
       color: #fff;
     }
 
-    /* Partikel-Leinwand für schwebende Goldfunken */
+    /* Partikel-Leinwand für schwebende Goldfunken - NUR WÄHREND DES CLIPS AKTIV! */
     #sparks-canvas {
       position: absolute;
       top: 0;
@@ -32,6 +32,12 @@
       height: 100%;
       pointer-events: none;
       z-index: 10;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    #sparks-canvas.active {
+      opacity: 1;
     }
 
     /* ---------------------------------------------------------
@@ -85,7 +91,7 @@
        2. HEADER: EMPFEHLUNG DES HAUSES + STREAMER-PROFIL
        --------------------------------------------------------- */
     .so-header {
-      padding: 20px 24px 14px 24px;
+      padding: 18px 24px 14px 24px;
       border-bottom: 1px solid rgba(200, 168, 75, 0.25);
       position: relative;
     }
@@ -94,7 +100,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .so-badge-title {
@@ -128,8 +134,8 @@
     }
 
     .so-avatar-frame {
-      width: 62px;
-      height: 62px;
+      width: 58px;
+      height: 58px;
       border-radius: 50%;
       border: 2px solid #c8a84b;
       box-shadow: 0 0 16px rgba(200, 168, 75, 0.4), inset 0 0 8px rgba(0,0,0,0.6);
@@ -151,7 +157,7 @@
 
     .so-streamer-name {
       font-family: 'Playfair Display', serif;
-      font-size: 26px;
+      font-size: 25px;
       font-weight: 900;
       color: #f3ebd6;
       line-height: 1.15;
@@ -164,7 +170,7 @@
     .so-streamer-meta {
       font-family: 'IM Fell English', serif;
       font-style: italic;
-      font-size: 15px;
+      font-size: 14.5px;
       color: rgba(229, 201, 106, 0.9);
       margin-top: 3px;
       white-space: nowrap;
@@ -192,7 +198,7 @@
       position: relative;
       width: 100%;
       height: 400px;
-      background: #050a06;
+      background: #000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -201,10 +207,10 @@
       border-bottom: 1px solid rgba(200, 168, 75, 0.2);
     }
 
-    .so-clip-frame {
+    .so-video-player {
       width: 100%;
       height: 100%;
-      border: none;
+      object-fit: contain;
       background: #000;
     }
 
@@ -222,7 +228,7 @@
     }
 
     .so-no-clip-icon {
-      font-size: 42px;
+      font-size: 38px;
       color: #c8a84b;
       filter: drop-shadow(0 0 10px rgba(200,168,75,0.4));
     }
@@ -232,7 +238,7 @@
       font-style: italic;
       font-size: 18px;
       color: #e5c96a;
-      max-width: 450px;
+      max-width: 480px;
       line-height: 1.4;
     }
 
@@ -245,17 +251,18 @@
       background: linear-gradient(90deg, rgba(8, 14, 9, 0.92) 0%, rgba(14, 24, 15, 0.8) 100%);
       border: 1px solid rgba(200, 168, 75, 0.35);
       border-radius: 4px;
-      padding: 8px 14px;
+      padding: 7px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       pointer-events: none;
       backdrop-filter: blur(4px);
+      z-index: 102;
     }
 
     .so-clip-title {
       font-family: 'Playfair Display', serif;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
       color: #f3ebd6;
       white-space: nowrap;
@@ -286,7 +293,7 @@
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #c8a84b, #f3ebd6, #e5c96a);
-      transition: width 0.15s linear;
+      transition: width 0.1s linear;
       box-shadow: 0 0 8px rgba(229, 201, 106, 0.8);
     }
 
@@ -340,7 +347,7 @@
 </head>
 <body>
 
-  <!-- SCHWEBENDE GOLD-FUNKEN -->
+  <!-- SCHWEBENDE GOLD-FUNKEN (NUR BEI AKTIVEM SHOUTOUT) -->
   <canvas id="sparks-canvas"></canvas>
 
   <!-- SHOUTOUT THEATER KARTE -->
@@ -373,7 +380,7 @@
 
     <!-- VIDEO THEATER -->
     <div class="so-video-theater" id="soTheater">
-      <div id="soMediaSlot" style="width:100%;height:100%;"></div>
+      <video class="so-video-player" id="soVideo" playsinline preload="auto"></video>
       <div class="so-clip-caption">
         <div class="so-clip-title" id="soClipTitle">Bester Clip des Kanals</div>
         <div class="so-clip-duration" id="soClipDuration">0:15</div>
@@ -397,12 +404,13 @@
 
   <script>
     // =========================================================
-    // 1. SCHWEBENDE GOLD-FUNKEN (MANOR SPARKS)
+    // 1. SCHWEBENDE GOLD-FUNKEN (NUR WÄHREND CLIPS AKTIV!)
     // =========================================================
     const canvas = document.getElementById('sparks-canvas');
     const ctx = canvas.getContext('2d');
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
+    let sparksRunning = false;
 
     window.addEventListener('resize', () => {
       width = canvas.width = window.innerWidth;
@@ -419,6 +427,7 @@
     }));
 
     function drawSparks() {
+      if (!sparksRunning) return;
       ctx.clearRect(0, 0, width, height);
       sparks.forEach(s => {
         ctx.beginPath();
@@ -434,7 +443,20 @@
       });
       requestAnimationFrame(drawSparks);
     }
-    drawSparks();
+
+    function startSparks() {
+      sparksRunning = true;
+      canvas.classList.add('active');
+      drawSparks();
+    }
+
+    function stopSparks() {
+      canvas.classList.remove('active');
+      setTimeout(() => {
+        sparksRunning = false;
+        ctx.clearRect(0, 0, width, height);
+      }, 800);
+    }
 
     // =========================================================
     // 2. ELEMENTE & SHOUTOUT LOGIK
@@ -444,29 +466,48 @@
     const soName = document.getElementById('soName');
     const soGame = document.getElementById('soGame');
     const soTwitchUrl = document.getElementById('soTwitchUrl');
-    const soMediaSlot = document.getElementById('soMediaSlot');
+    const soTheater = document.getElementById('soTheater');
+    const soVideo = document.getElementById('soVideo');
     const soClipTitle = document.getElementById('soClipTitle');
     const soClipDuration = document.getElementById('soClipDuration');
     const soProgress = document.getElementById('soProgress');
 
     let isPlaying = false;
     let closeTimeout = null;
-    let progressInterval = null;
+
+    // Lautstärke angenehm einstellen (0.6 = 60%)
+    soVideo.volume = 0.6;
+
+    // Fortschrittsbalken über Video-Zeit
+    soVideo.addEventListener('timeupdate', () => {
+      if (soVideo.duration) {
+        const pct = (soVideo.currentTime / soVideo.duration) * 100;
+        soProgress.style.width = pct + '%';
+      }
+    });
+
+    // Wenn der Clip fertig ist: sanft schließen & Funken stoppen
+    soVideo.addEventListener('ended', () => {
+      closeShoutout(1200);
+    });
 
     function closeShoutout(delayMs = 0) {
       if (closeTimeout) clearTimeout(closeTimeout);
       closeTimeout = setTimeout(() => {
         soContainer.classList.remove('show');
-        if (progressInterval) clearInterval(progressInterval);
-        soMediaSlot.innerHTML = '';
+        stopSparks();
+        soVideo.pause();
+        soVideo.src = '';
         soProgress.style.width = '0%';
         isPlaying = false;
       }, delayMs);
     }
 
     // =========================================================
-    // 3. TWITCH GQL SCHNITTSTELLE (CLIP + AVATAR + GAME IN 70ms)
+    // 3. TWITCH GQL SCHNITTSTELLE (CLIP + PLAYBACK-TOKEN)
     // =========================================================
+    const TWITCH_CLIENT_ID = 'kimne78kx3ncx6brgo4mv6wki5h1ko';
+
     async function fetchStreamerData(login) {
       const cleanLogin = login.toLowerCase().trim().replace('@', '');
       const query = `query {
@@ -480,6 +521,7 @@
           clips(first: 3) {
             edges {
               node {
+                id
                 slug
                 title
                 durationSeconds
@@ -497,7 +539,7 @@
         const res = await fetch('https://gql.twitch.tv/gql', {
           method: 'POST',
           headers: {
-            'Client-Id': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
+            'Client-Id': TWITCH_CLIENT_ID,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ query })
@@ -510,7 +552,45 @@
           }
         }
       } catch (e) {
-        console.warn("[Shoutout] Fehler beim Laden von Twitch GQL:", e);
+        console.warn("[Shoutout] GQL Streamer-Abfrage fehlgeschlagen:", e);
+      }
+      return null;
+    }
+
+    // Playback-Access-Token für den Clip holen (um 401 Unauthorized zu umgehen!)
+    async function fetchClipPlaybackToken(slug) {
+      try {
+        const body = {
+          operationName: "VideoAccessToken_Clip",
+          variables: { slug: slug },
+          extensions: {
+            persistedQuery: {
+              version: 1,
+              sha256Hash: "36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11"
+            }
+          }
+        };
+
+        const res = await fetch('https://gql.twitch.tv/gql', {
+          method: 'POST',
+          headers: {
+            'Client-Id': TWITCH_CLIENT_ID,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && json.data.clip && json.data.clip.playbackAccessToken) {
+            return {
+              sig: json.data.clip.playbackAccessToken.signature,
+              token: encodeURIComponent(json.data.clip.playbackAccessToken.value)
+            };
+          }
+        }
+      } catch (e) {
+        console.warn("[Shoutout] Token-Abfrage fehlgeschlagen:", e);
       }
       return null;
     }
@@ -531,7 +611,7 @@
         return;
       }
 
-      // Streamer-Daten befüllen
+      // Streamer-Daten setzen
       soName.textContent = data.displayName || cleanName;
       soAvatar.src = data.profileImageURL || 'https://static-cdn.jtvnw.net/user-default-pictures-uv/75305d54-c7cc-40d1-bb9c-91fbe85943c7-profile_image-300x300.png';
       
@@ -539,64 +619,63 @@
       soGame.textContent = gameName;
       soTwitchUrl.textContent = `twitch.tv/${cleanName}`;
 
-      // Clip auswählen und offiziellen Twitch-Player einbetten
       const clips = (data.clips && data.clips.edges) ? data.clips.edges : [];
       let clipTitle = `Bester Clip von ${data.displayName}`;
       let clipDuration = '0:15';
+      let directMp4Url = '';
 
       if (clips.length > 0) {
-        // Zufälligen Clip aus den Top-Clips wählen
         const randomClipNode = clips[Math.floor(Math.random() * clips.length)].node;
         clipTitle = randomClipNode.title || clipTitle;
-        const durSecs = Math.max(8, Math.min(60, Math.round(randomClipNode.durationSeconds || 15)));
+        const durSecs = Math.max(6, Math.min(60, Math.round(randomClipNode.durationSeconds || 15)));
         clipDuration = `0:${durSecs < 10 ? '0' : ''}${durSecs}`;
 
-        const host = window.location.hostname || 'christophriemer93-stack.github.io';
-        const embedUrl = `https://clips.twitch.tv/embed?clip=${randomClipNode.slug}&parent=${host}&parent=christophriemer93-stack.github.io&parent=localhost&parent=127.0.0.1&autoplay=true&muted=false`;
+        // 1. Playback-Token holen
+        const tokenData = await fetchClipPlaybackToken(randomClipNode.slug);
+        
+        // 2. Video-Qualität wählen (720 oder beste)
+        if (randomClipNode.videoQualities && randomClipNode.videoQualities.length > 0) {
+          const q720 = randomClipNode.videoQualities.find(q => q.quality === '720') || randomClipNode.videoQualities[0];
+          if (tokenData && tokenData.sig && tokenData.token) {
+            directMp4Url = `${q720.sourceURL}?sig=${tokenData.sig}&token=${tokenData.token}`;
+          } else {
+            directMp4Url = q720.sourceURL;
+          }
+        }
+      }
 
-        soMediaSlot.innerHTML = `
-          <iframe 
-            src="${embedUrl}" 
-            class="so-clip-frame" 
-            allow="autoplay; fullscreen" 
-            allowfullscreen="true" 
-            scrolling="no">
-          </iframe>
-        `;
+      soClipTitle.textContent = clipTitle;
+      soClipDuration.textContent = clipDuration;
+      soProgress.style.width = '0%';
 
-        // Fortschrittsbalken über Clip-Dauer animieren
-        const startTime = Date.now();
-        const totalMs = durSecs * 1000;
-        if (progressInterval) clearInterval(progressInterval);
-        progressInterval = setInterval(() => {
-          const elapsed = Date.now() - startTime;
-          const pct = Math.min(100, (elapsed / totalMs) * 100);
-          soProgress.style.width = pct + '%';
-          if (pct >= 100) clearInterval(progressInterval);
-        }, 100);
+      // Funken starten
+      startSparks();
 
-        // Sanft schließen nach Clip-Ende (+ 2 Sekunden Puffer)
+      if (directMp4Url) {
+        soVideo.style.display = 'block';
+        soVideo.src = directMp4Url;
+        soVideo.load();
+        soVideo.play().catch(e => {
+          console.warn("[Shoutout] Autoplay blockiert, schalte Ton stumm:", e);
+          soVideo.muted = true;
+          soVideo.play();
+        });
+
+        // Maximaler Sicherheits-Timeout (Dauer + 4 Sekunden)
+        const dur = parseInt(clipDuration.split(':')[1], 10) || 15;
         if (closeTimeout) clearTimeout(closeTimeout);
         closeTimeout = setTimeout(() => {
-          closeShoutout(1000);
-        }, totalMs + 2000);
+          closeShoutout(0);
+        }, (dur + 4) * 1000);
 
       } else {
-        // Falls der Kanal noch keine Clips hat
-        soMediaSlot.innerHTML = `
-          <div class="so-no-clip-card">
-            <div class="so-no-clip-icon">✦ ❖ ✦</div>
-            <div class="so-no-clip-text">Dieser ehrenwerte Streamer hat noch keine öffentlichen Clips hinterlegt. Besucht seinen Salon live auf twitch.tv/${cleanName}!</div>
-          </div>
-        `;
+        // Falls kein Clip existiert: Visitenkarte anzeigen
+        soVideo.style.display = 'none';
         if (closeTimeout) clearTimeout(closeTimeout);
         closeTimeout = setTimeout(() => {
           closeShoutout(1000);
         }, 8000);
       }
-
-      soClipTitle.textContent = clipTitle;
-      soClipDuration.textContent = clipDuration;
 
       // Einblenden
       soContainer.classList.add('show');
@@ -673,7 +752,7 @@
     // Sofortiger Test über URL-Parameter (?test=1 oder ?so=gronkh)
     if (urlParams.get('test') === '1' || urlParams.get('so')) {
       const testTarget = urlParams.get('so') || 'd0ppelxp';
-      setTimeout(() => triggerShoutout(testTarget), 1000);
+      setTimeout(() => triggerShoutout(testTarget), 800);
     }
   </script>
 </body>
