@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
@@ -559,10 +559,19 @@
           ledgerData.watchtime[targetUser].displayName = targetDisplay;
           saveLedgerData();
           console.log(`[Ledger] Watchtime erfolgreich gespeichert: ${targetDisplay} -> ${totalMin} Min (${days}d ${hrs}h ${mins}m)`);
+          return {
+            user: targetUser,
+            displayName: targetDisplay,
+            minutes: totalMin,
+            days: days,
+            hrs: hrs,
+            mins: mins
+          };
         }
       } catch (e) {
         console.error("Fehler beim Parsen der Watchtime-Nachricht:", e);
       }
+      return null;
     }
 
     // Aktive Chatter im Stream (kontinuierliches Backup-Tracking)
@@ -675,11 +684,9 @@
     const timerBar = document.getElementById('ledgerTimerBar');
     let isLedgerShowing = false;
     let ledgerHideTimeout = null;
+    let ledgerTimerInterval = null;
 
-    async function showLedgerCard(durationMs = 15000) {
-      if (isLedgerShowing) return;
-      isLedgerShowing = true;
-
+    async function showLedgerCard(durationMs = 12000, requesterInfo = null) {
       const leaders = getTopPerformers();
 
       // UI Befüllen
@@ -695,21 +702,45 @@
       document.getElementById('namePatron').textContent = leaders.topPatron.name;
       document.getElementById('valPatron').textContent = leaders.topPatron.value;
 
+      // Optional: Untertitel anpassen bei Chat-Abfrage
+      const subEl = document.querySelector('.ledger-subtitle');
+      if (subEl) {
+        if (requesterInfo && requesterInfo.displayName) {
+          const reqUser = (requesterInfo.user || requesterInfo.displayName).toLowerCase().trim();
+          let statsStr = '';
+          if (requesterInfo.minutes) {
+            const h = (requesterInfo.minutes / 60).toFixed(1);
+            statsStr = ` • ${h} Std. Anwesenheit`;
+          } else if (ledgerData.watchtime && ledgerData.watchtime[reqUser]) {
+            const h = (ledgerData.watchtime[reqUser].minutes / 60).toFixed(1);
+            statsStr = ` • ${h} Std. Anwesenheit`;
+          }
+          subEl.innerHTML = `<span style="color:#e5c96a;">✦ Salon-Akte von <strong>${requesterInfo.displayName}</strong>${statsStr} ✦</span>`;
+        } else {
+          subEl.textContent = 'Die herausragendsten Persönlichkeiten des Salons';
+        }
+      }
+
       // Avatare parallel abrufen
       applyAvatar(leaders.topTime.user, 'avatarTime', 'fbTime');
       applyAvatar(leaders.topHunt.user, 'avatarHunt', 'fbHunt');
       applyAvatar(leaders.topWordle.user, 'avatarWordle', 'fbWordle');
       applyAvatar(leaders.topPatron.user, 'avatarPatron', 'fbPatron');
 
+      // Vorherige Timer & Balken stoppen (damit schnelle Mehrfach-Aufrufe nicht geblockt werden!)
+      if (ledgerHideTimeout) clearTimeout(ledgerHideTimeout);
+      if (ledgerTimerInterval) clearInterval(ledgerTimerInterval);
+
       // Karte einblenden
       timerBar.style.width = '100%';
       ledgerCard.classList.add('show');
+      isLedgerShowing = true;
 
       const start = Date.now();
-      const interval = setInterval(() => {
+      ledgerTimerInterval = setInterval(() => {
         const left = (start + durationMs) - Date.now();
         if (left <= 0) {
-          clearInterval(interval);
+          clearInterval(ledgerTimerInterval);
         } else {
           timerBar.style.width = `${(left / durationMs) * 100}%`;
         }
@@ -717,7 +748,10 @@
 
       ledgerHideTimeout = setTimeout(() => {
         ledgerCard.classList.remove('show');
-        setTimeout(() => { isLedgerShowing = false; }, 750);
+        setTimeout(() => {
+          isLedgerShowing = false;
+          if (subEl) subEl.textContent = 'Die herausragendsten Persönlichkeiten des Salons';
+        }, 750);
       }, durationMs);
     }
 
@@ -781,8 +815,12 @@
         registerChatterActivity(user);
 
         const text = (d.text || '').toLowerCase().trim();
-        if (text === '!watchtime' || text === '!zeit') {
-          showLedgerCard();
+        const isWatchCmd = text === '!watchtime' || text.startsWith('!watchtime') ||
+                           text === '!zeit' || text.startsWith('!zeit') ||
+                           text === '!salon' || text.startsWith('!salon') ||
+                           text === '!ledger' || text.startsWith('!ledger');
+        if (isWatchCmd) {
+          showLedgerCard(12000, { user: (d.nick || user).toLowerCase(), displayName: user });
         }
       }
 
@@ -823,36 +861,41 @@
           }
 
           if (line.includes('PRIVMSG')) {
-            const match = line.match(/@([^ ]+) :([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)/);
-            let displayName = 'Gentleman';
-            let chatText = '';
+            // Extrem robuster PRIVMSG Matcher für Twitch IRC (ignoriert Badges/Spaces in Tags)
+            const privmsgMatch = line.match(/PRIVMSG\s+#[^\s:]+\s*:(.*)$/i);
+            if (!privmsgMatch) continue;
 
-            if (match) {
-              const rawTags = match[1];
-              const username = match[2];
-              chatText = match[3].trim();
-              const tagMatch = rawTags.match(/display-name=([^;]+)/);
-              displayName = (tagMatch && tagMatch[1]) ? tagMatch[1] : username;
-            } else {
-              const matchUser = line.match(/display-name=([^;]+)/);
-              const matchNick = line.match(/:([^!]+)!/);
-              displayName = matchUser ? matchUser[1] : (matchNick ? matchNick[1] : 'Gentleman');
-              const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
-              if (textIdx !== -1) {
-                chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
-              }
-            }
+            const chatText = privmsgMatch[1].trim();
+            if (!chatText) continue;
+
+            // Display Name und Nickname extrahieren
+            const tagMatch = line.match(/display-name=([^; \r\n]+)/i);
+            const userMatch = line.match(/:([^!@\s]+)!/);
+            const displayName = (tagMatch && tagMatch[1]) ? tagMatch[1] : (userMatch ? userMatch[1] : 'Gentleman');
+            const username = (userMatch ? userMatch[1] : displayName).toLowerCase();
 
             if (displayName) registerChatterActivity(displayName);
 
-            // Wenn StreamElements Bot im Chat antwortet (z.B. auf !watchtime)
-            if (displayName.toLowerCase() === 'streamelements' || displayName.toLowerCase() === 'nightbot') {
-              parseStreamElementsBotMessage(chatText);
+            // 1. Wenn StreamElements oder Nightbot im Chat antwortet (z.B. auf !watchtime)
+            if (username === 'streamelements' || username === 'nightbot' || displayName.toLowerCase() === 'streamelements') {
+              const parsed = parseStreamElementsBotMessage(chatText);
+              if (parsed) {
+                showLedgerCard(12000, parsed);
+              }
+              continue;
             }
 
-            const cmd = chatText.toLowerCase();
-            if (cmd === '!watchtime' || cmd === '!zeit') {
-              showLedgerCard();
+            // 2. Chat-Befehle prüfen (erlaubt "!watchtime", "!watchtime @user", "!zeit", "!salon", etc.)
+            const cmd = chatText.toLowerCase().trim();
+            const isWatchtime = cmd === '!watchtime' || cmd.startsWith('!watchtime') ||
+                                cmd === '!zeit' || cmd.startsWith('!zeit') ||
+                                cmd === '!salon' || cmd.startsWith('!salon') ||
+                                cmd === '!ledger' || cmd.startsWith('!ledger') ||
+                                cmd === '!ahnengalerie';
+
+            if (isWatchtime) {
+              console.log(`[Ledger] Watchtime ausgeführt von ${displayName}: ${chatText}`);
+              showLedgerCard(12000, { user: username, displayName: displayName });
             }
           }
         }
