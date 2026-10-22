@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>The Gentlemen – Empfehlung des Hauses (Shoutout Player)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       THE GENTLEMEN MANOR – EMPFEHLUNG DES HAUSES (SHOUTOUT)
+       ========================================================= */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Playfair Display', serif;
+      pointer-events: none;
+      position: relative;
+      color: #fff;
+    }
+
+    /* Partikel-Leinwand für schwebende Goldfunken */
+    #sparks-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* ---------------------------------------------------------
+       1. DER SHOUTOUT THEATER-KASTEN (CENTER POPUP)
+       --------------------------------------------------------- */
+    .so-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.92);
+      width: 760px;
+      background: linear-gradient(150deg, rgba(11, 20, 12, 0.98) 0%, rgba(18, 32, 19, 0.98) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.55);
+      border-radius: 6px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.9),
+        0 0 0 3px rgba(200, 168, 75, 0.25),
+        0 25px 70px rgba(0, 0, 0, 0.95),
+        inset 0 1px 0 rgba(229, 201, 106, 0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: 
+        transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.6s ease;
+      z-index: 100;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+
+    .so-container.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Goldene Ornamente in den 4 Ecken */
+    .so-corner {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #c8a84b;
+      pointer-events: none;
+      z-index: 105;
+    }
+    .c-tl { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+    .c-tr { top: 8px; right: 8px; border-left: none; border-bottom: none; }
+    .c-bl { bottom: 8px; left: 8px; border-right: none; border-top: none; }
+    .c-br { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+
+    /* ---------------------------------------------------------
+       2. HEADER: EMPFEHLUNG DES HAUSES + STREAMER-PROFIL
+       --------------------------------------------------------- */
+    .so-header {
+      padding: 20px 24px 14px 24px;
+      border-bottom: 1px solid rgba(200, 168, 75, 0.25);
+      position: relative;
+    }
+
+    .so-badge-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .so-badge-title {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 13.5px;
+      letter-spacing: 2px;
+      color: #c8a84b;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .so-twitch-link {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #e5c96a;
+      background: rgba(200, 168, 75, 0.15);
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      padding: 3px 10px;
+      border-radius: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .so-profile-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .so-avatar-frame {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      border: 2px solid #c8a84b;
+      box-shadow: 0 0 16px rgba(200, 168, 75, 0.4), inset 0 0 8px rgba(0,0,0,0.6);
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #080e08;
+    }
+
+    .so-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .so-profile-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .so-streamer-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: #f3ebd6;
+      line-height: 1.15;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .so-streamer-meta {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 15px;
+      color: rgba(229, 201, 106, 0.9);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .so-game-tag {
+      color: #f3ebd6;
+      font-weight: 700;
+      font-style: normal;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      background: rgba(40, 70, 45, 0.5);
+      border: 1px solid rgba(200,168,75,0.3);
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-left: 6px;
+    }
+
+    /* ---------------------------------------------------------
+       3. VIDEO THEATER (CLIP PLAYER)
+       --------------------------------------------------------- */
+    .so-video-theater {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .so-video-player {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    /* Clip Titel Overlay am unteren Rand des Videos */
+    .so-clip-caption {
+      position: absolute;
+      bottom: 12px;
+      left: 14px;
+      right: 14px;
+      background: linear-gradient(90deg, rgba(8, 14, 9, 0.92) 0%, rgba(14, 24, 15, 0.8) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.35);
+      border-radius: 4px;
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .so-clip-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #f3ebd6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 75%;
+    }
+
+    .so-clip-duration {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #e5c96a;
+    }
+
+    /* Goldener Fortschrittsbalken ganz unten */
+    .so-progress-track {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(0,0,0,0.6);
+      z-index: 104;
+    }
+
+    .so-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #c8a84b, #f3ebd6, #e5c96a);
+      transition: width 0.15s linear;
+      box-shadow: 0 0 8px rgba(229, 201, 106, 0.8);
+    }
+
+    /* ---------------------------------------------------------
+       4. TEST-STATION (UNAUFFÄLLIG BEI OBS)
+       --------------------------------------------------------- */
+    .test-station-bar {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(10, 16, 10, 0.94);
+      border: 1px solid rgba(200, 168, 75, 0.35);
+      padding: 8px 14px;
+      border-radius: 4px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      z-index: 9999;
+      pointer-events: auto;
+    }
+    body.no-preview .test-station-bar {
+      display: none !important;
+    }
+    .test-input {
+      background: #080e08;
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      color: #f3ebd6;
+      padding: 5px 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      border-radius: 3px;
+      outline: none;
+      width: 120px;
+    }
+    .test-btn {
+      background: #182819;
+      border: 1px solid #c8a84b;
+      color: #f3ebd6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .test-btn:hover {
+      background: #c8a84b;
+      color: #0c140c;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SCHWEBENDE GOLD-FUNKEN -->
+  <canvas id="sparks-canvas"></canvas>
+
+  <!-- SHOUTOUT THEATER KARTE -->
+  <div class="so-container" id="soContainer">
+    <!-- 4 Eck-Ornamente -->
+    <div class="so-corner c-tl"></div>
+    <div class="so-corner c-tr"></div>
+    <div class="so-corner c-bl"></div>
+    <div class="so-corner c-br"></div>
+
+    <div class="so-header">
+      <div class="so-badge-row">
+        <div class="so-badge-title">✦ Empfehlung des Salons ✦</div>
+        <div class="so-twitch-link" id="soTwitchUrl">twitch.tv/channel</div>
+      </div>
+
+      <div class="so-profile-row">
+        <div class="so-avatar-frame">
+          <img src="" alt="Avatar" class="so-avatar-img" id="soAvatar">
+        </div>
+        <div class="so-profile-info">
+          <div class="so-streamer-name" id="soName">Streamer Name</div>
+          <div class="so-streamer-meta">
+            <span>Ehren-Gentleman &bull; Zuletzt live mit:</span>
+            <span class="so-game-tag" id="soGame">Just Chatting</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIDEO THEATER -->
+    <div class="so-video-theater">
+      <video class="so-video-player" id="soVideo" playsinline preload="auto"></video>
+      <div class="so-clip-caption">
+        <div class="so-clip-title" id="soClipTitle">Bester Clip des Kanals</div>
+        <div class="so-clip-duration" id="soClipDuration">0:15</div>
+      </div>
+    </div>
+
+    <!-- FORTSCHRITTSBALKEN -->
+    <div class="so-progress-track">
+      <div class="so-progress-fill" id="soProgress"></div>
+    </div>
+  </div>
+
+  <!-- TESTLEISTE FÜR BROWSER -->
+  <div class="test-station-bar">
+    <button class="test-btn" onclick="triggerShoutout('d0ppelxp')">!so d0ppelxp</button>
+    <button class="test-btn" onclick="triggerShoutout('papaplatte')">!so Papaplatte</button>
+    <button class="test-btn" onclick="triggerShoutout('gronkh')">!so Gronkh</button>
+    <input type="text" class="test-input" id="customUser" placeholder="Kanalname..." onkeydown="if(event.key==='Enter') triggerShoutout(this.value)">
+    <button class="test-btn" onclick="triggerShoutout(document.getElementById('customUser').value)">Testen</button>
+  </div>
+
+  <script>
+    // =========================================================
+    // 1. SCHWEBENDE GOLD-FUNKEN (MANOR SPARKS)
+    // =========================================================
+    const canvas = document.getElementById('sparks-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const sparks = Array.from({ length: 45 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: Math.random() * 1.8 + 0.4,
+      vy: Math.random() * 0.4 + 0.15,
+      vx: (Math.random() - 0.5) * 0.25,
+      alpha: Math.random() * 0.7 + 0.2
+    }));
+
+    function drawSparks() {
+      ctx.clearRect(0, 0, width, height);
+      sparks.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(231, 202, 109, ${s.alpha})`;
+        ctx.shadowColor = '#e7ca6d';
+        ctx.shadowBlur = 4;
+        ctx.fill();
+
+        s.y -= s.vy;
+        s.x += s.vx;
+        if (s.y < 0) { s.y = height + 10; s.x = Math.random() * width; }
+      });
+      requestAnimationFrame(drawSparks);
+    }
+    drawSparks();
+
+    // =========================================================
+    // 2. ELEMENTE & SHOUTOUT LOGIK
+    // =========================================================
+    const soContainer = document.getElementById('soContainer');
+    const soAvatar = document.getElementById('soAvatar');
+    const soName = document.getElementById('soName');
+    const soGame = document.getElementById('soGame');
+    const soTwitchUrl = document.getElementById('soTwitchUrl');
+    const soVideo = document.getElementById('soVideo');
+    const soClipTitle = document.getElementById('soClipTitle');
+    const soClipDuration = document.getElementById('soClipDuration');
+    const soProgress = document.getElementById('soProgress');
+
+    let isPlaying = false;
+    let closeTimeout = null;
+    let progressInterval = null;
+
+    // Lautstärke angenehm einstellen (0.6 = 60%)
+    soVideo.volume = 0.6;
+
+    // Fortschrittsbalken aktualisieren
+    soVideo.addEventListener('timeupdate', () => {
+      if (soVideo.duration) {
+        const pct = (soVideo.currentTime / soVideo.duration) * 100;
+        soProgress.style.width = pct + '%';
+      }
+    });
+
+    // Wenn der Clip zu Ende ist, sanft schließen
+    soVideo.addEventListener('ended', () => {
+      closeShoutout(1500);
+    });
+
+    function closeShoutout(delayMs = 0) {
+      if (closeTimeout) clearTimeout(closeTimeout);
+      closeTimeout = setTimeout(() => {
+        soContainer.classList.remove('show');
+        soVideo.pause();
+        soVideo.src = '';
+        isPlaying = false;
+      }, delayMs);
+    }
+
+    // =========================================================
+    // 3. TWITCH GQL SCHNITTSTELLE (CLIP + AVATAR + GAME IN 70ms)
+    // =========================================================
+    async function fetchStreamerData(login) {
+      const cleanLogin = login.toLowerCase().trim().replace('@', '');
+      const query = `query {
+        user(login: "${cleanLogin}") {
+          id
+          displayName
+          profileImageURL(width: 300)
+          lastBroadcast {
+            game { displayName }
+          }
+          clips(first: 3) {
+            edges {
+              node {
+                slug
+                title
+                durationSeconds
+                videoQualities {
+                  quality
+                  sourceURL
+                }
+              }
+            }
+          }
+        }
+      }`;
+
+      try {
+        const res = await fetch('https://gql.twitch.tv/gql', {
+          method: 'POST',
+          headers: {
+            'Client-Id': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ query })
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && json.data.user) {
+            return json.data.user;
+          }
+        }
+      } catch (e) {
+        console.warn("[Shoutout] Fehler beim Laden von Twitch GQL:", e);
+      }
+      return null;
+    }
+
+    // =========================================================
+    // 4. SHOUTOUT STARTEN
+    // =========================================================
+    async function triggerShoutout(channelInput) {
+      if (!channelInput || isPlaying) return;
+      const cleanName = channelInput.toLowerCase().trim().replace('@', '');
+      console.log(`[Shoutout] Starte Empfehlung für: ${cleanName}`);
+      isPlaying = true;
+
+      const data = await fetchStreamerData(cleanName);
+      if (!data) {
+        console.warn(`[Shoutout] Konnte keine Daten für ${cleanName} finden.`);
+        isPlaying = false;
+        return;
+      }
+
+      // Streamer-Daten befüllen
+      soName.textContent = data.displayName || cleanName;
+      soAvatar.src = data.profileImageURL || 'https://static-cdn.jtvnw.net/user-default-pictures-uv/75305d54-c7cc-40d1-bb9c-91fbe85943c7-profile_image-300x300.png';
+      
+      const gameName = (data.lastBroadcast && data.lastBroadcast.game) ? data.lastBroadcast.game.displayName : 'Just Chatting';
+      soGame.textContent = gameName;
+      soTwitchUrl.textContent = `twitch.tv/${cleanName}`;
+
+      // Clip auswählen (bevorzugt 720p / beste Qualität)
+      const clips = (data.clips && data.clips.edges) ? data.clips.edges : [];
+      let clipUrl = '';
+      let clipTitle = `Bester Clip von ${data.displayName}`;
+      let clipDuration = '0:15';
+
+      if (clips.length > 0) {
+        // Zufälligen aus den Top 3 Clips wählen für mehr Abwechslung!
+        const randomClipNode = clips[Math.floor(Math.random() * clips.length)].node;
+        clipTitle = randomClipNode.title || clipTitle;
+        const dur = Math.round(randomClipNode.durationSeconds || 15);
+        clipDuration = `0:${dur < 10 ? '0' : ''}${dur}`;
+
+        if (randomClipNode.videoQualities && randomClipNode.videoQualities.length > 0) {
+          // Bevorzuge 720 oder höchste verfügbare Qualität
+          const q720 = randomClipNode.videoQualities.find(q => q.quality === '720') || randomClipNode.videoQualities[0];
+          clipUrl = q720.sourceURL;
+        }
+      }
+
+      soClipTitle.textContent = clipTitle;
+      soClipDuration.textContent = clipDuration;
+      soProgress.style.width = '0%';
+
+      // Video setzen und abspielen
+      if (clipUrl) {
+        soVideo.src = clipUrl;
+        soVideo.play().catch(e => {
+          console.warn("[Shoutout] Autoplay mit Ton blockiert, schalte Ton stumm:", e);
+          soVideo.muted = true;
+          soVideo.play();
+        });
+      }
+
+      // Einblenden
+      soContainer.classList.add('show');
+
+      // Sicherheits-Timeout (maximal 35 Sekunden)
+      if (closeTimeout) clearTimeout(closeTimeout);
+      closeTimeout = setTimeout(() => {
+        closeShoutout(0);
+      }, 35000);
+    }
+
+    // =========================================================
+    // 5. TWITCH IRC CHAT-LISTENER (!so & /shoutout Event)
+    // =========================================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelParam = urlParams.get('channel') || 'd0ppelxp';
+
+    if (window.obsstudio || urlParams.get('preview') === '0' || urlParams.get('hide_preview') === '1') {
+      document.body.classList.add('no-preview');
+    }
+
+    function connectTwitchIrc(channelName) {
+      const targetChan = channelName.toLowerCase().replace('#', '');
+      const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+      ws.onopen = function () {
+        ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+        ws.send('PASS SCHMOOPIIE');
+        ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+        ws.send(`JOIN #${targetChan}`);
+        console.log(`[Twitch IRC Shoutout] Verbunden mit #${targetChan}`);
+      };
+
+      ws.onmessage = function (event) {
+        const lines = event.data.split('\r\n');
+        for (let line of lines) {
+          if (!line) continue;
+          if (line.startsWith('PING')) {
+            ws.send('PONG :tmi.twitch.tv');
+            continue;
+          }
+
+          // 1. Twitch nativer /shoutout Befehl (USERNOTICE)
+          if (line.includes('USERNOTICE') && line.includes('msg-id=shoutout_receive')) {
+            const matchTarget = line.match(/target-user-name=([^;]+)/);
+            if (matchTarget && matchTarget[1]) {
+              triggerShoutout(matchTarget[1]);
+              continue;
+            }
+          }
+
+          // 2. Chat-Befehl !so oder !shoutout
+          if (line.includes('PRIVMSG')) {
+            const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
+            if (textIdx !== -1) {
+              const chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
+              const lower = chatText.toLowerCase();
+
+              if (lower.startsWith('!so ') || lower.startsWith('!shoutout ')) {
+                const parts = chatText.split(' ');
+                if (parts.length > 1 && parts[1].trim()) {
+                  const target = parts[1].trim();
+                  triggerShoutout(target);
+                }
+              }
+            }
+          }
+        }
+      };
+
+      ws.onclose = function () {
+        setTimeout(() => connectTwitchIrc(channelName), 4000);
+      };
+    }
+
+    if (channelParam) {
+      connectTwitchIrc(channelParam);
+    }
+
+    // Sofortiger Test über URL-Parameter (?test=1 oder ?so=gronkh)
+    if (urlParams.get('test') === '1' || urlParams.get('so')) {
+      const testTarget = urlParams.get('so') || 'd0ppelxp';
+      setTimeout(() => triggerShoutout(testTarget), 1000);
+    }
+  </script>
+</body>
+</html>
