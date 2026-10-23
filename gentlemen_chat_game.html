@@ -453,6 +453,431 @@
     body.no-preview .preview-bar {
       display: none !important;
     }
+
+    /* =========================================================
+       3. WEINKELLER-WIDGET: DIE BLINDVERKOSTUNG
+       ========================================================= */
+    .wine-widget {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -46%) scale(0.92);
+      width: 840px;
+      background: linear-gradient(155deg, rgba(14, 24, 15, 0.985) 0%, rgba(20, 14, 16, 0.99) 55%, rgba(12, 20, 13, 0.99) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.65);
+      border-radius: 6px;
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.9),
+        0 0 0 4px rgba(200, 168, 75, 0.18),
+        0 25px 70px rgba(0, 0, 0, 0.95),
+        0 0 50px rgba(122, 24, 38, 0.25),
+        inset 0 1px 0 rgba(243, 235, 214, 0.3);
+      opacity: 0;
+      transition: all 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 110;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .wine-widget.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .wine-widget::before,
+    .wine-widget::after {
+      content: '';
+      display: block;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #c8a84b 25%, #f3ebd6 50%, #c8a84b 75%, transparent);
+    }
+
+    .wine-inner {
+      padding: 24px 30px 22px;
+      position: relative;
+    }
+
+    .corner-ornament {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-color: rgba(200, 168, 75, 0.55);
+      border-style: solid;
+      pointer-events: none;
+    }
+    .corner-tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
+    .corner-tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; }
+    .corner-bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
+    .corner-br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
+
+    .header-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    .header-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200, 168, 75, 0.55));
+    }
+    .header-line.right {
+      background: linear-gradient(90deg, rgba(200, 168, 75, 0.55), transparent);
+    }
+    .header-crest {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: #c8a84b;
+    }
+
+    .wine-main-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: #f3ebd6;
+      text-align: center;
+      letter-spacing: 0.6px;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
+      margin-bottom: 2px;
+    }
+
+    .wine-subtitle {
+      font-family: 'IM Fell English', serif;
+      font-size: 15px;
+      font-style: italic;
+      color: #d8cdb4;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .tasting-stage {
+      display: grid;
+      grid-template-columns: 205px 1fr;
+      gap: 22px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .bottle-pedestal {
+      background: radial-gradient(circle at 50% 45%, rgba(110, 18, 34, 0.28) 0%, rgba(8, 14, 9, 0.88) 75%);
+      border: 1px solid rgba(200, 168, 75, 0.35);
+      border-radius: 5px;
+      padding: 14px 10px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8);
+    }
+
+    .cellar-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #e5c96a;
+      background: rgba(200, 168, 75, 0.14);
+      border: 1px solid rgba(200, 168, 75, 0.35);
+      padding: 3px 9px;
+      border-radius: 3px;
+      margin-bottom: 6px;
+      z-index: 2;
+    }
+
+    .svg-bottle-wrap {
+      width: 140px;
+      height: 195px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    @keyframes gentleFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(-1deg); }
+    }
+
+    @keyframes uncorkPop {
+      0% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.08) rotate(-4deg); }
+      50% { transform: scale(1.12) rotate(4deg); filter: drop-shadow(0 0 20px rgba(229, 201, 106, 0.85)); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .svg-bottle-wrap.floating {
+      animation: gentleFloat 4s ease-in-out infinite;
+    }
+
+    .svg-bottle-wrap.uncorked {
+      animation: uncorkPop 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .vintage-year-tag {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: #f3ebd6;
+      letter-spacing: 1px;
+      margin-top: 6px;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .vintage-price-tag {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #4ade80;
+      margin-top: 2px;
+      opacity: 0;
+      transform: translateY(5px);
+      transition: all 0.4s ease;
+    }
+
+    .vintage-price-tag.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .tasting-details {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .notes-box {
+      background: rgba(8, 13, 9, 0.78);
+      border: 1px solid rgba(200, 168, 75, 0.28);
+      border-left: 3px solid #c8a84b;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+    }
+
+    .notes-header {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: #c8a84b;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .notes-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .note-pill {
+      background: linear-gradient(135deg, rgba(110, 18, 34, 0.35) 0%, rgba(25, 16, 18, 0.8) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.32);
+      border-radius: 3px;
+      padding: 5px 10px;
+      font-family: 'IM Fell English', serif;
+      font-size: 13.5px;
+      color: #f3ebd6;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .wine-option {
+      background: rgba(10, 17, 11, 0.85);
+      border: 1px solid rgba(200, 168, 75, 0.28);
+      border-radius: 4px;
+      padding: 10px 12px;
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      transition: all 0.35s ease;
+    }
+
+    .wine-option-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 3px;
+      background: rgba(200, 168, 75, 0.15);
+      border: 1px solid #c8a84b;
+      color: #e5c96a;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .wine-option-info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .wine-option-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f3ebd6;
+      line-height: 1.22;
+      white-space: normal;
+      overflow-wrap: break-word;
+    }
+
+    .wine-option-sub {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9.5px;
+      color: #9ab09c;
+      line-height: 1.25;
+      margin-top: 2px;
+      white-space: normal;
+    }
+
+    .wine-option-votes {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #e5c96a;
+      background: rgba(200, 168, 75, 0.14);
+      padding: 2px 7px;
+      border-radius: 10px;
+      border: 1px solid rgba(200, 168, 75, 0.3);
+      flex-shrink: 0;
+    }
+
+    .wine-option.correct {
+      background: linear-gradient(135deg, rgba(20, 68, 36, 0.92) 0%, rgba(12, 38, 20, 0.95) 100%);
+      border-color: #4ade80;
+      box-shadow: 0 0 18px rgba(74, 222, 128, 0.35);
+      transform: scale(1.02);
+    }
+    .wine-option.correct .wine-option-letter {
+      background: #4ade80;
+      color: #08140b;
+      border-color: #fff;
+    }
+
+    .wine-option.wrong {
+      opacity: 0.38;
+      filter: grayscale(0.6);
+    }
+
+    .reveal-banner {
+      display: none;
+      background: linear-gradient(90deg, rgba(110, 18, 34, 0.45) 0%, rgba(20, 34, 21, 0.92) 50%, rgba(110, 18, 34, 0.45) 100%);
+      border: 1px solid rgba(229, 201, 106, 0.55);
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+    }
+
+    .reveal-banner.active {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .reveal-verdict {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .reveal-verdict-tag {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #e5c96a;
+    }
+
+    .reveal-verdict-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 900;
+      color: #f3ebd6;
+    }
+
+    .reveal-winners {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10.5px;
+      color: #d8cdb4;
+      text-align: right;
+      max-width: 310px;
+    }
+
+    .reveal-winners strong {
+      color: #4ade80;
+    }
+
+    .wine-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(200, 168, 75, 0.22);
+      padding-top: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      color: #9ab09c;
+    }
+
+    .wine-cmd-hint {
+      color: #f3ebd6;
+    }
+
+    .wine-cmd-hint strong {
+      color: #e5c96a;
+      background: rgba(200, 168, 75, 0.16);
+      padding: 1px 6px;
+      border-radius: 3px;
+      border: 1px solid rgba(200, 168, 75, 0.35);
+    }
+
+    .live-taster-ticker {
+      color: #e5c96a;
+      font-style: italic;
+      font-family: 'IM Fell English', serif;
+      font-size: 13px;
+    }
+
+    .wine-timer-wrap {
+      width: 100%;
+      height: 3px;
+      background: rgba(0, 0, 0, 0.55);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .wine-timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #8b1e2f, #c8a84b, #f3ebd6);
+      transition: width 0.15s linear;
+    }
   </style>
 </head>
 <body>
@@ -462,21 +887,22 @@
        ========================================================= -->
   <div class="preview-bar" id="previewBar">
     <div class="preview-title">
-      <span>✦ FASANENJAGD &bull; TEST-STATION</span>
+      <span>✦ FASANENJAGD & WEINKELLER • TEST</span>
       <span style="font-size: 10px; color: #8a9c8b; cursor: pointer;" onclick="document.body.classList.toggle('no-preview')">[Ausblenden]</span>
     </div>
     <div style="font-size: 10.5px; color: #a4b8a5;">
-      Nächste Random-Jagd in: <strong id="nextHuntCountdown" style="color:#e5c96a;">--:--</strong>
+      Nächstes Event in: <strong id="nextHuntCountdown" style="color:#e5c96a;">--:--</strong>
       | Status: <strong id="huntStatus" style="color:#4ade80;">Bereit</strong>
     </div>
     <div class="preview-btns">
-      <button class="btn-test" onclick="triggerHuntStart()">▶ Jagd sofort starten</button>
-      <button class="btn-test" onclick="simulateShot('Lord_Pearson')">!schuss (Lord Pearson)</button>
-      <button class="btn-test" onclick="simulateShot('Bobby_Glass')">!schuss (Bobby Glass)</button>
-      <button class="btn-test" onclick="simulateShot('Lady_Genevieve')">!schuss (Genevieve)</button>
-      <button class="btn-test" onclick="endHuntNow()">⚡ Jagd sofort beenden (Ergebnis)</button>
-      <button class="btn-test" onclick="simulateStash('Lord_Pearson')">!stash (Lord Pearson)</button>
-      <button class="btn-test btn-danger" onclick="resetAllStats()">↺ Reset Jagdbuch</button>
+      <button class="btn-test" onclick="triggerHuntStart()">🦆 Jagd starten</button>
+      <button class="btn-test" onclick="simulateShot('Lord_Pearson')">!schuss (Pearson)</button>
+      <button class="btn-test" onclick="endHuntNow()">⚡ Jagd-Ergebnis</button>
+      <button class="btn-test" onclick="simulateStash('Lord_Pearson')">!stash</button>
+      <button class="btn-test" style="border-color:#e5c96a; background:#3b121c;" onclick="startWineTasting()">🍷 Weinprobe starten</button>
+      <button class="btn-test" style="border-color:#e5c96a; background:#3b121c;" onclick="simulateChatVotes()">🤖 Wein-Tipps</button>
+      <button class="btn-test" style="border-color:#e5c96a; background:#3b121c;" onclick="revealWineNow()">✨ Wein enthüllen</button>
+      <button class="btn-test btn-danger" onclick="resetAllStats()">↺ Reset</button>
     </div>
   </div>
 
@@ -555,6 +981,163 @@
         <div class="stash-progress-bar-bg">
           <div class="stash-progress-bar-fill" id="stashProgressFill"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       3. WEINKELLER-KARTE (DIE BLINDVERKOSTUNG)
+       ========================================================= -->
+  <div class="wine-widget" id="wineWidget">
+    <div class="corner-ornament corner-tl"></div>
+    <div class="corner-ornament corner-tr"></div>
+    <div class="corner-ornament corner-bl"></div>
+    <div class="corner-ornament corner-br"></div>
+
+    <div class="wine-inner">
+      <div class="header-divider">
+        <div class="header-line"></div>
+        <div class="header-crest">DOPPEL XP // DER WEINKELLER DES BARONS</div>
+        <div class="header-line right"></div>
+      </div>
+
+      <div class="wine-main-title" id="widgetMainTitle">DIE BLINDVERKOSTUNG</div>
+      <div class="wine-subtitle" id="widgetSubtitle">Der Butler schenkt einen unbekannten Tropfen aus dem tiefsten Gewölbe ein...</div>
+
+      <div class="tasting-stage">
+        <div class="bottle-pedestal">
+          <div class="cellar-badge" id="cellarVaultTag">GEWÖLBE IV • UNBEKANNT</div>
+
+          <div class="svg-bottle-wrap floating" id="bottleWrap">
+            <svg viewBox="0 0 140 190" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="bottleGlass" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#0a120b"/>
+                  <stop offset="30%" stop-color="#1e3520"/>
+                  <stop offset="55%" stop-color="#0f1c10"/>
+                  <stop offset="85%" stop-color="#291218"/>
+                  <stop offset="100%" stop-color="#080d08"/>
+                </linearGradient>
+                <linearGradient id="goldFoil" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#f3ebd6"/>
+                  <stop offset="50%" stop-color="#c8a84b"/>
+                  <stop offset="100%" stop-color="#7e6320"/>
+                </linearGradient>
+                <linearGradient id="rubyWine" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#a81c33"/>
+                  <stop offset="50%" stop-color="#6e0e1e"/>
+                  <stop offset="100%" stop-color="#33040b"/>
+                </linearGradient>
+                <linearGradient id="parchmentLabel" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f5eedc"/>
+                  <stop offset="100%" stop-color="#d5c5a1"/>
+                </linearGradient>
+              </defs>
+
+              <ellipse cx="70" cy="180" rx="52" ry="6" fill="rgba(0,0,0,0.65)"/>
+              <rect x="44" y="12" width="18" height="34" rx="2" fill="url(#bottleGlass)" stroke="#c8a84b" stroke-width="0.6"/>
+              <rect x="43" y="10" width="20" height="16" rx="2" fill="url(#goldFoil)"/>
+              <line x1="43" y1="22" x2="63" y2="22" stroke="#574312" stroke-width="1"/>
+              <path d="M44,44 C32,54 28,66 28,82 L28,170 C28,175 32,178 38,178 L68,178 C74,178 78,175 78,170 L78,82 C78,66 74,54 62,44 Z"
+                    fill="url(#bottleGlass)" stroke="rgba(200,168,75,0.5)" stroke-width="1"/>
+              <path d="M34,70 L34,165" stroke="rgba(255,255,255,0.16)" stroke-width="2.5" stroke-linecap="round"/>
+              <rect id="svgLabelBg" x="33" y="86" width="40" height="58" rx="2" fill="url(#parchmentLabel)" stroke="#c8a84b" stroke-width="1.2"/>
+              <rect x="35.5" y="88.5" width="35" height="53" rx="1" fill="none" stroke="#8b1e2f" stroke-width="0.6"/>
+
+              <g id="svgMysterySeal">
+                <circle cx="53" cy="115" r="14" fill="#7a1624" stroke="#c8a84b" stroke-width="1.2"/>
+                <text x="53" y="121" text-anchor="middle" fill="#f3ebd6" font-family="Playfair Display, serif" font-weight="900" font-size="18">?</text>
+              </g>
+
+              <g id="svgRevealedCrest" style="display:none;">
+                <text x="53" y="104" text-anchor="middle" fill="#7a1624" font-family="Montserrat, sans-serif" font-weight="800" font-size="5.5">GRAND CRU</text>
+                <text x="53" y="120" text-anchor="middle" fill="#1a241b" font-family="Playfair Display, serif" font-weight="900" font-size="14">✦</text>
+                <line x1="40" y1="128" x2="66" y2="128" stroke="#7a1624" stroke-width="0.8"/>
+                <text x="53" y="136" text-anchor="middle" fill="#5a4822" font-family="IM Fell English, serif" font-size="6">EST. MANOR</text>
+              </g>
+
+              <ellipse cx="104" cy="177" rx="16" ry="3.5" fill="rgba(243,235,214,0.25)" stroke="#c8a84b" stroke-width="0.8"/>
+              <line x1="104" y1="138" x2="104" y2="177" stroke="rgba(243,235,214,0.45)" stroke-width="2"/>
+              <path id="svgWineLiquid" d="M87,114 C87,130 95,138 104,138 C113,138 121,130 121,114 Z" fill="url(#rubyWine)"/>
+              <ellipse cx="104" cy="114" rx="17" ry="3" fill="#c92a42" opacity="0.7"/>
+              <path d="M89,90 C85,112 87,138 104,138 C121,138 123,112 119,90 Z"
+                    fill="rgba(255,255,255,0.06)" stroke="rgba(243,235,214,0.55)" stroke-width="1"/>
+              <ellipse cx="104" cy="90" rx="15" ry="2.5" fill="none" stroke="#e5c96a" stroke-width="1"/>
+            </svg>
+          </div>
+
+          <div class="vintage-year-tag" id="vintageYearTag">Jahrgang ???</div>
+          <div class="vintage-price-tag" id="vintagePriceTag">Schätzwert: £0</div>
+        </div>
+
+        <div class="tasting-details">
+          <div class="notes-box">
+            <div class="notes-header">
+              <span>👃 DIE 3 BOUQUET-NOTIZEN DES BUTLERS</span>
+              <span id="totalVotesCounter" style="color:#e5c96a;">0 Tipps im Salon</span>
+            </div>
+            <div class="notes-list" id="notesList"></div>
+          </div>
+
+          <div class="reveal-banner" id="revealBanner">
+            <div class="reveal-verdict">
+              <span class="reveal-verdict-tag" id="revealRarityTag">👑 KRONJUWEL DES KELLERS</span>
+              <span class="reveal-verdict-name" id="revealTrueName">Château Lafite Rothschild</span>
+            </div>
+            <div class="reveal-winners" id="revealWinnersText"></div>
+          </div>
+
+          <div class="options-grid" id="optionsGrid">
+            <div class="wine-option" id="optA">
+              <div class="wine-option-letter">A</div>
+              <div class="wine-option-info">
+                <div class="wine-option-title" id="optTitleA">-</div>
+                <div class="wine-option-sub" id="optSubA">-</div>
+              </div>
+              <div class="wine-option-votes" id="optVotesA">0</div>
+            </div>
+
+            <div class="wine-option" id="optB">
+              <div class="wine-option-letter">B</div>
+              <div class="wine-option-info">
+                <div class="wine-option-title" id="optTitleB">-</div>
+                <div class="wine-option-sub" id="optSubB">-</div>
+              </div>
+              <div class="wine-option-votes" id="optVotesB">0</div>
+            </div>
+
+            <div class="wine-option" id="optC">
+              <div class="wine-option-letter">C</div>
+              <div class="wine-option-info">
+                <div class="wine-option-title" id="optTitleC">-</div>
+                <div class="wine-option-sub" id="optSubC">-</div>
+              </div>
+              <div class="wine-option-votes" id="optVotesC">0</div>
+            </div>
+
+            <div class="wine-option" id="optD">
+              <div class="wine-option-letter">D</div>
+              <div class="wine-option-info">
+                <div class="wine-option-title" id="optTitleD">-</div>
+                <div class="wine-option-sub" id="optSubD">-</div>
+              </div>
+              <div class="wine-option-votes" id="optVotesD">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wine-footer">
+        <div class="wine-cmd-hint">
+          Gib deinen Tipp im Chat ab: <strong>!wein A</strong> &bull; <strong>!wein B</strong> &bull; <strong>!wein C</strong> &bull; <strong>!wein D</strong>
+        </div>
+        <div class="live-taster-ticker" id="tasterTicker">
+          ✦ Der Butler erwartet die Expertise des Salons...
+        </div>
+      </div>
+
+      <div class="wine-timer-wrap">
+        <div class="wine-timer-bar" id="wineTimerBar"></div>
       </div>
     </div>
   </div>
@@ -718,7 +1301,7 @@
     // Phase 1: Jagd startet zufällig (oder per Test-Button)
     // ---------------------------------------------------------
     function triggerHuntStart() {
-      if (isHuntActive) return;
+      if (isHuntActive || isTastingActive) return;
       if (otherGameActive) {
         scheduleNextRandomHunt(120); // 2 Min verschieben wenn anderes Spiel aktiv
         return;
@@ -967,24 +1550,816 @@
     }
 
     // =========================================================
-    // 5. RANDOM TIMER SYSTEM (Unberechenbarer Start)
+    // 5. DIE BLINDVERKOSTUNG (WEINKELLER DES BARONS)
+    // =========================================================
+    const WINE_CELLAR_DB = [
+      {
+        id: 'lafite_1899',
+        name: 'Château Lafite Rothschild',
+        sub: 'Pauillac • Premier Grand Cru',
+        year: '1899',
+        value: '£14.500',
+        category: 'mythic',
+        rarityLabel: '👑 KRONJUWEL DES KELLERS',
+        vault: 'GEWÖLBE I • SCHATZKAMMER',
+        notes: [
+          '🍒 Schwarze Johannisbeere & Trüffel',
+          '🪵 120 Jahre alte Zedernholz-Kiste',
+          '🎩 Samtig wie der Mantel des Königs'
+        ],
+        decoys: [
+          { name: 'Gepanschter Hafenschnaps', sub: 'Liverpool • Fassware' },
+          { name: 'Chianti Classico', sub: 'Toskana • Tischwein' },
+          { name: 'Max’ verdünnter Traubensaft', sub: 'Kühlschrank • Offen seit Mai' }
+        ]
+      },
+      {
+        id: 'romanee_conti',
+        name: 'Domaine de la Romanée-Conti',
+        sub: 'Burgund • Monopollage',
+        year: '1945',
+        value: '£28.900',
+        category: 'mythic',
+        rarityLabel: '👑 KRONJUWEL DES KELLERS',
+        vault: 'GEWÖLBE I • GEHEIMTRESOR',
+        notes: [
+          '🌹 Welke Rosenblätter & Wildkirsche',
+          '🍂 Waldboden nach einem Herbstregen',
+          '✨ Ein Abgang, der drei Tage anhält'
+        ],
+        decoys: [
+          { name: 'Dornfelder Halbtrocken', sub: 'Tankstelle • Unteres Regal' },
+          { name: 'Bordeaux Supérieur', sub: 'Frankreich • Landwein' },
+          { name: 'Omas angesetzter Likör', sub: 'Dachboden • Jahrgang 1998' }
+        ]
+      },
+      {
+        id: 'dom_perignon',
+        name: 'Dom Pérignon P3 Plénitude',
+        sub: 'Champagne • Brut Millésime',
+        year: '1971',
+        value: '£4.800',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE II • FESTSAAL',
+        notes: [
+          '🥂 Feinste Perlage & geröstete Mandeln',
+          '🍋 Kandierte Zitrone & Brioche',
+          '💎 Staubtrocken und messerscharf'
+        ],
+        decoys: [
+          { name: 'Warmer Prosecco aus der Dose', sub: 'Kiosk • Mit Strohhalm' },
+          { name: 'Riesling Spätlese', sub: 'Mosel • Fruchtsüß' },
+          { name: 'Abgestandenes Ginger Ale', sub: 'Salon-Bar • Ohne Kohlensäure' }
+        ]
+      },
+      {
+        id: 'barolo_monfortino',
+        name: 'Giacomo Conterno Barolo',
+        sub: 'Piemont • Riserva Monfortino',
+        year: '1978',
+        value: '£2.200',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE III • SÜDFLÜGEL',
+        notes: [
+          '🥀 Getrocknete Feigen & Teer-Aroma',
+          '🍫 Dunkle Herren-Schokolade (90%)',
+          '🦁 Kräftige Tannine mit Biss'
+        ],
+        decoys: [
+          { name: 'Lambrusco aus dem 2-Liter-Krug', sub: 'Pizzeria • Eiskalt' },
+          { name: 'Chablis Premier Cru', sub: 'Burgund • Weißwein' },
+          { name: 'Hustensaft vom Hofarzt', sub: 'Apotheke • Kräutermischung' }
+        ]
+      },
+      {
+        id: 'chateau_margaux',
+        name: 'Château Margaux Premier Cru',
+        sub: 'Margaux • Bordeaux',
+        year: '1982',
+        value: '£3.400',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE II • SALON-RESERVE',
+        notes: [
+          '🫐 Reife Brombeere & Veilchenduft',
+          '🔥 Geröstetes Eichenholz & Vanille',
+          '🎻 Vollendete Harmonie am Gaumen'
+        ],
+        decoys: [
+          { name: 'Glühwein vom Vorjahr', sub: 'Thermoskanne • Mit Zimtstange' },
+          { name: 'Pinot Grigio', sub: 'Venetien • Leicht & dünn' },
+          { name: 'Pferde-Einreibung mit Alkohol', sub: 'Stallungen • Nur äußerlich' }
+        ]
+      },
+      {
+        id: 'vinegar_butler',
+        name: 'Château Kopfschmerz (Korkschmecker)',
+        sub: 'Unbekannter Discounter • Tetrapak-Abfüllung',
+        year: '2024',
+        value: '£1,49',
+        category: 'vinegar',
+        rarityLabel: '💀 KELLER-FEHLGRIFF! (Reiner Essigstich!)',
+        vault: 'HINTERHOF • REGENTONNE',
+        notes: [
+          '🧦 Nasser Jagdhund im Novembernebel',
+          '📦 Aufgeweichte Pappe & saurer Apfel',
+          '⚡ Zieht einem sofort die Schuhe aus'
+        ],
+        decoys: [
+          { name: 'Château Pétrus', sub: 'Pomerol • Grand Vin' },
+          { name: 'Vega Sicilia Único', sub: 'Ribera del Duero • Spanien' },
+          { name: 'Opus One Napa Valley', sub: 'Kalifornien • Kultwein' }
+        ]
+      },
+      {
+        id: 'vinegar_max',
+        name: 'Max’ vergessener Gewürz-Essig',
+        sub: 'Küchenschrank ganz hinten • Naturtrüb',
+        year: '2019',
+        value: '£0,85',
+        category: 'vinegar',
+        rarityLabel: '💀 KELLER-FEHLGRIFF! (Unverzehrbare Plörre!)',
+        vault: 'KÜCHE • UNTER DER SPÜLE',
+        notes: [
+          '🥒 Deutliche Note von Gewürzgurken-Wasser',
+          '🧪 Stechender Duft nach Fensterreiniger',
+          '😵 Der Butler weigert sich zu schlucken'
+        ],
+        decoys: [
+          { name: 'Tignanello Antinori', sub: 'Toskana • Supertuscan' },
+          { name: 'Penfolds Grange', sub: 'Australien • Shiraz' },
+          { name: 'Château Cheval Blanc', sub: 'Saint-Émilion • Premier Cru' }
+        ]
+      },
+      {
+        id: 'porto_vintage',
+        name: 'Taylor Fladgate Vintage Port',
+        sub: 'Douro-Tal • Königlicher Portwein',
+        year: '1927',
+        value: '£5.600',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE IV • KAMINZIMMER',
+        notes: [
+          '🍯 Flüssiges Karamell & eingelegte Pflaumen',
+          '🌰 Gebrannte Walnuss & Pfeifentabak',
+          '🔥 Wärmt wie ein Kaminfeuer im Winter'
+        ],
+        decoys: [
+          { name: 'Abgestandenes Malzbier', sub: 'Brauerei • Alkoholfrei' },
+          { name: 'Sauvignon Blanc', sub: 'Neuseeland • Grasig frisch' },
+          { name: 'Kalter Früchtetee', sub: 'Teeküche • Hagebutte' }
+        ]
+      },
+      {
+        id: 'petrus_1961',
+        name: 'Château Pétrus Pomerol',
+        sub: 'Bordeaux • 100% Merlot Legende',
+        year: '1961',
+        value: '£19.200',
+        category: 'mythic',
+        rarityLabel: '👑 KRONJUWEL DES KELLERS',
+        vault: 'GEWÖLBE I • SCHATZKAMMER',
+        notes: [
+          '🍄 Schwarzer Perigord-Trüffel & Maulbeere',
+          '🍫 Geschmolzene Edelbitterschokolade',
+          '👑 Dichte Textur wie flüssiger Samt'
+        ],
+        decoys: [
+          { name: 'Sangria aus dem 5-Liter-Eimer', sub: 'Mallorca • Mit Obststücken' },
+          { name: 'Grüner Veltliner', sub: 'Wachau • Pfeffrig leicht' },
+          { name: 'Kirschsaft vom Frühstücksbuffet', sub: 'Speisesaal • Verdünnt' }
+        ]
+      },
+      {
+        id: 'screaming_eagle',
+        name: 'Screaming Eagle Cabernet',
+        sub: 'Napa Valley • Kult-Kalifornier',
+        year: '1992',
+        value: '£16.800',
+        category: 'mythic',
+        rarityLabel: '👑 KRONJUWEL DES KELLERS',
+        vault: 'GEWÖLBE I • ÜBERSEE-TRESOR',
+        notes: [
+          '🫐 Cassis-Explosion & Espressobohne',
+          '🌿 Frische Minze & Graphit',
+          '🦅 Kraftvoll wie ein Adlerschrei'
+        ],
+        decoys: [
+          { name: 'Kalifornischer Dosen-Rosé', sub: 'Tankstelle • Warm' },
+          { name: 'Liebfrauenmilch', sub: 'Rheinhessen • Lieblich' },
+          { name: 'Chris’ kalter Energy-Drink', sub: 'Schreibtisch • Seit gestern offen' }
+        ]
+      },
+      {
+        id: 'yquem_1811',
+        name: 'Château d’Yquem (Kometen-Jahrgang)',
+        sub: 'Sauternes • Edelsüßer Jahrhundertwein',
+        year: '1811',
+        value: '£42.000',
+        category: 'mythic',
+        rarityLabel: '👑 KRONJUWEL DES KELLERS',
+        vault: 'GEWÖLBE I • NAPOLEON-KAMMER',
+        notes: [
+          '🍑 Kandierte Aprikose & Safranfäden',
+          '🐝 Königlicher Wildblüten-Honig',
+          '☄️ Flüssiges Gold aus Napoleons Ära'
+        ],
+        decoys: [
+          { name: 'Zuckerwasser für Kolibris', sub: 'Wintergarten • Selbstgerührt' },
+          { name: 'Trockener Sherry Fino', sub: 'Jerez • Salzig-herb' },
+          { name: 'Abgelaufener Pfirsich-Eistee', sub: 'Vorratsschrank • 2021' }
+        ]
+      },
+      {
+        id: 'krug_ambonnay',
+        name: 'Krug Clos d’Ambonnay Blanc de Noirs',
+        sub: 'Champagne • Seltene Einzellage',
+        year: '1995',
+        value: '£6.400',
+        category: 'mythic',
+        rarityLabel: '👑 KRONJUWEL DES KELLERS',
+        vault: 'GEWÖLBE I • KRONLEUCHTER-SAAL',
+        notes: [
+          '🥐 Warmes Butter-Croissant & Bratapfel',
+          '🌰 Geröstete Haselnuss & Ingwer',
+          '✨ Champagner für gekrönte Häupter'
+        ],
+        decoys: [
+          { name: 'Kinder-Party-Blubberwasser', sub: 'Supermarkt • Mit Bärchen-Etikett' },
+          { name: 'Apfelschorle aus der Plastikflasche', sub: 'Turnhalle • Halb leer' },
+          { name: 'Chianti im Bastkorb', sub: 'Trattoria • Trocken' }
+        ]
+      },
+      {
+        id: 'sassicaia_1985',
+        name: 'Tenuta San Guido Sassicaia',
+        sub: 'Bolgheri • Der legendäre Supertuscan',
+        year: '1985',
+        value: '£3.900',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE II • ITALIEN-FLÜGEL',
+        notes: [
+          '🌿 Mediterrane Kräuter & Rosmarin',
+          '🍒 Dunkle Amarenakirsche & Zedernholz',
+          '🏇 Rassige Eleganz der Toskana'
+        ],
+        decoys: [
+          { name: 'Nudelwasser vom Vortag', sub: 'Küche • Leicht gesalzen' },
+          { name: 'Federweißer im Gärprozess', sub: 'Winzerfest • Spritzig' },
+          { name: 'Müller-Thurgau Kabinett', sub: 'Franken • Bocksbeutel' }
+        ]
+      },
+      {
+        id: 'vega_sicilia',
+        name: 'Vega Sicilia Único Gran Reserva',
+        sub: 'Ribera del Duero • Spaniens Stolz',
+        year: '1968',
+        value: '£3.100',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE II • MADRID-LOGE',
+        notes: [
+          '🍂 Feines Sattel-Leder & dunkle Pflaume',
+          '🚬 Spanische Zigarre & Gewürznelke',
+          '⚔️ Zehn Jahre im Fass gereift'
+        ],
+        decoys: [
+          { name: 'Kalimotxo (Rotwein mit Cola)', sub: 'Studentenparty • 50/50 Mix' },
+          { name: 'Prosecco Spumante', sub: 'Venetien • Leicht' },
+          { name: 'Tomatensaft mit Pfeffer', sub: 'Bordservice • Reihe 14' }
+        ]
+      },
+      {
+        id: 'penfolds_grange',
+        name: 'Penfolds Grange Bin 95 Shiraz',
+        sub: 'South Australia • Ikone der Südhalbkugel',
+        year: '1976',
+        value: '£2.450',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE III • KOLONIAL-ARCHIV',
+        notes: [
+          '🌿 Eukalyptus-Hauch & schwarzer Pfeffer',
+          '🍫 Mokka, Lakritz & dunkle Beeren',
+          '🦘 Ein Schwergewicht im Kristallglas'
+        ],
+        decoys: [
+          { name: 'Känguru-Kräuterschnaps', sub: 'Outback • 54% Vol.' },
+          { name: 'Leichter Sommer-Weißwein', sub: 'Balkonien • Eisgekühlt' },
+          { name: 'Rote-Bete-Saft (Bio)', sub: 'Reformhaus • Erdig' }
+        ]
+      },
+      {
+        id: 'egon_muller',
+        name: 'Egon Müller Scharzhofberger',
+        sub: 'Saar • Trockenbeerenauslese Riesling',
+        year: '1976',
+        value: '£11.500',
+        category: 'mythic',
+        rarityLabel: '👑 KRONJUWEL DES KELLERS',
+        vault: 'GEWÖLBE I • DEUTSCHE SCHATZKAMMER',
+        notes: [
+          '🍍 Exotische Maracuja & Weinbergpfirsich',
+          '🪨 Edler Schieferstein & Honigmelone',
+          '⚡ Messerscharfe Säure trifft Nektar'
+        ],
+        decoys: [
+          { name: 'Abgestandene Zitronenlimonade', sub: 'Gartentisch • Mit Wespe drin' },
+          { name: 'Schwerer Merlot aus Chile', sub: 'Supermarkt • Holzchips' },
+          { name: 'Kamillentee ohne Zucker', sub: 'Krankenzimmer • Lauwarm' }
+        ]
+      },
+      {
+        id: 'amarone_quintarelli',
+        name: 'Giuseppe Quintarelli Amarone',
+        sub: 'Valpolicella Classico • Handgeschrieben',
+        year: '1990',
+        value: '£1.850',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE III • VERONA-REGAL',
+        notes: [
+          '🍇 Getrocknete Rosinen & Schwarzkirsche',
+          '☕ Espresso, Balsamico & Kardamom',
+          '🕯️ Meditationswein für späte Stunden'
+        ],
+        decoys: [
+          { name: 'Wässriger Rosé vom Fass', sub: 'Strandbar • Viel Eis' },
+          { name: 'Rhabarberschorle', sub: 'Hofladen • Naturtrüb' },
+          { name: 'Balsamico-Dressing pur', sub: 'Salatschüssel • Versehentlich eingeschenkt' }
+        ]
+      },
+      {
+        id: 'chateauneuf_rayas',
+        name: 'Château Rayas Châteauneuf-du-Pape',
+        sub: 'Rhône • 100% alte Grenache-Reben',
+        year: '1995',
+        value: '£2.700',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE II • PAPST-GEWÖLBE',
+        notes: [
+          '🍓 Walderdbeeren-Kompott & weißer Pfeffer',
+          '🌿 Lavendel, Thymian & Garrigue-Kräuter',
+          '☀️ Flüssige südfranzösische Sonne'
+        ],
+        decoys: [
+          { name: 'Erdbeer-Limes vom Jahrmarkt', sub: 'Kirmesbude • Klebrig süß' },
+          { name: 'Trockener Apfelwein (Ebbelwoi)', sub: 'Frankfurt • Aus dem Bembel' },
+          { name: 'Kochwein zum Ablöschen', sub: 'Herdplatte • Offen seit 3 Wochen' }
+        ]
+      },
+      {
+        id: 'vinegar_bathwater',
+        name: 'Lord Higgins’ vergessenes Badewasser',
+        sub: 'Badezuber im Ostflügel • In Flasche abgefüllt',
+        year: '2025',
+        value: '£0,00',
+        category: 'vinegar',
+        rarityLabel: '💀 KELLER-FEHLGRIFF! (Absoluter Skandal im Salon!)',
+        vault: 'OSTFLÜGEL • BADEZIMMER',
+        notes: [
+          '🧼 Deutliche Kopfnote von Kernseife & Lavendel',
+          '🦆 Dezenter Hauch von Quietscheentchen-Gummi',
+          '🛁 Lauwarm und leicht schäumend im Abgang'
+        ],
+        decoys: [
+          { name: 'Château Mouton Rothschild', sub: 'Pauillac • Premier Cru' },
+          { name: 'Louis Roederer Cristal', sub: 'Champagne • Prestige Cuvée' },
+          { name: 'Brunello di Montalcino', sub: 'Toskana • Biondi-Santi' }
+        ]
+      },
+      {
+        id: 'vinegar_gluehwein',
+        name: 'Tankstellen-Glühwein „Heißer Schlitten“',
+        sub: 'Zapfsäule 4 • Im 3-Liter-Kanister gereift',
+        year: '2022',
+        value: '£1,99',
+        category: 'vinegar',
+        rarityLabel: '💀 KELLER-FEHLGRIFF! (Sodbrennen garantiert!)',
+        vault: 'GARAGE • NEBEN DEM RASENMÄHER',
+        notes: [
+          '🍬 400 Gramm Industriezucker pro Glas',
+          '🎄 Künstliches Zimt-Aroma & Nelken-Keule',
+          '🤕 Verursacht schon beim Riechen Katerstimmung'
+        ],
+        decoys: [
+          { name: 'Château Cheval Blanc', sub: 'Saint-Émilion • Grand Cru' },
+          { name: 'Ornellaia Bolgheri Superiore', sub: 'Toskana • Italien' },
+          { name: 'Tinta de Toro Pintia', sub: 'Spanien • Vega Sicilia' }
+        ]
+      },
+      {
+        id: 'vinegar_lampoil',
+        name: 'Graf Koks’ Petroleum & Lampenöl',
+        sub: 'Werkzeugkeller • Falsche Flasche gegriffen',
+        year: '1999',
+        value: '£3,50',
+        category: 'vinegar',
+        rarityLabel: '💀 KELLER-FEHLGRIFF! (Nicht in Kamin-Nähe trinken!)',
+        vault: 'HEIZUNGSKELLER • REGAL C',
+        notes: [
+          '⛽ Markante Note von Diesel & Asphalt',
+          '🕯️ Brennt hervorragend am Baumwolldocht',
+          '🚒 Der Butler ruft vorsorglich die Feuerwehr'
+        ],
+        decoys: [
+          { name: 'Riesling Große Lage (Schieferboden)', sub: 'Mosel • Alte Reben' },
+          { name: 'Syrah Côte-Rôtie', sub: 'Nord-Rhône • Guigal' },
+          { name: 'Barbaresco Angelo Gaja', sub: 'Piemont • Italien' }
+        ]
+      },
+      {
+        id: 'vinegar_chris_tea',
+        name: 'Chris’ 4 Tage alter Gaming-Eistee',
+        sub: 'Schreibtisch-Fundstück • Unter dem Monitor gereift',
+        year: '2026',
+        value: '£0,45',
+        category: 'vinegar',
+        rarityLabel: '💀 KELLER-FEHLGRIFF! (Lebendige Kulturen enthalten!)',
+        vault: 'STREAM-ZIMMER • HINTER DEM MIKROFON',
+        notes: [
+          '🍋 Künstliche Pfirsich-Zitrone mit Staubflocke',
+          '🌡️ Perfekte Zimmertemperatur von 24,5 Grad',
+          '🎮 Schmeckt nach 12 Stunden Tarkov-Grind'
+        ],
+        decoys: [
+          { name: 'Château d’Yquem Sauternes', sub: 'Bordeaux • Edelsüß' },
+          { name: 'Tokaji Eszencia', sub: 'Ungarn • Königlicher Nektar' },
+          { name: 'Gewürztraminer Vendanges Tardives', sub: 'Elsass • Spätlese' }
+        ]
+      },
+      {
+        id: 'tignanello_2015',
+        name: 'Marchesi Antinori Tignanello',
+        sub: 'Toskana IGT • Sangiovese & Cabernet',
+        year: '2015',
+        value: '£420',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE III • FLORENZ-ECKE',
+        notes: [
+          '🍒 Reife Herzkirsche & dunkle Beeren',
+          '🌿 Mediterraner Salbei & Vanilleschote',
+          '🇮🇹 Der Liebling des italienischen Adels'
+        ],
+        decoys: [
+          { name: 'Pizzabäcker-Hauswein im Krug', sub: 'Neapel • Unetikettiert' },
+          { name: 'Weißherbst Halbtrocken', sub: 'Baden • Schorlenwein' },
+          { name: 'Hustensirup Spitzwegerich', sub: 'Hausapotheke • Süß' }
+        ]
+      },
+      {
+        id: 'opus_one',
+        name: 'Opus One (Mondavi & Rothschild)',
+        sub: 'Oakville Napa Valley • Bordeaux-Blend',
+        year: '2013',
+        value: '£680',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE II • TRANSATLANTIK-LOGE',
+        notes: [
+          '🫐 Brombeerkompott & schwarze Oliven',
+          '🍫 Feinherbe Kakaobohne & Zedernholz',
+          '🤝 Französische Noblesse trifft Kalifornien'
+        ],
+        decoys: [
+          { name: 'Root Beer ohne Kohlensäure', sub: 'Diner • USA' },
+          { name: 'Gepanschter Dornfelder', sub: 'Supermarkt • 2,49€' },
+          { name: 'Traubenschorle aus der Kita', sub: 'Pausenbrot • Lauwarm' }
+        ]
+      },
+      {
+        id: 'tarkov_moonshine',
+        name: 'Fierce Hatchling Tarkov-Moonshine',
+        sub: 'Hideout-Schwarzbrennerei • 88% Vol.',
+        year: '2025',
+        value: '£240',
+        category: 'vinegar',
+        rarityLabel: '💀 KELLER-FEHLGRIFF! (Macht kurzzeitig blind!)',
+        vault: 'HIDEOUT • WASSERSAMMLER',
+        notes: [
+          '🔥 Brennt sofort sämtliche Nasenhaare weg',
+          '🥔 Rohe Kartoffelschale & Rostwasser',
+          '💥 Sichert das Überleben auf Woods bei -20 Grad'
+        ],
+        decoys: [
+          { name: 'Macallan 30 Years Sherry Oak', sub: 'Speyside • Single Malt' },
+          { name: 'Hennessy Paradis Cognac', sub: 'Frankreich • Grande Champagne' },
+          { name: 'Grappa Nonino Riserva', sub: 'Friaul • Holzfass' }
+        ]
+      },
+      {
+        id: 'cheval_blanc',
+        name: 'Château Cheval Blanc 1947',
+        sub: 'Saint-Émilion • Premier Grand Cru Classé A',
+        year: '1947',
+        value: '£24.000',
+        category: 'mythic',
+        rarityLabel: '👑 KRONJUWEL DES KELLERS',
+        vault: 'GEWÖLBE I • RITTERSAAL',
+        notes: [
+          '🍒 Überreife Schwarzkirsche & Lebkuchengewürz',
+          '🐎 Kraftvoll, wild und ungezähmt',
+          '🏆 Einer der berühmtesten Rotweine aller Zeiten'
+        ],
+        decoys: [
+          { name: 'Pferdetränke-Wasser', sub: 'Koppel • Mit Haferflocken' },
+          { name: 'Beaujolais Nouveau', sub: 'Bistro • Jungwein' },
+          { name: 'Roter Traubensaft (Tetrapak)', sub: 'Kantine • Gezuckert' }
+        ]
+      },
+      {
+        id: 'cristal_roederer',
+        name: 'Louis Roederer Cristal Rosé',
+        sub: 'Champagne • Zaren-Cuvée in Klarglas',
+        year: '2008',
+        value: '£1.250',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE II • ZAREN-LOGE',
+        notes: [
+          '🍓 Frische Himbeere & Blutorangenschale',
+          '🥖 Warmer Brioche-Teig & Kreide-Mineralik',
+          '👑 Eigens für Zar Alexander II. kreiert'
+        ],
+        decoys: [
+          { name: 'Erdbeerbowle von der Gartenparty', sub: 'Plastikschüssel • Mit Dosenobst' },
+          { name: 'Rosé-Sekt Halbtrocken', sub: 'Tankstelle • Im Angebot' },
+          { name: 'Wassermelonen-Limonade', sub: 'Freibad • Kiosk' }
+        ]
+      },
+      {
+        id: 'masseto_toscana',
+        name: 'Masseto Tenuta dell’Ornellaia',
+        sub: 'Toskana • 100% Edler Merlot',
+        year: '2006',
+        value: '£1.650',
+        category: 'legendary',
+        rarityLabel: '⚜️ EDLER HERZOGS-TROPFEN',
+        vault: 'GEWÖLBE II • MITTELMEER-KAMMER',
+        notes: [
+          '🫐 Schwarze Pflaume, Trüffel & dunkle Schokolade',
+          '🏺 Auf blauem Lehmboden an der Küste gewachsen',
+          '🎩 Samtiger als ein englischer Maßanzug'
+        ],
+        decoys: [
+          { name: 'Abgestandene Espresso-Reste', sub: 'Siebträger • Kalt' },
+          { name: 'Montepulciano d’Abruzzo', sub: 'Supermarkt • 3,99€' },
+          { name: 'Olivenöl Extra Vergine', sub: 'Küche • Aus Versehen im Weinglas' }
+        ]
+      }
+    ];
+
+    let isTastingActive = false;
+    let isRevealed = false;
+    let currentWine = null;
+    let currentOptions = [];
+    let userVotes = new Map();
+    let tastingTimer = null;
+    let hideWineTimeout = null;
+
+    const TASTING_DURATION_MS = 50000; // 50 Sekunden zum Abstimmen
+    const REVEAL_DURATION_MS = 14000;  // 14 Sekunden Auflösung
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function startWineTasting(forcedWine = null) {
+      if (isHuntActive || isTastingActive) return;
+      const lastWordle = parseInt(localStorage.getItem('gentlemen_wordle_running_until') || '0', 10);
+      if (otherGameActive || Date.now() < lastWordle) {
+        scheduleNextRandomHunt(120);
+        return;
+      }
+
+      if (tastingTimer) clearInterval(tastingTimer);
+      if (hideWineTimeout) clearTimeout(hideWineTimeout);
+
+      isTastingActive = true;
+      isRevealed = false;
+      userVotes.clear();
+      broadcastHuntState(true);
+
+      if (huntStatusEl) huntStatusEl.textContent = "Weinprobe aktiv (50s)!";
+
+      currentWine = forcedWine || WINE_CELLAR_DB[Math.floor(Math.random() * WINE_CELLAR_DB.length)];
+
+      const rawChoices = [
+        { name: currentWine.name, sub: currentWine.sub, isCorrect: true },
+        ...currentWine.decoys.map(d => ({ name: d.name, sub: d.sub, isCorrect: false }))
+      ];
+      const shuffled = shuffleArray(rawChoices);
+      const letters = ['A', 'B', 'C', 'D'];
+      currentOptions = shuffled.map((item, idx) => ({
+        letter: letters[idx],
+        ...item
+      }));
+
+      document.getElementById('widgetMainTitle').textContent = 'DIE BLINDVERKOSTUNG';
+      document.getElementById('widgetSubtitle').textContent = 'Der Butler schenkt einen unbekannten Tropfen ein – welcher Wein befindet sich im Glas?';
+      document.getElementById('cellarVaultTag').textContent = currentWine.vault;
+      document.getElementById('vintageYearTag').textContent = `Jahrgang ${currentWine.year.substring(0, 2)}??`;
+
+      const priceEl = document.getElementById('vintagePriceTag');
+      priceEl.classList.remove('visible');
+      priceEl.textContent = `Schätzwert: ${currentWine.value}`;
+
+      document.getElementById('svgMysterySeal').style.display = 'block';
+      document.getElementById('svgRevealedCrest').style.display = 'none';
+      const bottleWrap = document.getElementById('bottleWrap');
+      bottleWrap.classList.remove('uncorked');
+      bottleWrap.classList.add('floating');
+
+      const notesList = document.getElementById('notesList');
+      notesList.innerHTML = currentWine.notes
+        .map(n => `<div class="note-pill">${n}</div>`)
+        .join('');
+
+      document.getElementById('revealBanner').classList.remove('active');
+
+      currentOptions.forEach(opt => {
+        const box = document.getElementById(`opt${opt.letter}`);
+        box.classList.remove('correct', 'wrong');
+        document.getElementById(`optTitle${opt.letter}`).textContent = opt.name;
+        document.getElementById(`optSub${opt.letter}`).textContent = opt.sub;
+        document.getElementById(`optVotes${opt.letter}`).textContent = '0';
+      });
+
+      document.getElementById('totalVotesCounter').textContent = '0 Tipps im Salon';
+      document.getElementById('tasterTicker').textContent = '✦ Der Butler erwartet die Expertise des Salons...';
+
+      document.getElementById('wineWidget').classList.add('show');
+
+      const timerBar = document.getElementById('wineTimerBar');
+      timerBar.style.width = '100%';
+      const startTime = Date.now();
+
+      tastingTimer = setInterval(() => {
+        const remaining = (startTime + TASTING_DURATION_MS) - Date.now();
+        if (remaining <= 0) {
+          clearInterval(tastingTimer);
+          revealWineNow();
+        } else {
+          timerBar.style.width = `${(remaining / TASTING_DURATION_MS) * 100}%`;
+        }
+      }, 100);
+    }
+
+    function registerWineVote(username, displayName, letterChoice) {
+      if (!isTastingActive || isRevealed) return;
+      const choice = letterChoice.toUpperCase().trim();
+      if (!['A', 'B', 'C', 'D'].includes(choice)) return;
+
+      const cleanUser = username.toLowerCase().trim();
+      userVotes.set(cleanUser, { displayName: displayName || username, choice });
+
+      const counts = { A: 0, B: 0, C: 0, D: 0 };
+      userVotes.forEach(v => { counts[v.choice]++; });
+
+      ['A', 'B', 'C', 'D'].forEach(l => {
+        document.getElementById(`optVotes${l}`).textContent = counts[l];
+      });
+
+      document.getElementById('totalVotesCounter').textContent = `${userVotes.size} ${userVotes.size === 1 ? 'Tipp' : 'Tipps'} im Salon`;
+      document.getElementById('tasterTicker').innerHTML = `🍷 <strong>${escapeHtml(displayName)}</strong> schwenkt das Glas und tippt auf <strong>[${choice}]</strong>`;
+    }
+
+    function revealWineNow() {
+      if (!currentWine || isRevealed) return;
+      if (tastingTimer) clearInterval(tastingTimer);
+
+      isRevealed = true;
+      isTastingActive = false;
+
+      const correctOpt = currentOptions.find(o => o.isCorrect);
+
+      document.getElementById('svgMysterySeal').style.display = 'none';
+      document.getElementById('svgRevealedCrest').style.display = 'block';
+      const bottleWrap = document.getElementById('bottleWrap');
+      bottleWrap.classList.remove('floating');
+      bottleWrap.classList.add('uncorked');
+
+      document.getElementById('vintageYearTag').textContent = `Jahrgang ${currentWine.year}`;
+      document.getElementById('vintagePriceTag').classList.add('visible');
+
+      document.getElementById('widgetMainTitle').textContent = 'DIE ENTHÜLLUNG DES TROPFENS';
+      document.getElementById('widgetSubtitle').textContent = `Antwort [${correctOpt.letter}] war korrekt: ${currentWine.name} (${currentWine.year})`;
+
+      currentOptions.forEach(opt => {
+        const box = document.getElementById(`opt${opt.letter}`);
+        if (opt.isCorrect) {
+          box.classList.add('correct');
+        } else {
+          box.classList.add('wrong');
+        }
+      });
+
+      const winners = [];
+      userVotes.forEach((val) => {
+        if (val.choice === correctOpt.letter) {
+          winners.push(val.displayName);
+        }
+      });
+
+      const banner = document.getElementById('revealBanner');
+      document.getElementById('revealRarityTag').textContent = currentWine.rarityLabel;
+      document.getElementById('revealTrueName').textContent = `${currentWine.name} (${currentWine.year}) • ${currentWine.value}`;
+
+      const winnersEl = document.getElementById('revealWinnersText');
+      if (winners.length > 0) {
+        const shown = winners.slice(0, 4).join(', ');
+        const extra = winners.length > 4 ? ` +${winners.length - 4} weitere` : '';
+        winnersEl.innerHTML = `🏆 <strong>Meister-Sommeliers:</strong><br>${escapeHtml(shown)}${extra}`;
+        document.getElementById('tasterTicker').innerHTML = `🥂 Exzellenter Gaumen! ${winners.length} ${winners.length === 1 ? 'Gentleman hat' : 'Gentlemen haben'} den Tropfen erkannt!`;
+      } else {
+        winnersEl.innerHTML = `😅 <strong>Kein Treffer im Salon!</strong><br>Der Butler trinkt die Flasche selbst.`;
+        document.getElementById('tasterTicker').innerHTML = `✦ Niemand hat den Jahrgang erkannt – der Butler genießt den Rest!`;
+      }
+
+      banner.classList.add('active');
+
+      const timerBar = document.getElementById('wineTimerBar');
+      timerBar.style.width = '100%';
+      const startRev = Date.now();
+      tastingTimer = setInterval(() => {
+        const left = (startRev + REVEAL_DURATION_MS) - Date.now();
+        if (left <= 0) {
+          clearInterval(tastingTimer);
+        } else {
+          timerBar.style.width = `${(left / REVEAL_DURATION_MS) * 100}%`;
+        }
+      }, 100);
+
+      hideWineTimeout = setTimeout(() => {
+        if (tastingTimer) clearInterval(tastingTimer);
+        isTastingActive = false;
+        isRevealed = false;
+        document.getElementById('wineWidget').classList.remove('show');
+        if (huntStatusEl) huntStatusEl.textContent = "Bereit";
+        broadcastHuntState(false);
+        scheduleNextRandomHunt();
+      }, REVEAL_DURATION_MS);
+    }
+
+    function simulateChatVotes() {
+      if (!isTastingActive || isRevealed) {
+        startWineTasting();
+      }
+      const sampleLords = [
+        'Lord_Fynala', 'Sir_Maximilian', 'Baron_von_Tarkov',
+        'Lady_Evelyn', 'Graf_Koks', 'Duke_of_Hazard'
+      ];
+      const choices = ['A', 'B', 'C', 'D'];
+      sampleLords.forEach((lord, i) => {
+        setTimeout(() => {
+          const pick = choices[Math.floor(Math.random() * choices.length)];
+          registerWineVote(lord, lord, pick);
+        }, i * 250);
+      });
+    }
+
+    // =========================================================
+    // 6. RANDOM TIMER SYSTEM (Wechselt zwischen Jagd & Weinprobe!)
     // =========================================================
     let nextHuntTimestamp = 0;
     let randomTimerInterval = null;
+    let nextEventIsWine = false; // Wechselt automatisch zwischen Fasanenjagd und Blindverkostung ab!
 
-    function scheduleNextRandomHunt() {
-      const minMs = CONFIG.minIntervalMinutes * 60 * 1000;
-      const maxMs = CONFIG.maxIntervalMinutes * 60 * 1000;
-      const randomWait = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+    function scheduleNextRandomHunt(overrideSeconds = null) {
+      let waitMs;
+      if (overrideSeconds) {
+        waitMs = overrideSeconds * 1000;
+      } else {
+        const minMs = CONFIG.minIntervalMinutes * 60 * 1000;
+        const maxMs = CONFIG.maxIntervalMinutes * 60 * 1000;
+        waitMs = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+      }
 
-      nextHuntTimestamp = Date.now() + randomWait;
+      nextHuntTimestamp = Date.now() + waitMs;
 
       if (randomTimerInterval) clearInterval(randomTimerInterval);
       randomTimerInterval = setInterval(() => {
         const diff = nextHuntTimestamp - Date.now();
         if (diff <= 0) {
           clearInterval(randomTimerInterval);
-          triggerHuntStart();
+          if (nextEventIsWine) {
+            nextEventIsWine = false;
+            startWineTasting();
+          } else {
+            nextEventIsWine = true;
+            triggerHuntStart();
+          }
         } else {
           updateCountdownDisplay(diff);
         }
@@ -1038,28 +2413,54 @@
     // =========================================================
     // 7. EVENT LISTENER (StreamElements & Twitch IRC)
     // =========================================================
+    function processUnifiedChatCommand(username, displayName, rawChatText, avatar = null) {
+      if (!rawChatText) return;
+      const cmd = rawChatText.toLowerCase().trim();
+
+      // 1. Manuelle Start-Befehle
+      if (cmd === '!verkostung' || cmd === '!weinprobe') {
+        startWineTasting();
+        return;
+      }
+      if (cmd === '!fasanenjagd') {
+        triggerHuntStart();
+        return;
+      }
+
+      // 2. Weinverkostung Tipps (!wein A, !tipp B, oder einfach A/B/C/D während Verkostung läuft)
+      const wineVoteMatch = cmd.match(/^(?:!wein|!tipp|!vote)\s+([abcd])\b/i) || (isTastingActive && cmd.match(/^([abcd])$/i));
+      if (wineVoteMatch) {
+        registerWineVote(username, displayName, wineVoteMatch[1]);
+        return;
+      }
+
+      // 3. Fasanenjagd Befehle (!schuss, !stash)
+      if (cmd.startsWith('!schuss') || cmd.startsWith('!shoot') || cmd.startsWith('!jagd')) {
+        handleShotCommand(displayName);
+      } else if (cmd.startsWith('!stash') || cmd.startsWith('!rang') || cmd.startsWith('!beute')) {
+        handleStashCommand(displayName, avatar);
+      }
+    }
+
     window.addEventListener('onEventReceived', function (obj) {
       if (!obj || !obj.detail) return;
       if (obj.detail.listener === 'message') {
         const d = obj.detail.event.data;
         if (!d) return;
 
-        const text = (d.text || '').toLowerCase().trim();
+        const text = (d.text || '').trim();
         const user = d.displayName || d.nick || 'Gentleman';
+        const nick = (d.nick || user).toLowerCase();
         const avatar = d.avatar || null;
 
-        if (text.startsWith('!schuss') || text.startsWith('!shoot') || text.startsWith('!jagd')) {
-          handleShotCommand(user);
-        } else if (text.startsWith('!stash') || text.startsWith('!beute') || text.startsWith('!rang')) {
-          handleStashCommand(user, avatar);
-        }
+        processUnifiedChatCommand(nick, user, text, avatar);
       }
     });
 
     // In OBS automatisch Preview-Leiste ausblenden (window.obsstudio ist von OBS gesetzt)
     const urlParams = new URLSearchParams(window.location.search);
     const channelParam = urlParams.get('channel') || 'd0ppelxp';
-    if (window.obsstudio || urlParams.get('preview') === '0' || urlParams.get('hide_preview') === '1') {
+    if (window.obsstudio || urlParams.get('preview') === '0' || urlParams.get('hide_preview') === '1' || (window.location.protocol !== 'file:' && urlParams.get('preview') !== '1')) {
       document.body.classList.add('no-preview');
     }
 
@@ -1073,7 +2474,7 @@
         ws.send('PASS SCHMOOPIIE');
         ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
         ws.send(`JOIN #${targetChan}`);
-        console.log(`[Twitch IRC Fasanenjagd] Verbunden mit #${targetChan}`);
+        console.log(`[Twitch IRC Salon-Games] Verbunden mit #${targetChan}`);
       };
 
       ws.onmessage = function (event) {
@@ -1086,38 +2487,19 @@
           }
 
           if (line.includes('PRIVMSG')) {
-            // Regex Match: @tags :user!user@user.tmi.twitch.tv PRIVMSG #chan :message
-            const match = line.match(/@([^ ]+) :([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)/);
-            let displayName = 'Gentleman';
-            let chatText = '';
+            // Robuster PRIVMSG Matcher (unabhängig von Badges/Spaces)
+            const privmsgMatch = line.match(/PRIVMSG\s+#[^\s:]+\s*:(.*)$/i);
+            if (!privmsgMatch) continue;
 
-            if (match) {
-              const rawTags = match[1];
-              const username = match[2];
-              chatText = match[3].trim();
-
-              const tagMatch = rawTags.match(/display-name=([^;]+)/);
-              displayName = (tagMatch && tagMatch[1]) ? tagMatch[1] : username;
-            } else {
-              // Fallback Parsing
-              const matchUser = line.match(/display-name=([^;]+)/);
-              const matchNick = line.match(/:([^!]+)!/);
-              displayName = matchUser ? matchUser[1] : (matchNick ? matchNick[1] : 'Gentleman');
-
-              const textIdx = line.indexOf(`PRIVMSG #${targetChan} :`);
-              if (textIdx !== -1) {
-                chatText = line.substring(textIdx + (`PRIVMSG #${targetChan} :`).length).trim();
-              }
-            }
-
+            const chatText = privmsgMatch[1].trim();
             if (!chatText) continue;
-            const cmd = chatText.toLowerCase();
 
-            if (cmd.startsWith('!schuss') || cmd.startsWith('!shoot') || cmd.startsWith('!jagd')) {
-              handleShotCommand(displayName);
-            } else if (cmd.startsWith('!stash') || cmd.startsWith('!rang') || cmd.startsWith('!beute')) {
-              handleStashCommand(displayName);
-            }
+            const tagMatch = line.match(/display-name=([^; \r\n]+)/i);
+            const userMatch = line.match(/:([^!@\s]+)!/);
+            const displayName = (tagMatch && tagMatch[1]) ? tagMatch[1] : (userMatch ? userMatch[1] : 'Gentleman');
+            const username = (userMatch ? userMatch[1] : displayName).toLowerCase();
+
+            processUnifiedChatCommand(username, displayName, chatText);
           }
         }
       };
