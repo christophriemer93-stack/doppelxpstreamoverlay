@@ -13,8 +13,8 @@
     // Euer offizieller StreamElements Overlay API-Key für Kanal d0ppelxp (66654638be356b0a6587f9ab)
     const SE_API_TOKEN = params.get('token') || 'CRQBE-BXXw5s6_3svxRorpLEpGruRwGyZO20Dl8untBOo7D_';
 
-    // Eure originalen StreamElements Alert-Sounds sind jetzt standardmäßig AKTIV (nur per ?sound=0 stummschaltbar)
-    const enableSound = params.get('sound') !== '0';
+    // Sound standardmäßig DEAKTIVIERT (damit es sich in OBS nicht mit dem Haupt-Alert-Overlay doppelt; nur per ?sound=1 aktivierbar)
+    const enableSound = params.get('sound') === '1';
     const SE_SOUNDS = {
         follower: 'https://cdn.streamelements.com/uploads/01m551q9mxg1p402f0eyktn4qh.mp3',
         sub: 'https://cdn.streamelements.com/uploads/01m551q9q5hbzev33nh9vcqd00.mp3',
