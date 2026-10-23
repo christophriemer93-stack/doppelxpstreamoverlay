@@ -460,20 +460,37 @@
       } catch (e) {}
     }
 
-    // Cloud-Daten beim Start laden
+    // Cloud-Daten beim Start laden (Watchtime & Fasanenjäger)
     async function initCloudWatchtime() {
       if (window.CloudDB) {
-        const cloudData = await window.CloudDB.getWatchtimeData();
-        if (cloudData && Object.keys(cloudData).length > 0) {
-          Object.keys(cloudData).forEach(u => {
-            if (!isStreamerOrBot(u)) {
-              if (!ledgerData.watchtime[u] || cloudData[u].minutes > ledgerData.watchtime[u].minutes) {
-                ledgerData.watchtime[u] = cloudData[u];
+        try {
+          const cloudData = await window.CloudDB.getWatchtimeData();
+          if (cloudData && Object.keys(cloudData).length > 0) {
+            Object.keys(cloudData).forEach(u => {
+              if (!isStreamerOrBot(u)) {
+                if (!ledgerData.watchtime[u] || cloudData[u].minutes > ledgerData.watchtime[u].minutes) {
+                  ledgerData.watchtime[u] = cloudData[u];
+                }
               }
+            });
+          }
+        } catch(e) {}
+
+        // Jäger aus Cloud für die Ahnengalerie (Säule 2) synchronisieren
+        try {
+          if (typeof window.CloudDB.getAllHunters === 'function') {
+            const hunters = await window.CloudDB.getAllHunters();
+            if (hunters && typeof hunters === 'object' && Object.keys(hunters).length > 0) {
+              const currentLocal = JSON.parse(localStorage.getItem('gentlemen_pheasant_hunt_v2') || '{}');
+              Object.keys(hunters).forEach(h => {
+                if (!currentLocal[h] || (hunters[h].totalHits || 0) > (currentLocal[h].totalHits || 0)) {
+                  currentLocal[h] = hunters[h];
+                }
+              });
+              localStorage.setItem('gentlemen_pheasant_hunt_v2', JSON.stringify(currentLocal));
             }
-          });
-          renderLedger();
-        }
+          }
+        } catch(e) {}
       }
     }
     initCloudWatchtime();

@@ -38,6 +38,17 @@ const CloudDB = {
     // -------------------------------------------------------------
     // FASANENJAGD & STASH
     // -------------------------------------------------------------
+    async getAllHunters() {
+        try {
+            const res = await fetch(`${FIREBASE_BASE_URL}/pheasants.json`, { cache: 'no-store' });
+            if (!res.ok) throw new Error("HTTP error " + res.status);
+            return await res.json() || {};
+        } catch (e) {
+            console.warn("[CloudDB] Konnte Jäger-Daten nicht laden:", e);
+            return {};
+        }
+    },
+
     async getHunterStash(username) {
         try {
             const cleanUser = username.toLowerCase().replace(/[^a-z0-9_]/g, '');

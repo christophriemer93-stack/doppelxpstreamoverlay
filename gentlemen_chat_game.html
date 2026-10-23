@@ -6,6 +6,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="cloud_db.js"></script>
   <style>
     /* =========================================================
        THE GENTLEMEN – FASANENJAGD & STASH SYSTEM
@@ -635,7 +636,7 @@
 
     };
 
-    // Stash-Datenbank im localStorage
+    // Stash-Datenbank im localStorage & Firebase Cloud
     let userDatabase = {};
     try {
       const saved = localStorage.getItem('gentlemen_pheasant_hunt_v2');
@@ -645,8 +646,40 @@
     function saveDatabase() {
       try {
         localStorage.setItem('gentlemen_pheasant_hunt_v2', JSON.stringify(userDatabase));
+        // In Firebase Cloud sichern
+        if (window.CloudDB && typeof window.CloudDB.updateHunterStash === 'function') {
+          Object.keys(userDatabase).forEach(k => {
+            window.CloudDB.updateHunterStash(k, userDatabase[k]);
+          });
+        }
       } catch (e) {}
     }
+
+    // Beim Start bestehende Jäger aus Firebase Cloud laden
+    async function initCloudPheasants() {
+      if (window.CloudDB && typeof window.CloudDB.getAllHunters === 'function') {
+        const cloudData = await window.CloudDB.getAllHunters();
+        if (cloudData && typeof cloudData === 'object') {
+          Object.keys(cloudData).forEach(u => {
+            const cRec = cloudData[u];
+            if (!userDatabase[u] || (cRec.totalHits || 0) > (userDatabase[u].totalHits || 0)) {
+              userDatabase[u] = {
+                displayName: cRec.displayName || u,
+                totalShots: Math.max(cRec.totalShots || 0, userDatabase[u]?.totalShots || 0),
+                totalHits: Math.max(cRec.totalHits || 0, userDatabase[u]?.totalHits || 0),
+                rareHits: Math.max(cRec.rareHits || 0, userDatabase[u]?.rareHits || 0),
+                misses: Math.max(cRec.misses || 0, userDatabase[u]?.misses || 0),
+                lastSeen: cRec.lastActive || Date.now()
+              };
+            }
+          });
+          try {
+            localStorage.setItem('gentlemen_pheasant_hunt_v2', JSON.stringify(userDatabase));
+          } catch(e) {}
+        }
+      }
+    }
+    initCloudPheasants();
 
     function getUserRecord(username) {
       const key = username.toLowerCase().trim();
