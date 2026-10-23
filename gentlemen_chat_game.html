@@ -1220,46 +1220,70 @@
     };
 
     // Stash-Datenbank im localStorage & Firebase Cloud
+    const FIREBASE_DB_URL = "https://doppelxp-stream-default-rtdb.europe-west1.firebasedatabase.app";
     let userDatabase = {};
     try {
       const saved = localStorage.getItem('gentlemen_pheasant_hunt_v2');
       if (saved) userDatabase = JSON.parse(saved);
     } catch (e) {}
 
+    function pushHunterToFirebase(userKey, record) {
+      if (!record) return;
+      const cleanKey = userKey.toLowerCase().trim().replace(/[.#$\[\]\/]/g, '_');
+      fetch(`${FIREBASE_DB_URL}/pheasants/${encodeURIComponent(cleanKey)}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...record,
+          lastActive: Date.now()
+        })
+      }).catch(() => {});
+    }
+
     function saveDatabase() {
       try {
         localStorage.setItem('gentlemen_pheasant_hunt_v2', JSON.stringify(userDatabase));
-        // In Firebase Cloud sichern
-        if (window.CloudDB && typeof window.CloudDB.updateHunterStash === 'function') {
-          Object.keys(userDatabase).forEach(k => {
-            window.CloudDB.updateHunterStash(k, userDatabase[k]);
-          });
-        }
+        // Direkt in Firebase Cloud sichern
+        Object.keys(userDatabase).forEach(k => {
+          pushHunterToFirebase(k, userDatabase[k]);
+        });
       } catch (e) {}
     }
 
-    // Beim Start bestehende Jäger aus Firebase Cloud laden
+    // Beim Start bidirektional mit Firebase Cloud synchronisieren (Cloud <-> Lokal)
     async function initCloudPheasants() {
-      if (window.CloudDB && typeof window.CloudDB.getAllHunters === 'function') {
-        const cloudData = await window.CloudDB.getAllHunters();
-        if (cloudData && typeof cloudData === 'object') {
-          Object.keys(cloudData).forEach(u => {
-            const cRec = cloudData[u];
-            if (!userDatabase[u] || (cRec.totalHits || 0) > (userDatabase[u].totalHits || 0)) {
-              userDatabase[u] = {
-                displayName: cRec.displayName || u,
-                totalShots: Math.max(cRec.totalShots || 0, userDatabase[u]?.totalShots || 0),
-                totalHits: Math.max(cRec.totalHits || 0, userDatabase[u]?.totalHits || 0),
-                rareHits: Math.max(cRec.rareHits || 0, userDatabase[u]?.rareHits || 0),
-                misses: Math.max(cRec.misses || 0, userDatabase[u]?.misses || 0),
-                lastSeen: cRec.lastActive || Date.now()
-              };
-            }
-          });
-          try {
-            localStorage.setItem('gentlemen_pheasant_hunt_v2', JSON.stringify(userDatabase));
-          } catch(e) {}
-        }
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/pheasants.json`, { cache: 'no-store' });
+        const cloudData = (res.ok ? await res.json() : {}) || {};
+
+        // 1. Cloud -> Lokal mergen
+        Object.keys(cloudData).forEach(u => {
+          const cRec = cloudData[u];
+          if (!cRec) return;
+          userDatabase[u] = {
+            displayName: cRec.displayName || userDatabase[u]?.displayName || u,
+            totalShots: Math.max(cRec.totalShots || 0, userDatabase[u]?.totalShots || 0),
+            totalHits: Math.max(cRec.totalHits || 0, userDatabase[u]?.totalHits || 0),
+            rareHits: Math.max(cRec.rareHits || 0, userDatabase[u]?.rareHits || 0),
+            misses: Math.max(cRec.misses || 0, userDatabase[u]?.misses || 0),
+            lastSeen: Math.max(cRec.lastActive || 0, userDatabase[u]?.lastSeen || Date.now())
+          };
+        });
+
+        try {
+          localStorage.setItem('gentlemen_pheasant_hunt_v2', JSON.stringify(userDatabase));
+        } catch(e) {}
+
+        // 2. Lokal -> Cloud pushen (falls lokal schon Jäger gespeichert sind, die noch nicht in Firebase liegen)
+        Object.keys(userDatabase).forEach(u => {
+          const lRec = userDatabase[u];
+          const cRec = cloudData[u];
+          if (!cRec || (lRec.totalShots || 0) > (cRec.totalShots || 0) || (lRec.totalHits || 0) > (cRec.totalHits || 0)) {
+            pushHunterToFirebase(u, lRec);
+          }
+        });
+      } catch (e) {
+        console.warn("[Fasanenjagd] Firebase Sync Hinweis:", e);
       }
     }
     initCloudPheasants();
@@ -1491,6 +1515,21 @@
     }
 
     async function showStashCard(username, directAvatar) {
+      const cleanKey = username.toLowerCase().trim().replace(/[.#$\[\]\/]/g, '_');
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/pheasants/${encodeURIComponent(cleanKey)}.json`, { cache: 'no-store' });
+        if (res.ok) {
+          const cRec = await res.json();
+          if (cRec) {
+            const lRec = getUserRecord(username);
+            lRec.totalShots = Math.max(lRec.totalShots || 0, cRec.totalShots || 0);
+            lRec.totalHits  = Math.max(lRec.totalHits  || 0, cRec.totalHits  || 0);
+            lRec.rareHits   = Math.max(lRec.rareHits   || 0, cRec.rareHits   || 0);
+            lRec.misses     = Math.max(lRec.misses     || 0, cRec.misses     || 0);
+          }
+        }
+      } catch (e) {}
+
       const userRec = getUserRecord(username);
       const rankInfo = getRankInfo(userRec.totalHits);
 

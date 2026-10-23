@@ -3,7 +3,7 @@ const FIREBASE_BASE_URL = "https://doppelxp-stream-default-rtdb.europe-west1.fir
 
 const CloudDB = {
     // -------------------------------------------------------------
-    // UHREN-INVENTAR & TRESOR
+    // UHREN-INVENTAR & TRESOR (SHOWCASE + SPIELER-TRESORE)
     // -------------------------------------------------------------
     async getVaultWatches() {
         try {
@@ -11,7 +11,6 @@ const CloudDB = {
             if (!res.ok) throw new Error("HTTP error " + res.status);
             const data = await res.json();
             if (!data) return [];
-            // Wandelt Object in Array um
             return Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse();
         } catch (e) {
             console.warn("[CloudDB] Konnte Uhren nicht aus Firebase laden (Fallback):", e);
@@ -35,6 +34,47 @@ const CloudDB = {
         }
     },
 
+    // Komplette Spieler-Tresore (welche Uhren-IDs jeder Zuschauer besitzt + Cooldown)
+    async getAllWatchVaults() {
+        try {
+            const res = await fetch(`${FIREBASE_BASE_URL}/watches_vault.json`, { cache: 'no-store' });
+            if (!res.ok) throw new Error("HTTP error " + res.status);
+            return await res.json() || {};
+        } catch (e) {
+            console.warn("[CloudDB] Konnte Spieler-Tresore nicht aus Firebase laden:", e);
+            return {};
+        }
+    },
+
+    async getUserWatchVault(username) {
+        try {
+            const cleanUser = username.toLowerCase().trim().replace(/[.#$\[\]\/]/g, '_');
+            const res = await fetch(`${FIREBASE_BASE_URL}/watches_vault/${encodeURIComponent(cleanUser)}.json`, { cache: 'no-store' });
+            if (!res.ok) throw new Error("HTTP error " + res.status);
+            return await res.json() || null;
+        } catch (e) {
+            console.warn("[CloudDB] Konnte Einzel-Tresor nicht laden:", e);
+            return null;
+        }
+    },
+
+    async updateUserWatchVault(username, vaultEntry) {
+        try {
+            const cleanUser = username.toLowerCase().trim().replace(/[.#$\[\]\/]/g, '_');
+            await fetch(`${FIREBASE_BASE_URL}/watches_vault/${encodeURIComponent(cleanUser)}.json`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    lastDraw: vaultEntry.lastDraw || 0,
+                    watches: Array.isArray(vaultEntry.watches) ? vaultEntry.watches : [],
+                    updatedAt: Date.now()
+                })
+            });
+        } catch (e) {
+            console.warn("[CloudDB] Fehler beim Sichern des Spieler-Tresors in Firebase:", e);
+        }
+    },
+
     // -------------------------------------------------------------
     // FASANENJAGD & STASH
     // -------------------------------------------------------------
@@ -51,21 +91,21 @@ const CloudDB = {
 
     async getHunterStash(username) {
         try {
-            const cleanUser = username.toLowerCase().replace(/[^a-z0-9_]/g, '');
-            const res = await fetch(`${FIREBASE_BASE_URL}/pheasants/${cleanUser}.json`, { cache: 'no-store' });
+            const cleanUser = username.toLowerCase().trim().replace(/[.#$\[\]\/]/g, '_');
+            const res = await fetch(`${FIREBASE_BASE_URL}/pheasants/${encodeURIComponent(cleanUser)}.json`, { cache: 'no-store' });
             if (!res.ok) throw new Error("HTTP error " + res.status);
             const data = await res.json();
-            return data || { hits: 0, shots: 0, royal: 0 };
+            return data || null;
         } catch (e) {
             console.warn("[CloudDB] Konnte Stash nicht laden:", e);
-            return { hits: 0, shots: 0, royal: 0 };
+            return null;
         }
     },
 
     async updateHunterStash(username, stashData) {
         try {
-            const cleanUser = username.toLowerCase().replace(/[^a-z0-9_]/g, '');
-            await fetch(`${FIREBASE_BASE_URL}/pheasants/${cleanUser}.json`, {
+            const cleanUser = username.toLowerCase().trim().replace(/[.#$\[\]\/]/g, '_');
+            await fetch(`${FIREBASE_BASE_URL}/pheasants/${encodeURIComponent(cleanUser)}.json`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -94,8 +134,8 @@ const CloudDB = {
 
     async updateWatchtime(username, minutes, displayName) {
         try {
-            const cleanUser = username.toLowerCase().replace(/[^a-z0-9_]/g, '');
-            await fetch(`${FIREBASE_BASE_URL}/watchtime/${cleanUser}.json`, {
+            const cleanUser = username.toLowerCase().trim().replace(/[.#$\[\]\/]/g, '_');
+            await fetch(`${FIREBASE_BASE_URL}/watchtime/${encodeURIComponent(cleanUser)}.json`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

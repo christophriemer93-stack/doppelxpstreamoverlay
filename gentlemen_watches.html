@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
@@ -1781,7 +1781,9 @@ if (typeof window !== 'undefined') {
     const WATCH_FALLBACK_SVG = 'data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="100" r="92" fill="%230c140c" stroke="%23c8a84b" stroke-width="6"/><circle cx="100" cy="100" r="86" fill="%23142215" stroke="%231a2e1d" stroke-width="2"/><circle cx="100" cy="25" r="3" fill="%23e5c96a"/><circle cx="175" cy="100" r="3" fill="%23e5c96a"/><circle cx="100" cy="175" r="3" fill="%23e5c96a"/><circle cx="25" cy="100" r="3" fill="%23e5c96a"/><line x1="100" y1="100" x2="100" y2="45" stroke="%23c8a84b" stroke-width="3" stroke-linecap="round"/><line x1="100" y1="100" x2="140" y2="100" stroke="%23c8a84b" stroke-width="2.5" stroke-linecap="round"/><line x1="100" y1="100" x2="80" y2="135" stroke="%23e5c96a" stroke-width="1.5" stroke-linecap="round"/><circle cx="100" cy="100" r="5" fill="%23f5e6b3"/><text x="100" y="75" font-family="serif" font-size="9" fill="%23c8a84b" text-anchor="middle">CHRONOMETRE</text><text x="100" y="130" font-family="serif" font-style="italic" font-size="8" fill="%23c8a84b" text-anchor="middle">Gentlemen</text></svg>';
 
     // Viewer Vault Data: { [username]: { lastDraw: timestamp, watches: [ watchId, ... ] } }
+    const FIREBASE_DB_URL = "https://doppelxp-stream-default-rtdb.europe-west1.firebasedatabase.app";
     let vaultData = {};
+
     function loadVault() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -1791,13 +1793,66 @@ if (typeof window !== 'undefined') {
       }
     }
 
-    function saveVault() {
+    function saveVault(changedUser = null) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(vaultData));
       } catch (e) {}
+
+      // Direkt in Firebase (watches_vault) sichern
+      const usersToSync = changedUser ? [changedUser] : Object.keys(vaultData);
+      usersToSync.forEach(u => {
+        const entry = vaultData[u];
+        if (!entry) return;
+        const cleanKey = u.toLowerCase().trim().replace(/[.#$\[\]\/]/g, '_');
+        fetch(`${FIREBASE_DB_URL}/watches_vault/${encodeURIComponent(cleanKey)}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lastDraw: entry.lastDraw || 0,
+            watches: Array.isArray(entry.watches) ? entry.watches : [],
+            updatedAt: Date.now()
+          })
+        }).catch(() => {});
+      });
+    }
+
+    // Bidirektionaler Cloud-Sync beim Start (lädt Cloud-Tresore & pusht lokale Tresore hoch)
+    async function initCloudWatchVault() {
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/watches_vault.json`, { cache: 'no-store' });
+        const cloudVaults = (res.ok ? await res.json() : {}) || {};
+
+        // 1. Cloud -> Lokal mergen
+        Object.keys(cloudVaults).forEach(u => {
+          const cEntry = cloudVaults[u];
+          if (!cEntry) return;
+          const localEntry = vaultData[u] || { lastDraw: 0, watches: [] };
+          const mergedWatches = Array.from(new Set([...(localEntry.watches || []), ...(cEntry.watches || [])]));
+          vaultData[u] = {
+            lastDraw: Math.max(localEntry.lastDraw || 0, cEntry.lastDraw || 0),
+            watches: mergedWatches
+          };
+        });
+
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(vaultData));
+        } catch (e) {}
+
+        // 2. Lokal -> Cloud pushen (falls lokal schon Uhren gezogen wurden, die noch nicht in Firebase sind)
+        Object.keys(vaultData).forEach(u => {
+          const lEntry = vaultData[u];
+          const cEntry = cloudVaults[u];
+          if (!cEntry || (lEntry.watches || []).length > (cEntry.watches || []).length) {
+            saveVault(u);
+          }
+        });
+      } catch (e) {
+        console.warn("[Uhrenspiel] Firebase Vault Sync Hinweis:", e);
+      }
     }
 
     loadVault();
+    initCloudWatchVault();
 
     // =========================================================
     // 2. SELTENHEITS-WAHRSCHEINLICHKEITEN (DROP RATES)
@@ -1907,6 +1962,24 @@ if (typeof window !== 'undefined') {
     // --- TRESOR ZEIGEN ---
     async function displayUserTresor(user, avatarUrl = null) {
       const cleanUser = (user || 'Gentleman').toLowerCase().trim();
+      const cleanKey = cleanUser.replace(/[.#$\[\]\/]/g, '_');
+
+      // Vor Anzeige kurz Live-Stand aus Firebase abgleichen
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/watches_vault/${encodeURIComponent(cleanKey)}.json`, { cache: 'no-store' });
+        if (res.ok) {
+          const cEntry = await res.json();
+          if (cEntry) {
+            const localEntry = vaultData[cleanUser] || { lastDraw: 0, watches: [] };
+            vaultData[cleanUser] = {
+              lastDraw: Math.max(localEntry.lastDraw || 0, cEntry.lastDraw || 0),
+              watches: Array.from(new Set([...(localEntry.watches || []), ...(cEntry.watches || [])]))
+            };
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(vaultData)); } catch (e) {}
+          }
+        }
+      } catch (e) {}
+
       const uData = vaultData[cleanUser] || { lastDraw: 0, watches: [] };
 
       tresorUser.textContent = user;
@@ -2022,19 +2095,30 @@ if (typeof window !== 'undefined') {
       if (!uData.watches.includes(drawnWatch.id)) {
         uData.watches.push(drawnWatch.id);
       }
-      saveVault();
+      saveVault(cleanUser);
 
-      // In Firebase Cloud sichern falls verfÃ¼gbar
+      // In Firebase Cloud sichern (sowohl über CloudDB als auch direkt per Fetch-Fallback)
+      const watchPayload = {
+        watchId: drawnWatch.id,
+        name: drawnWatch.brand + " " + drawnWatch.model,
+        sub: "Ref. " + drawnWatch.ref,
+        value: formatPound(drawnWatch.price),
+        rarity: drawnWatch.tier >= 4 ? "mythic" : (drawnWatch.tier === 3 ? "legendary" : "rare"),
+        rarityLabel: drawnWatch.tierName,
+        owner: user,
+        img: drawnWatch.img || "",
+        date: "Live im Stream gezogen!",
+        timestamp: now
+      };
+
       if (window.CloudDB && typeof window.CloudDB.saveWatch === 'function') {
-        window.CloudDB.saveWatch({
-          name: drawnWatch.brand + " " + drawnWatch.model,
-          sub: "Ref. " + drawnWatch.ref,
-          value: formatPound(drawnWatch.price),
-          rarity: drawnWatch.tier >= 4 ? "mythic" : (drawnWatch.tier === 3 ? "legendary" : "rare"),
-          rarityLabel: drawnWatch.tierName,
-          owner: user,
-          date: "Live im Stream gezogen!"
-        });
+        window.CloudDB.saveWatch(watchPayload);
+      } else {
+        fetch(`${FIREBASE_DB_URL}/watches.json`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(watchPayload)
+        }).catch(() => {});
       }
 
       displayDrawnWatch(user, drawnWatch);
