@@ -387,6 +387,17 @@
             // In 30-Tage Register für Endscreen eintragen
             recordHistoryEvent(alert.type, data);
 
+            // Live-Sync für 9:16 Vertikal-Overlays (Firebase + LocalStorage)
+            try {
+                const syncPayload = JSON.stringify({ type: alert.type, data: data, ts: Date.now() });
+                localStorage.setItem('gentlemen_live_alert_sync', syncPayload);
+                fetch('https://doppelxp-stream-default-rtdb.europe-west1.firebasedatabase.app/live_alert.json', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: syncPayload
+                }).catch(() => {});
+            } catch (e) {}
+
             // Raid Klasse vor jedem Alert bereinigen
             card.classList.remove('raid-alert');
 

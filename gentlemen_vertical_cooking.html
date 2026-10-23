@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen – The Estate Kitchen (Vertical 9:16)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+            background: transparent;
+            font-family: 'Playfair Display', serif;
+            position: relative;
+        }
+
+        /* === 0. HINTERGRUND-MASKE MIT 2 EXAKTEN 16:9 KAMERA-CUTOUTS ===
+           Hauptkamera oben:      x=44, y=115, w=992, h=558 (16:9)
+           Schneidebrett Mitte:   x=44, y=708, w=992, h=558 (16:9)
+        */
+        .bg-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #particle-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1080px; height: 1920px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* === ÄUSSERER GOLDRAHMEN === */
+        .outer-frame {
+            position: absolute;
+            inset: 14px;
+            border: 1px solid rgba(200, 168, 75, 0.35);
+            z-index: 15;
+            pointer-events: none;
+        }
+
+        .frame-top, .frame-bottom {
+            position: absolute;
+            left: 0; right: 0;
+            height: 4px;
+            z-index: 20;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(200,168,75,0.4) 12%,
+                #c8a84b 32%,
+                #e5c96a 50%,
+                #c8a84b 68%,
+                rgba(200,168,75,0.4) 88%,
+                transparent 100%
+            );
+        }
+        .frame-top { top: 0; }
+        .frame-bottom { bottom: 0; }
+
+        /* === KOPFZEILE (y: 42px - 102px) === */
+        .kitchen-top-header {
+            position: absolute;
+            top: 42px;
+            left: 44px;
+            right: 44px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background: linear-gradient(90deg, rgba(14, 24, 15, 0.92), rgba(22, 38, 24, 0.96), rgba(14, 24, 15, 0.92));
+            border: 1px solid rgba(200, 168, 75, 0.45);
+            border-radius: 3px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.75);
+            z-index: 12;
+        }
+
+        .kh-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: #e5c96a;
+        }
+
+        .kh-right {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 18px;
+            color: rgba(232, 220, 192, 0.85);
+        }
+
+        /* === 1. & 2. KAMERARAHMEN (EXAKT ÜBER DEN CUTOUTS) === */
+        .cam-frame-box {
+            position: absolute;
+            left: 44px;
+            width: 992px;
+            height: 558px;
+            border: 2.5px solid #c8a84b;
+            border-radius: 3px;
+            box-shadow:
+                0 0 0 3px #09120a,
+                0 0 0 4.5px rgba(200, 168, 75, 0.45),
+                0 14px 40px rgba(0,0,0,0.88),
+                inset 0 0 28px rgba(0,0,0,0.6);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .cam-main { top: 115px; }
+        .cam-board { top: 708px; }
+
+        .cam-corner {
+            position: absolute;
+            width: 24px; height: 24px;
+            border: 3px solid #f3ebd6;
+            border-color: #e5c96a;
+        }
+        .cc-tl { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+        .cc-tr { top: -3px; right: -3px; border-left: none; border-bottom: none; }
+        .cc-bl { bottom: -3px; left: -3px; border-right: none; border-top: none; }
+        .cc-br { bottom: -3px; right: -3px; border-left: none; border-top: none; }
+
+        .cam-pill-tag {
+            position: absolute;
+            top: -14px;
+            left: 28px;
+            background: linear-gradient(135deg, #0d180e 0%, #182b1a 100%);
+            border: 1.5px solid #e5c96a;
+            border-radius: 12px;
+            padding: 3px 16px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #f3ebd6;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.85);
+        }
+
+        /* === 3. KOMPAKTES REZEPT- & TIMER-PANEL UNTEN (y: 1296px - 1590px) ===
+           Lässt unten ab y=1590px (330px) Platz für die native Twitch-Mobile-UI!
+        */
+        .culinary-bottom-panel {
+            position: absolute;
+            top: 1296px;
+            left: 44px;
+            width: 992px;
+            height: 288px;
+            background: linear-gradient(160deg, rgba(15, 26, 16, 0.97) 0%, rgba(22, 37, 23, 0.97) 50%, rgba(12, 20, 12, 0.98) 100%);
+            border: 1.5px solid rgba(200, 168, 75, 0.55);
+            border-top: 3px solid #e5c96a;
+            border-radius: 4px;
+            box-shadow: 0 16px 45px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255,255,255,0.12);
+            z-index: 12;
+            display: flex;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Linke Seite im Panel: Gericht & Aktive Schritte (620px) */
+        .recipe-left {
+            width: 620px;
+            padding: 20px 26px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 1px solid rgba(200, 168, 75, 0.28);
+        }
+
+        .dish-header-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .course-eyebrow {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3.5px;
+            text-transform: uppercase;
+            color: #c8a84b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dish-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 26px;
+            color: #f3ebd6;
+            line-height: 1.15;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Schritte-Viewport (zeigt 2-3 Schritte mit Auto-Scroll zum aktiven Schritt) */
+        .steps-viewport {
+            height: 132px;
+            overflow: hidden;
+            position: relative;
+            background: rgba(8, 14, 8, 0.55);
+            border: 1px solid rgba(200, 168, 75, 0.22);
+            border-radius: 3px;
+            padding: 10px 14px;
+        }
+
+        .steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform 0.45s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        .step-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 7px 12px;
+            border-radius: 3px;
+            background: rgba(16, 26, 16, 0.6);
+            border-left: 3px solid rgba(200, 168, 75, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .step-row.done {
+            opacity: 0.48;
+            border-left-color: #5ea869;
+        }
+        .step-row.done .step-text {
+            text-decoration: line-through;
+        }
+
+        .step-row.active {
+            background: linear-gradient(90deg, rgba(200, 168, 75, 0.22), rgba(24, 42, 24, 0.85));
+            border-left: 4px solid #e5c96a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+        }
+
+        .step-num {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            color: #e5c96a;
+            min-width: 24px;
+        }
+
+        .step-text {
+            font-family: 'IM Fell English', serif;
+            font-size: 19px;
+            color: #f3ebd6;
+            line-height: 1.2;
+        }
+
+        .cmd-hint-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: rgba(200, 168, 75, 0.65);
+        }
+
+        .cmd-pill {
+            background: rgba(0,0,0,0.45);
+            border: 1px solid rgba(200, 168, 75, 0.3);
+            padding: 2px 8px;
+            border-radius: 2px;
+            color: #e5c96a;
+        }
+
+        /* Rechte Seite im Panel: Manor Küchen-Chronometer (372px) */
+        .timer-right {
+            flex: 1;
+            padding: 22px 26px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(26, 44, 26, 0.55) 0%, rgba(10, 17, 10, 0.8) 100%);
+        }
+
+        .timer-top-row {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .timer-eyebrow {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: rgba(200, 168, 75, 0.8);
+            text-transform: uppercase;
+        }
+
+        .timer-badge {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            padding: 3px 10px;
+            border-radius: 2px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(200, 168, 75, 0.4);
+            color: #e5c96a;
+        }
+        .timer-badge.running {
+            background: rgba(27, 77, 36, 0.85);
+            border-color: #72cf85;
+            color: #bbf0c5;
+        }
+        .timer-badge.done {
+            background: rgba(150, 35, 35, 0.9);
+            border-color: #ff8888;
+            color: #fff;
+            animation: pulseDone 0.8s infinite alternate;
+        }
+        @keyframes pulseDone {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+
+        .timer-clock-digits {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 68px;
+            color: #e5c96a;
+            letter-spacing: 4px;
+            line-height: 1;
+            text-shadow: 0 0 30px rgba(229, 201, 106, 0.35);
+            margin: 6px 0;
+        }
+
+        .timer-task-label {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 20px;
+            color: #f3ebd6;
+            margin-bottom: 8px;
+        }
+
+        .timer-track {
+            width: 100%;
+            height: 7px;
+            background: rgba(0,0,0,0.65);
+            border: 1px solid rgba(200, 168, 75, 0.35);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #9e7f30, #e5c96a, #f3ebd6);
+            transition: width 1s linear;
+        }
+    </style>
+</head>
+<body data-scene="cooking">
+
+    <div class="frame-top"></div>
+    <div class="frame-bottom"></div>
+    <div class="outer-frame"></div>
+
+    <!-- Solid Manor Green Background with 2 exact 16:9 Cutouts -->
+    <div class="bg-layer">
+        <svg width="1080" height="1920" viewBox="0 0 1080 1920">
+            <defs>
+                <radialGradient id="kitchenVertGrad" cx="50%" cy="45%" r="75%">
+                    <stop offset="0%" stop-color="#152817"/>
+                    <stop offset="60%" stop-color="#0b160c"/>
+                    <stop offset="100%" stop-color="#050a06"/>
+                </radialGradient>
+                <mask id="kitchenCamsMask">
+                    <rect width="1080" height="1920" fill="white"/>
+                    <!-- 1. Hauptkamera (Oben 16:9: 992 x 558) -->
+                    <rect x="44" y="115" width="992" height="558" rx="3" fill="black"/>
+                    <!-- 2. Schneidebrett / Herdkamera (Mitte 16:9: 992 x 558) -->
+                    <rect x="44" y="708" width="992" height="558" rx="3" fill="black"/>
+                </mask>
+            </defs>
+            <rect width="1080" height="1920" fill="url(#kitchenVertGrad)" mask="url(#kitchenCamsMask)"/>
+        </svg>
+    </div>
+
+    <canvas id="particle-canvas" width="1080" height="1920"></canvas>
+
+    <!-- KOPFZEILE -->
+    <header class="kitchen-top-header">
+        <div class="kh-left">
+            <span>✦</span>
+            <span>THE ESTATE KITCHEN</span>
+            <span>✦</span>
+        </div>
+        <div class="kh-right" id="course-name">Hauptgang · Private Reserve</div>
+    </header>
+
+    <!-- 1. HAUPTKAMERA RAHMEN (OBEN) -->
+    <div class="cam-frame-box cam-main">
+        <div class="cam-pill-tag">✦ &nbsp; Chef &amp; Salon</div>
+        <div class="cam-corner cc-tl"></div>
+        <div class="cam-corner cc-tr"></div>
+        <div class="cam-corner cc-bl"></div>
+        <div class="cam-corner cc-br"></div>
+    </div>
+
+    <!-- 2. SCHNEIDEBRETT / HERD KAMERA RAHMEN (MITTE) -->
+    <div class="cam-frame-box cam-board">
+        <div class="cam-pill-tag">✦ &nbsp; Herd &amp; Schneidebrett</div>
+        <div class="cam-corner cc-tl"></div>
+        <div class="cam-corner cc-tr"></div>
+        <div class="cam-corner cc-bl"></div>
+        <div class="cam-corner cc-br"></div>
+    </div>
+
+    <!-- 3. KOMPAKTES REZEPT- & TIMER-PANEL (UNTEN) -->
+    <section class="culinary-bottom-panel" id="culinary-card">
+        <div class="recipe-left">
+            <div class="dish-header-row">
+                <div class="course-eyebrow">
+                    <span>✦ &nbsp; AKTUELLES MENÜ</span>
+                    <span id="step-count-label">Schritt 1 / 5</span>
+                </div>
+                <div class="dish-title" id="dish-title">Dry Aged Ribeye · Trüffeljus · Pommes Pont-Neuf</div>
+            </div>
+
+            <div class="steps-viewport">
+                <div class="steps-list" id="steps-list"></div>
+            </div>
+
+            <div class="cmd-hint-row">
+                <span>Chat-Regie:</span>
+                <span class="cmd-pill">!step 1-5</span>
+                <span class="cmd-pill">!next</span>
+                <span class="cmd-pill">!timer [min]</span>
+                <span class="cmd-pill">!gericht [Name]</span>
+            </div>
+        </div>
+
+        <div class="timer-right">
+            <div class="timer-top-row">
+                <span class="timer-eyebrow">⏱ Chronometer</span>
+                <span class="timer-badge" id="timer-badge">STANDBY</span>
+            </div>
+
+            <div class="timer-clock-digits" id="timer-display">10:00</div>
+            <div class="timer-task-label" id="timer-label">Garzeit / Ruhen</div>
+
+            <div class="timer-track">
+                <div class="timer-bar" id="timer-progress-bar"></div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const channel = (urlParams.get('channel') || 'd0ppelxp').toLowerCase();
+
+        // --- 1. Goldene Partikel außerhalb der beiden 16:9 Kamera-Fenster ---
+        const pCanvas = document.getElementById('particle-canvas');
+        const pCtx = pCanvas.getContext('2d');
+        const cutouts = [
+            { x: 44, y: 115, w: 992, h: 558 },
+            { x: 44, y: 708, w: 992, h: 558 }
+        ];
+
+        const particles = Array.from({ length: 65 }, () => ({
+            x: Math.random() * 1080,
+            y: Math.random() * 1920,
+            r: Math.random() * 1.9 + 0.4,
+            speed: Math.random() * 0.25 + 0.05,
+            drift: (Math.random() - 0.5) * 0.14,
+            phase: Math.random() * Math.PI * 2
+        }));
+
+        function drawParticles() {
+            pCtx.clearRect(0, 0, 1080, 1920);
+            const now = Date.now() * 0.001;
+            particles.forEach(p => {
+                const inCam = cutouts.some(c => p.x >= c.x && p.x <= c.x + c.w && p.y >= c.y && p.y <= c.y + c.h);
+                if (!inCam) {
+                    const alpha = 0.1 + Math.abs(Math.sin(now * 0.6 + p.phase)) * 0.3;
+                    pCtx.beginPath();
+                    pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    pCtx.fillStyle = `rgba(229, 201, 106, ${alpha.toFixed(2)})`;
+                    pCtx.fill();
+                }
+                p.y -= p.speed;
+                p.x += p.drift;
+                if (p.y < -5) { p.y = 1925; p.x = Math.random() * 1080; }
+                if (p.x < 0) p.x = 1080;
+                if (p.x > 1080) p.x = 0;
+            });
+            requestAnimationFrame(drawParticles);
+        }
+        drawParticles();
+
+        // --- 2. Schritte & Timer Logik ---
+        let stepsData = [
+            'Mise en Place & Kräuter hacken',
+            'Gusseisenpfanne erhitzen & Butterschmalz',
+            'Scharf anbraten & mit Rosmarin arrosieren',
+            'Sauce reduzieren & Fleisch ruhen lassen',
+            'Tranchieren, Anrichten & Tasting'
+        ];
+        let currentActiveStep = 1;
+
+        const stepsListEl = document.getElementById('steps-list');
+        const stepCountLabelEl = document.getElementById('step-count-label');
+        const dishTitleEl = document.getElementById('dish-title');
+        const courseNameEl = document.getElementById('course-name');
+
+        function renderSteps() {
+            stepsListEl.innerHTML = '';
+            stepsData.forEach((text, i) => {
+                const stepNum = i + 1;
+                const row = document.createElement('div');
+                row.className = 'step-row';
+                if (stepNum < currentActiveStep) row.classList.add('done');
+                else if (stepNum === currentActiveStep) row.classList.add('active');
+
+                row.innerHTML = `
+                    <span class="step-num">${stepNum < currentActiveStep ? '✓' : '0' + stepNum}</span>
+                    <span class="step-text">${text}</span>
+                `;
+                stepsListEl.appendChild(row);
+            });
+            stepCountLabelEl.textContent = `Schritt ${Math.min(currentActiveStep, stepsData.length)} / ${stepsData.length}`;
+
+            // Auto-Scroll zum aktiven Schritt
+            const rowHeight = 46;
+            const offset = Math.max(0, (currentActiveStep - 1) * rowHeight);
+            stepsListEl.style.transform = `translateY(-${offset}px)`;
+        }
+
+        function setActiveStep(step) {
+            currentActiveStep = Math.max(1, Math.min(stepsData.length + 1, step));
+            renderSteps();
+        }
+
+        // --- Timer ---
+        let timerTotalSeconds = 600;
+        let timerRemainingSeconds = 600;
+        let timerInterval = null;
+
+        const timerDisplayEl = document.getElementById('timer-display');
+        const timerLabelEl = document.getElementById('timer-label');
+        const timerBadgeEl = document.getElementById('timer-badge');
+        const timerBarEl = document.getElementById('timer-progress-bar');
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function playBellSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                [880, 1318.5].forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 2.2);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + idx * 0.12);
+                    osc.stop(ctx.currentTime + 2.2);
+                });
+            } catch (e) {}
+        }
+
+        function startTimer(seconds, label = 'Garzeit') {
+            clearInterval(timerInterval);
+            timerTotalSeconds = Math.max(1, Math.round(seconds));
+            timerRemainingSeconds = timerTotalSeconds;
+            timerLabelEl.textContent = label;
+            timerBadgeEl.textContent = 'LÄUFT';
+            timerBadgeEl.className = 'timer-badge running';
+            timerDisplayEl.textContent = formatTime(timerRemainingSeconds);
+            timerBarEl.style.width = '100%';
+
+            timerInterval = setInterval(() => {
+                timerRemainingSeconds--;
+                if (timerRemainingSeconds <= 0) {
+                    timerRemainingSeconds = 0;
+                    clearInterval(timerInterval);
+                    timerBadgeEl.textContent = 'FERTIG!';
+                    timerBadgeEl.className = 'timer-badge done';
+                    playBellSound();
+                }
+                timerDisplayEl.textContent = formatTime(timerRemainingSeconds);
+                const pct = (timerRemainingSeconds / timerTotalSeconds) * 100;
+                timerBarEl.style.width = `${Math.max(0, pct)}%`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerBadgeEl.textContent = 'STANDBY';
+            timerBadgeEl.className = 'timer-badge';
+            timerDisplayEl.textContent = formatTime(timerTotalSeconds);
+            timerBarEl.style.width = '100%';
+        }
+
+        function handleCommand(rawText) {
+            const clean = (rawText || '').trim();
+            if (!clean.startsWith('!')) return;
+            const parts = clean.split(' ');
+            const cmd = parts[0].toLowerCase();
+            const arg1 = (parts[1] || '').toLowerCase();
+            const rest = parts.slice(2).join(' ');
+
+            if (cmd === '!step' || cmd === '!schritt' || cmd === '!phase') {
+                if (!arg1 || ['next', 'weiter', 'done', '+'].includes(arg1)) setActiveStep(currentActiveStep + 1);
+                else if (['prev', 'back', 'zurueck', '-'].includes(arg1)) setActiveStep(currentActiveStep - 1);
+                else if (!isNaN(parseInt(arg1, 10))) setActiveStep(parseInt(arg1, 10));
+            } else if (['!next', '!weiter', '!done'].includes(cmd)) {
+                setActiveStep(currentActiveStep + 1);
+            } else if (['!prev', '!zurueck'].includes(cmd)) {
+                setActiveStep(currentActiveStep - 1);
+            } else if (cmd === '!gericht' || cmd === '!dish') {
+                const title = parts.slice(1).join(' ');
+                if (title) dishTitleEl.textContent = title;
+            } else if (cmd === '!timer') {
+                if (['stop', 'reset', 'aus'].includes(arg1)) stopTimer();
+                else if (arg1 && !isNaN(parseFloat(arg1))) {
+                    startTimer(parseFloat(arg1) * 60, rest || 'Garzeit');
+                } else {
+                    startTimer(600, 'Garzeit');
+                }
+            }
+        }
+
+        // Twitch IRC Verbindung für Live-Steuerung über den Chat (#d0ppelxp)
+        function connectTwitchIrc(chan) {
+            const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+            ws.onopen = () => {
+                ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+                ws.send('PASS SCHMOOPIIE');
+                ws.send('NICK justinfan' + Math.floor(Math.random() * 89999 + 10000));
+                ws.send('JOIN #' + chan);
+            };
+            ws.onmessage = (e) => {
+                const lines = e.data.split('\r\n');
+                for (const line of lines) {
+                    if (!line) continue;
+                    if (line.startsWith('PING')) {
+                        ws.send('PONG :tmi.twitch.tv');
+                        continue;
+                    }
+                    if (line.includes('PRIVMSG')) {
+                        const isModOrBroadcaster = line.includes('broadcaster/1') || line.includes('mod=1');
+                        const msgMatch = line.match(/PRIVMSG #[^ ]+ :(.*)$/);
+                        if (msgMatch && isModOrBroadcaster) {
+                            handleCommand(msgMatch[1]);
+                        }
+                    }
+                }
+            };
+            ws.onclose = () => setTimeout(() => connectTwitchIrc(chan), 5000);
+        }
+
+        renderSteps();
+        connectTwitchIrc(channel);
+
+        // Globale API für Vorschau & Studio (inkl. postMessage für lokale file:// Iframes)
+        window.CookingVertical = {
+            setActiveStep,
+            startTimer,
+            stopTimer,
+            setDish: (t, c) => {
+                if (t) dishTitleEl.textContent = t;
+                if (c) courseNameEl.textContent = c;
+            },
+            handleCommand
+        };
+
+        window.addEventListener('message', (e) => {
+            if (e && e.data && e.data.action === 'gm_cook_cmd') {
+                handleCommand(e.data.cmd);
+            }
+        });
+    </script>
+    <script src="gentlemen_vertical_alerts.js"></script>
+</body>
+</html>

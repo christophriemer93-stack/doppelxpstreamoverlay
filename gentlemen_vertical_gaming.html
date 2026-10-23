@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen – Gaming Overlay (Vertical 9:16)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+            background: transparent;
+            font-family: 'Playfair Display', serif;
+            position: relative;
+            pointer-events: none;
+        }
+
+        /* =========================================================
+           1. ULTRA-SLIM OUTER GENTLEMEN RIBBON FRAME (1080x1920)
+           ========================================================= */
+        .outer-ribbon-frame {
+            position: absolute;
+            inset: 0;
+            border: 5px solid #0d1a0f;
+            box-shadow:
+                inset 0 0 0 2px #e5c96a,
+                inset 0 0 0 5px #0d1a0f,
+                inset 0 0 0 6px rgba(200, 168, 75, 0.55),
+                inset 0 0 30px rgba(0, 0, 0, 0.65);
+            z-index: 20;
+        }
+
+        /* 4 Goldene Eck-Winkel außen */
+        .corner-bracket {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-color: #e5c96a;
+            border-style: solid;
+            z-index: 25;
+            filter: drop-shadow(0 0 5px rgba(229, 201, 106, 0.5));
+        }
+        .c-tl { top: 4px; left: 4px; border-width: 4px 0 0 4px; }
+        .c-tr { top: 4px; right: 4px; border-width: 4px 4px 0 0; }
+        .c-bl { bottom: 4px; left: 4px; border-width: 0 0 4px 4px; }
+        .c-br { bottom: 4px; right: 4px; border-width: 0 4px 4px 0; }
+
+        /* =========================================================
+           2. DIE EDLE GENTLEMEN-GOLDLEISTE (TRENNUNG CAM / GAMEPLAY)
+           Standardmäßig bei y = 608px (exakt 1080x608 = 16:9 für Facecam oben!)
+           ========================================================= */
+        .divider-assembly {
+            position: absolute;
+            top: 608px; /* 1/3 Höhe (exakt 16:9 Facecam oben: 1080 x 608) */
+            left: 0;
+            right: 0;
+            height: 14px;
+            transform: translateY(-50%);
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mehrschichtiger Moosgrün- & Doppelgold-Balken */
+        .divider-bar {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg,
+                #0a140b 0%,
+                #132415 25%,
+                #1a301c 50%,
+                #132415 75%,
+                #0a140b 100%
+            );
+            border-top: 2px solid #e5c96a;
+            border-bottom: 2px solid #c8a84b;
+            box-shadow:
+                0 -6px 20px rgba(0, 0, 0, 0.85),
+                0 8px 24px rgba(0, 0, 0, 0.9),
+                0 0 18px rgba(200, 168, 75, 0.25);
+            overflow: hidden;
+        }
+
+        /* Feine mittlere Goldader im Trennbalken */
+        .divider-bar::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0; right: 0;
+            height: 1px;
+            transform: translateY(-50%);
+            background: linear-gradient(90deg, transparent 5%, rgba(229, 201, 106, 0.55) 50%, transparent 95%);
+        }
+
+        /* Sanfter goldener Lichtschimmer über die Leiste */
+        .divider-shimmer {
+            position: absolute;
+            top: 0;
+            left: -60%;
+            width: 35%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 238, 180, 0.45), transparent);
+            transform: skewX(-25deg);
+            animation: barSweep 7s infinite ease-in-out;
+        }
+
+        @keyframes barSweep {
+            0% { left: -60%; }
+            30% { left: 130%; }
+            100% { left: 130%; }
+        }
+
+        /* Seitliche Eck-Winkel an der Trennleiste (für Facecam & Gameplay) */
+        .split-corner {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-color: #e5c96a;
+            border-style: solid;
+            z-index: 32;
+        }
+        .sc-tl { bottom: 11px; left: 4px; border-width: 0 0 3px 3px; }
+        .sc-tr { bottom: 11px; right: 4px; border-width: 0 3px 3px 0; }
+        .sc-bl { top: 11px; left: 4px; border-width: 3px 0 0 3px; }
+        .sc-br { top: 11px; right: 4px; border-width: 3px 3px 0 0; }
+
+        /* Zentrierte Gentlemen-Plakette auf der Trennleiste */
+        .center-plaque {
+            position: relative;
+            z-index: 35;
+            background: linear-gradient(135deg, #0d190e 0%, #162818 50%, #0d190e 100%);
+            border: 2px solid #e5c96a;
+            outline: 2px solid #091109;
+            border-radius: 20px;
+            padding: 4px 26px 5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow:
+                0 6px 20px rgba(0, 0, 0, 0.92),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .plaque-gem {
+            font-size: 11px;
+            color: #e5c96a;
+            text-shadow: 0 0 8px rgba(229, 201, 106, 0.6);
+        }
+
+        .plaque-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 15px;
+            letter-spacing: 3.5px;
+            color: #f3ebd6;
+            text-transform: uppercase;
+        }
+
+        .plaque-sub {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 10px;
+            letter-spacing: 2.5px;
+            color: #c8a84b;
+            text-transform: uppercase;
+            border-left: 1px solid rgba(200, 168, 75, 0.4);
+            padding-left: 12px;
+        }
+    </style>
+</head>
+<body data-scene="gaming">
+
+    <!-- Äußerer Moosgrün-Gold-Rahmen -->
+    <div class="outer-ribbon-frame"></div>
+    <div class="corner-bracket c-tl"></div>
+    <div class="corner-bracket c-tr"></div>
+    <div class="corner-bracket c-bl"></div>
+    <div class="corner-bracket c-br"></div>
+
+    <!-- Goldene Trennleiste zwischen Facecam (oben 1/3: 0–608px) und Gameplay (unten 2/3: 608–1920px) -->
+    <div class="divider-assembly" id="dividerAssembly">
+        <div class="split-corner sc-tl"></div>
+        <div class="split-corner sc-tr"></div>
+        <div class="split-corner sc-bl"></div>
+        <div class="split-corner sc-br"></div>
+
+        <div class="divider-bar">
+            <div class="divider-shimmer"></div>
+        </div>
+
+        <div class="center-plaque" id="centerPlaque">
+            <span class="plaque-gem">✦</span>
+            <span class="plaque-title">Doppel XP</span>
+            <span class="plaque-sub">The Gentlemen</span>
+            <span class="plaque-gem">✦</span>
+        </div>
+    </div>
+
+    <script>
+        // Optional per URL anpassbar:
+        // ?split=608 (Höhe der Facecam oben in Pixeln, Standard 608px = exaktes 16:9 bei 1080px Breite)
+        // ?plaque=0 (falls nur die blanke Goldleiste ohne DXP-Plakette gewünscht ist)
+        const params = new URLSearchParams(window.location.search);
+        const splitY = parseInt(params.get('split'), 10);
+        if (!isNaN(splitY) && splitY > 200 && splitY < 1600) {
+            document.getElementById('dividerAssembly').style.top = splitY + 'px';
+        }
+        if (params.get('plaque') === '0') {
+            document.getElementById('centerPlaque').style.display = 'none';
+        }
+    </script>
+    <script src="gentlemen_vertical_alerts.js"></script>
+</body>
+</html>

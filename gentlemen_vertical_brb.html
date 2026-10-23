@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>The Gentlemen – Be Right Back (Vertical 9:16)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+            background: transparent;
+            font-family: 'Playfair Display', serif;
+            position: relative;
+        }
+
+        /* === SOLID MANOR BACKGROUND WITH 16:9 CLIP CUTOUT (992 x 558 at x=44, y=640) === */
+        .bg-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #particle-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1080px; height: 1920px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* === OUTER FRAME === */
+        .outer-frame {
+            position: absolute;
+            inset: 18px;
+            border: 1px solid rgba(200, 168, 75, 0.32);
+            box-shadow: inset 0 0 0 4px rgba(13, 22, 13, 0.85), inset 0 0 0 5px rgba(200, 168, 75, 0.16);
+            z-index: 15;
+            pointer-events: none;
+        }
+
+        .frame-top, .frame-bottom {
+            position: absolute;
+            left: 0; right: 0;
+            height: 4px;
+            z-index: 20;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(200,168,75,0.4) 12%,
+                #c8a84b 32%,
+                #e5c96a 50%,
+                #c8a84b 68%,
+                rgba(200,168,75,0.4) 88%,
+                transparent 100%
+            );
+        }
+        .frame-top { top: 0; }
+        .frame-bottom { bottom: 0; }
+
+        .corner { position: absolute; width: 72px; height: 72px; z-index: 21; pointer-events: none; }
+        .corner svg { width: 100%; height: 100%; }
+        .corner-tl { top: 18px; left: 18px; }
+        .corner-tr { top: 18px; right: 18px; transform: scaleX(-1); }
+        .corner-bl { bottom: 18px; left: 18px; transform: scaleY(-1); }
+        .corner-br { bottom: 18px; right: 18px; transform: scale(-1,-1); }
+
+        /* === VERTICAL CONTENT LAYOUT === */
+        .vertical-brb-layout {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- 1. TOP HEADER BLOCK (y: 185px - 580px) --- */
+        .top-block {
+            margin-top: 195px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 70px;
+        }
+
+        .live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(8, 15, 9, 0.85);
+            border: 1px solid rgba(200, 168, 75, 0.45);
+            padding: 8px 20px;
+            border-radius: 2px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #e5c96a;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+        }
+
+        .pulse-dot {
+            width: 8px; height: 8px;
+            background: #e5c96a;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #e5c96a;
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.85); }
+        }
+
+        .brb-headline {
+            font-weight: 900;
+            font-size: 92px;
+            line-height: 1.0;
+            color: #e8dcc0;
+            text-shadow: 0 6px 35px rgba(0,0,0,0.95);
+            margin-bottom: 16px;
+        }
+
+        .brb-subline {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 26px;
+            color: rgba(200,168,75,0.78);
+            line-height: 1.35;
+        }
+
+        /* --- 2. 16:9 CLIP WINDOW (EXACTLY AT x=44, y=640, 992x558) --- */
+        .clip-frame-container {
+            position: absolute;
+            top: 640px;
+            left: 44px;
+            width: 992px;
+            height: 558px;
+            border: 2.5px solid #c8a84b;
+            box-shadow:
+                0 0 0 4px #0b140c,
+                0 0 0 5.5px rgba(200, 168, 75, 0.45),
+                0 20px 60px rgba(0,0,0,0.92),
+                inset 0 0 35px rgba(0,0,0,0.65);
+            background: transparent;
+        }
+
+        .clip-header-bar {
+            position: absolute;
+            top: -42px;
+            left: -2.5px; right: -2.5px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(16, 28, 16, 0.96) 0%, rgba(26, 42, 22, 0.96) 100%);
+            border: 1px solid rgba(200, 168, 75, 0.45);
+            border-bottom: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .clip-header-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #e5c96a;
+            font-weight: 800;
+        }
+
+        .clip-header-meta {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 15px;
+            color: rgba(200,168,75,0.75);
+        }
+
+        .clip-footer-bar {
+            position: absolute;
+            bottom: -38px;
+            left: -2.5px; right: -2.5px;
+            height: 36px;
+            background: linear-gradient(135deg, rgba(16, 28, 16, 0.96) 0%, rgba(22, 36, 18, 0.96) 100%);
+            border: 1px solid rgba(200, 168, 75, 0.35);
+            border-top: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.6);
+        }
+
+        .c-corner {
+            position: absolute;
+            width: 28px; height: 28px;
+            border: 3px solid #e5c96a;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .c-tl { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+        .c-tr { top: -3px; right: -3px; border-left: none; border-bottom: none; }
+        .c-bl { bottom: -3px; left: -3px; border-right: none; border-top: none; }
+        .c-br { bottom: -3px; right: -3px; border-left: none; border-top: none; }
+
+        /* --- 3. BOTTOM STATUS CARD (y: 1285px, WELL ABOVE MOBILE SAFE ZONE) --- */
+        .bottom-status-box {
+            position: absolute;
+            top: 1285px;
+            left: 80px;
+            right: 80px;
+            background: linear-gradient(135deg, rgba(18, 32, 18, 0.9) 0%, rgba(28, 46, 22, 0.9) 100%);
+            border: 1px solid rgba(200, 168, 75, 0.35);
+            border-left: 4px solid #c8a84b;
+            border-right: 4px solid #c8a84b;
+            padding: 24px 34px;
+            text-align: center;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.75);
+        }
+
+        .status-eyebrow {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.6);
+            margin-bottom: 10px;
+        }
+
+        .status-message {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 25px;
+            color: #f3ebd6;
+            min-height: 36px;
+            transition: opacity 0.5s ease;
+        }
+        .status-message.fade { opacity: 0; }
+
+        .estate-footer-tag {
+            position: absolute;
+            top: 1465px;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(200, 168, 75, 0.4);
+        }
+    </style>
+</head>
+<body data-scene="brb">
+
+    <div class="frame-top"></div>
+    <div class="frame-bottom"></div>
+    <div class="outer-frame"></div>
+
+    <!-- Ecken -->
+    <div class="corner corner-tl">
+        <svg viewBox="0 0 70 70" fill="none">
+            <path d="M4 66 L4 4 L66 4" stroke="#c8a84b" stroke-width="2.5"/>
+            <path d="M4 4 L16 16" stroke="rgba(200,168,75,0.5)" stroke-width="1.2"/>
+            <circle cx="4" cy="4" r="3.5" fill="#e5c96a"/>
+        </svg>
+    </div>
+    <div class="corner corner-tr">
+        <svg viewBox="0 0 70 70" fill="none">
+            <path d="M4 66 L4 4 L66 4" stroke="#c8a84b" stroke-width="2.5"/>
+            <path d="M4 4 L16 16" stroke="rgba(200,168,75,0.5)" stroke-width="1.2"/>
+            <circle cx="4" cy="4" r="3.5" fill="#e5c96a"/>
+        </svg>
+    </div>
+    <div class="corner corner-bl">
+        <svg viewBox="0 0 70 70" fill="none">
+            <path d="M4 66 L4 4 L66 4" stroke="#c8a84b" stroke-width="2.5"/>
+            <path d="M4 4 L16 16" stroke="rgba(200,168,75,0.5)" stroke-width="1.2"/>
+            <circle cx="4" cy="4" r="3.5" fill="#e5c96a"/>
+        </svg>
+    </div>
+    <div class="corner corner-br">
+        <svg viewBox="0 0 70 70" fill="none">
+            <path d="M4 66 L4 4 L66 4" stroke="#c8a84b" stroke-width="2.5"/>
+            <path d="M4 4 L16 16" stroke="rgba(200,168,75,0.5)" stroke-width="1.2"/>
+            <circle cx="4" cy="4" r="3.5" fill="#e5c96a"/>
+        </svg>
+    </div>
+
+    <!-- Solid Manor Green Background with true 16:9 transparent Cutout (992 x 558 at x=44, y=640) -->
+    <div class="bg-layer">
+        <svg width="1080" height="1920" viewBox="0 0 1080 1920">
+            <defs>
+                <radialGradient id="brbManorGrad" cx="50%" cy="45%" r="70%">
+                    <stop offset="0%" stop-color="#1a2a18"/>
+                    <stop offset="55%" stop-color="#101a0f"/>
+                    <stop offset="100%" stop-color="#070c07"/>
+                </radialGradient>
+                <mask id="brbClipCutout">
+                    <rect width="1080" height="1920" fill="white"/>
+                    <rect x="44" y="640" width="992" height="558" rx="2" fill="black"/>
+                </mask>
+            </defs>
+            <rect width="1080" height="1920" fill="url(#brbManorGrad)" mask="url(#brbClipCutout)"/>
+        </svg>
+    </div>
+
+    <canvas id="particle-canvas" width="1080" height="1920"></canvas>
+
+    <div class="vertical-brb-layout">
+        <!-- 1. TOP HEADER -->
+        <div class="top-block">
+            <div class="live-pill">
+                <div class="pulse-dot"></div>
+                <span>Stream pausiert · Gleich zurück</span>
+            </div>
+            <div class="brb-headline">Kurze Pause.</div>
+            <div class="brb-subline">Die Herren sind in wenigen Augenblicken wieder im Salon.</div>
+        </div>
+
+        <!-- 2. 16:9 CLIP CUTOUT FRAME -->
+        <div class="clip-frame-container">
+            <div class="clip-header-bar">
+                <span class="clip-header-title">✦ &nbsp; Aus den Archiven des Hauses</span>
+                <span class="clip-header-meta">The Gentlemen · Rückblick</span>
+            </div>
+
+            <div class="c-corner c-tl"></div>
+            <div class="c-corner c-tr"></div>
+            <div class="c-corner c-bl"></div>
+            <div class="c-corner c-br"></div>
+
+            <div class="clip-footer-bar">
+                <span>Halstead Estate Vorführraum</span>
+                <span>16:9 Vorführung</span>
+            </div>
+        </div>
+
+        <!-- 3. BOTTOM STATUS -->
+        <div class="bottom-status-box">
+            <div class="status-eyebrow">✦ &nbsp; Notiz des Butlers &nbsp; ✦</div>
+            <div class="status-message" id="brb-status">Das Kristallglas wird an der Bar frisch befüllt...</div>
+        </div>
+
+        <div class="estate-footer-tag">✦ &nbsp; Doppel XP · The Gentlemen &nbsp; ✦</div>
+    </div>
+
+    <script>
+        // --- Goldene Partikel (außerhalb des Clip-Fensters) ---
+        const pCanvas = document.getElementById('particle-canvas');
+        const pCtx = pCanvas.getContext('2d');
+
+        const particles = Array.from({ length: 70 }, () => ({
+            x: Math.random() * 1080,
+            y: Math.random() * 1920,
+            r: Math.random() * 1.9 + 0.3,
+            speed: Math.random() * 0.25 + 0.05,
+            drift: (Math.random() - 0.5) * 0.15,
+            phase: Math.random() * Math.PI * 2,
+        }));
+
+        function drawParticles() {
+            pCtx.clearRect(0, 0, 1080, 1920);
+            const now = Date.now() * 0.001;
+
+            particles.forEach(p => {
+                // Nicht mitten im transparenten Clip-Fenster zeichnen
+                const inClip = (p.x > 44 && p.x < 1036 && p.y > 640 && p.y < 1198);
+                if (!inClip) {
+                    const alpha = 0.08 + Math.abs(Math.sin(now * 0.6 + p.phase)) * 0.25;
+                    pCtx.beginPath();
+                    pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    pCtx.fillStyle = `rgba(200,168,75,${alpha.toFixed(2)})`;
+                    pCtx.fill();
+                }
+
+                p.y -= p.speed;
+                p.x += p.drift;
+                if (p.y < -4) { p.y = 1924; p.x = Math.random() * 1080; }
+                if (p.x < 0) p.x = 1080;
+                if (p.x > 1080) p.x = 0;
+            });
+            requestAnimationFrame(drawParticles);
+        }
+        drawParticles();
+
+        // --- Rotierende BRB-Sprüche ---
+        const brbMessages = [
+            'Das Kristallglas wird an der Bar frisch befüllt...',
+            'Kurze diplomatische Besprechung im Jagdzimmer...',
+            'Der Butler legt frisches Kaminholz im Salon nach...',
+            'Ein kurzer Blick in die Ländereien des Anwesens...',
+            'Bitte bewahren Sie Haltung – es geht sofort weiter.'
+        ];
+        let msgIdx = 0;
+        const statusEl = document.getElementById('brb-status');
+
+        setInterval(() => {
+            statusEl.classList.add('fade');
+            setTimeout(() => {
+                msgIdx = (msgIdx + 1) % brbMessages.length;
+                statusEl.textContent = brbMessages[msgIdx];
+                statusEl.classList.remove('fade');
+            }, 500);
+        }, 9000);
+    </script>
+    <script src="gentlemen_vertical_alerts.js"></script>
+</body>
+</html>
