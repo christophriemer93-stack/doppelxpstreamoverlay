@@ -1,10 +1,7 @@
 /* =========================================================
-   THE GENTLEMEN – INTEGRATED VERTICAL ALERTS ENGINE
-   Original Salon-Card Design + Multi-Bridge:
-   1. StreamElements Native (onEventReceived)
-   2. StreamElements Realtime WebSocket API (?jwt=TOKEN oder ?se_token=TOKEN)
-   3. Twitch IRC Live-Listener (#d0ppelxp für Subs, Resubs, Gifts, Sub-Bomben, Raids, Bits)
-   4. Firebase Realtime Sync & LocalStorage Broadcast (0ms Sync im selben OBS)
+   THE GENTLEMEN – INTEGRATED VERTICAL ALERTS ENGINE (v2)
+   Direkt verbunden mit dem StreamElements Realtime Server von d0ppelxp!
+   Empfängt ALLE echten Alerts & alle StreamElements "Emulate"-Tests in Echtzeit.
    ========================================================= */
 
 (function () {
@@ -12,12 +9,19 @@
 
     const params = new URLSearchParams(window.location.search);
     const channelName = (params.get('channel') || 'd0ppelxp').toLowerCase().replace('#', '');
-    const seJwtToken = params.get('jwt') || params.get('se_token') || localStorage.getItem('gentlemen_se_jwt') || '';
-    const enableSound = params.get('sound') === '1'; // Standardmäßig stumm im Vertikal-Canvas, damit es im Dual-Stream nicht doppelt mit dem 16:9 Alert klingt!
 
-    if (params.get('jwt') || params.get('se_token')) {
-        try { localStorage.setItem('gentlemen_se_jwt', seJwtToken); } catch (e) {}
-    }
+    // Euer offizieller StreamElements Overlay API-Key für Kanal d0ppelxp (66654638be356b0a6587f9ab)
+    const SE_API_TOKEN = params.get('token') || 'CRQBE-BXXw5s6_3svxRorpLEpGruRwGyZO20Dl8untBOo7D_';
+
+    // Eure originalen StreamElements Alert-Sounds (optional per ?sound=1 aktivierbar, standardmäßig 0 damit im Dual-Stream kein Echo mit 16:9 entsteht)
+    const enableSound = params.get('sound') === '1';
+    const SE_SOUNDS = {
+        follower: 'https://cdn.streamelements.com/uploads/01m551q9mxg1p402f0eyktn4qh.mp3',
+        sub: 'https://cdn.streamelements.com/uploads/01m551q9q5hbzev33nh9vcqd00.mp3',
+        raid: 'https://cdn.streamelements.com/uploads/01m551q9r9vkdc4pjbfrsv7vzj.mp3',
+        cheer: 'https://cdn.streamelements.com/uploads/01m551w5x1spvs5d6sy7w2t6x9.mp3',
+        volume: 0.6
+    };
 
     // --- 1. INJECT ORIGINAL GENTLEMEN ALERT CSS & HTML ---
     const styleEl = document.createElement('style');
@@ -28,7 +32,7 @@
             left: 50%;
             transform: translateX(-50%) translateY(-28px) scale(0.96);
             width: 860px;
-            z-index: 90;
+            z-index: 95;
             pointer-events: none;
             opacity: 0;
             transition: transform 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.45s ease;
@@ -256,16 +260,20 @@
     let isPlaying = false;
     let recentDedupe = new Set();
 
-    function queueAlert(type, data, eventId) {
-        const dedupeKey = eventId || `${type}_${(data && (data.name || data.username || data.sender)) || ''}_${(data && data.amount) || ''}_${Math.floor(Date.now() / 4000)}`;
+    function queueAlert(type, rawData, eventId) {
+        const data = Object.assign({}, rawData || {});
+        // StreamElements liefert bei echten Events displayName/username, bei Emulate-Tests name
+        data.name = data.name || data.displayName || data.username || 'Ein Gentleman';
+
+        const dedupeKey = eventId || `${type}_${data.name}_${data.sender || ''}_${data.amount || ''}_${Math.floor(Date.now() / 3000)}`;
         if (recentDedupe.has(dedupeKey)) return;
         recentDedupe.add(dedupeKey);
-        if (recentDedupe.size > 50) {
+        if (recentDedupe.size > 60) {
             const first = recentDedupe.values().next().value;
             recentDedupe.delete(first);
         }
 
-        alertQueue.push({ type: String(type || '').toLowerCase(), data: data || {} });
+        alertQueue.push({ type: String(type || '').toLowerCase(), data: data });
         processQueue();
     }
 
@@ -311,23 +319,21 @@
         } catch (e) {}
     }
 
-    function playChimeIfEnabled() {
+    function playAlertAudio(type) {
         if (!enableSound) return;
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.14, ctx.currentTime + i * 0.09);
-                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.8);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start(ctx.currentTime + i * 0.09);
-                osc.stop(ctx.currentTime + 1.8);
-            });
-        } catch (e) {}
+        let url = '';
+        if (type.includes('follower')) url = SE_SOUNDS.follower;
+        else if (type.includes('sub')) url = SE_SOUNDS.sub;
+        else if (type.includes('raid')) url = SE_SOUNDS.raid;
+        else if (type.includes('cheer') || type.includes('bits')) url = SE_SOUNDS.cheer;
+
+        if (url) {
+            try {
+                const a = new Audio(url);
+                a.volume = SE_SOUNDS.volume;
+                a.play().catch(() => {});
+            } catch (e) {}
+        }
     }
 
     function esc(s) {
@@ -345,7 +351,7 @@
         const sigEl = document.getElementById('gm-alert-signature');
 
         const data = alert.data || {};
-        const name = esc(data.name || data.username || 'Ein Gentleman');
+        const name = esc(data.name || data.displayName || data.username || 'Ein Gentleman');
 
         recordHistoryEvent(alert.type, data);
         card.classList.remove('raid-alert');
@@ -361,7 +367,7 @@
             duration = 7000;
         }
 
-        playChimeIfEnabled();
+        playAlertAudio(alert.type);
 
         if (alert.type.includes('follower')) {
             typeEl.innerText = 'Ein neuer Verbündeter tritt auf den Plan';
@@ -441,7 +447,81 @@
         }, duration);
     }
 
-    // --- 3. EMPFANGSKANAL A: STREAMELEMENTS NATIVE (FALLS IN SE EINGEBUNDEN) ---
+    // --- 3. DIREKTE STREAMELEMENTS REALTIME WEBSOCKET VERBINDUNG (EMULATE & ECHTE ALERTS!) ---
+    function connectStreamElementsRealtime() {
+        const ws = new WebSocket('wss://realtime.streamelements.com/socket.io/?EIO=3&transport=websocket');
+        let pingInterval = null;
+        let authSent = false;
+
+        ws.onopen = () => {
+            pingInterval = setInterval(() => {
+                if (ws.readyState === WebSocket.OPEN) ws.send('2');
+            }, 24000);
+        };
+
+        ws.onmessage = (e) => {
+            const msg = String(e.data || '');
+
+            // Socket.IO Handshake abgeschlossen -> mit d0ppelxp apikey authentifizieren
+            if ((msg === '40' || msg.startsWith('0{')) && !authSent) {
+                if (msg === '40') {
+                    authSent = true;
+                    ws.send('42' + JSON.stringify(['authenticate', { method: 'apikey', token: SE_API_TOKEN }]));
+                } else {
+                    setTimeout(() => {
+                        if (!authSent && ws.readyState === WebSocket.OPEN) {
+                            authSent = true;
+                            ws.send('42' + JSON.stringify(['authenticate', { method: 'apikey', token: SE_API_TOKEN }]));
+                        }
+                    }, 150);
+                }
+                return;
+            }
+
+            if (msg.startsWith('42')) {
+                try {
+                    const parsed = JSON.parse(msg.slice(2));
+                    const eventName = parsed[0];
+                    const payload = parsed[1] || {};
+
+                    if (eventName === 'authenticated') {
+                        console.log('[Gentlemen Vertical Alerts] Direkt mit StreamElements verbunden (d0ppelxp)!');
+                        return;
+                    }
+
+                    // 1. "Emulate" Button in StreamElements (event:test)
+                    if (eventName === 'event:test') {
+                        const listener = String(payload.listener || '').toLowerCase();
+                        const ev = payload.event || {};
+                        if (listener.includes('sub') && ev.isCommunityGift && !ev.bulkGifted) return;
+
+                        if (['follower', 'subscriber', 'sub', 'tip', 'donation', 'raid', 'cheer', 'bits'].some(k => listener.includes(k))) {
+                            queueAlert(listener, ev, 'test_' + Date.now() + Math.random());
+                        }
+                    }
+                    // 2. Echtes Live-Event von StreamElements (event)
+                    else if (eventName === 'event') {
+                        const type = String(payload.type || payload.listener || '').toLowerCase();
+                        const data = payload.data || payload.event || payload;
+                        if (type.includes('sub') && data.isCommunityGift && !data.bulkGifted) return;
+
+                        if (['follower', 'subscriber', 'sub', 'tip', 'donation', 'raid', 'cheer', 'bits'].some(k => type.includes(k))) {
+                            queueAlert(type, data, payload._id || ('live_' + Date.now()));
+                        }
+                    }
+                } catch (err) {}
+            }
+        };
+
+        ws.onclose = () => {
+            clearInterval(pingInterval);
+            setTimeout(connectStreamElementsRealtime, 4000);
+        };
+    }
+
+    connectStreamElementsRealtime();
+
+    // --- 4. FALLBACK: NATIVE STREAMELEMENTS & STUDIO POSTMESSAGE ---
     window.addEventListener('onEventReceived', function (obj) {
         if (!obj || !obj.detail || !obj.detail.event) return;
         const listener = obj.detail.listener || '';
@@ -453,145 +533,6 @@
         }
     });
 
-    // --- 4. EMPFANGSKANAL B: STREAMELEMENTS REALTIME WEBSOCKET API (MIT JWT TOKEN) ---
-    function connectStreamElementsSocket(jwt) {
-        if (!jwt) return;
-        const ws = new WebSocket('wss://realtime.streamelements.com/socket.io/?EIO=3&transport=websocket');
-        let pingInterval = null;
-
-        ws.onopen = () => {
-            pingInterval = setInterval(() => {
-                if (ws.readyState === WebSocket.OPEN) ws.send('2');
-            }, 25000);
-        };
-
-        ws.onmessage = (e) => {
-            const msg = e.data || '';
-            if (msg === '40') {
-                ws.send('42' + JSON.stringify(['authenticate', { method: 'jwt', token: jwt }]));
-            } else if (msg.startsWith('42')) {
-                try {
-                    const parsed = JSON.parse(msg.slice(2));
-                    const eventName = parsed[0];
-                    const payload = parsed[1] || {};
-                    if (eventName === 'event' || eventName === 'event:test') {
-                        const type = payload.type || payload.listener || '';
-                        const data = payload.data || payload.event || payload;
-                        if (type.includes('sub') && data.isCommunityGift && !data.bulkGifted) return;
-                        if (['follower', 'subscriber', 'sub', 'tip', 'donation', 'raid', 'cheer', 'bits'].some(k => type.includes(k))) {
-                            queueAlert(type, data, payload._id);
-                        }
-                    }
-                } catch (err) {}
-            }
-        };
-
-        ws.onclose = () => {
-            clearInterval(pingInterval);
-            setTimeout(() => connectStreamElementsSocket(jwt), 6000);
-        };
-    }
-
-    if (seJwtToken) {
-        connectStreamElementsSocket(seJwtToken);
-    }
-
-    // --- 5. EMPFANGSKANAL C: TWITCH IRC LIVE-SOCKET (#d0ppelxp) ---
-    // Empfängt Subs, Resubs, Gift-Subs, Sub-Bomben, Raids & Bits komplett ohne API-Token!
-    function connectTwitchIrcAlerts(chan) {
-        const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
-        ws.onopen = () => {
-            ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
-            ws.send('PASS SCHMOOPIIE');
-            ws.send('NICK justinfan' + Math.floor(Math.random() * 89999 + 10000));
-            ws.send('JOIN #' + chan);
-        };
-        ws.onmessage = (e) => {
-            const lines = (e.data || '').split('\r\n');
-            for (const line of lines) {
-                if (!line) continue;
-                if (line.startsWith('PING')) {
-                    ws.send('PONG :tmi.twitch.tv');
-                    continue;
-                }
-
-                // 1. USERNOTICE (Sub, Resub, Subgift, Submysterygift, Raid)
-                if (line.includes('USERNOTICE')) {
-                    const tagPart = line.split(' :')[0] || '';
-                    const getTag = (k) => {
-                        const m = tagPart.match(new RegExp('(?:^|;)' + k + '=([^;]*)'));
-                        return m ? m[1] : '';
-                    };
-
-                    const msgId = getTag('msg-id');
-                    const displayName = getTag('display-name') || getTag('login') || 'Ein Gentleman';
-                    const id = getTag('id') || String(Date.now());
-
-                    if (msgId === 'sub' || msgId === 'resub') {
-                        const months = parseInt(getTag('msg-param-cumulative-months') || '1', 10) || 1;
-                        queueAlert('subscriber-latest', { name: displayName, amount: months, months: months }, id);
-                    } else if (msgId === 'submysterygift') {
-                        const count = parseInt(getTag('msg-param-mass-gift-count') || '5', 10) || 5;
-                        queueAlert('subscriber-latest', { sender: displayName, amount: count, count: count, bulkGifted: true }, id);
-                    } else if (msgId === 'subgift') {
-                        // Prüfen ob Teil einer Sub-Bombe (Community Gift) -> nur Einzel-Gifts anzeigen
-                        const originId = getTag('msg-param-origin-id');
-                        const recipient = getTag('msg-param-recipient-display-name') || getTag('msg-param-recipient-user-name') || 'Ein Mitglied';
-                        queueAlert('subscriber-latest', { sender: displayName, name: recipient, recipient: recipient, gifted: true }, id);
-                    } else if (msgId === 'raid') {
-                        const viewers = parseInt(getTag('msg-param-viewerCount') || '10', 10) || 10;
-                        const raider = getTag('msg-param-displayName') || displayName;
-                        queueAlert('raid-latest', { name: raider, amount: viewers, viewers: viewers }, id);
-                    }
-                }
-
-                // 2. PRIVMSG mit Bits (Cheer)
-                else if (line.includes('PRIVMSG') && line.includes('bits=')) {
-                    const tagPart = line.split(' :')[0] || '';
-                    const bitsMatch = tagPart.match(/(?:^|;)bits=([0-9]+)/);
-                    if (bitsMatch) {
-                        const bits = parseInt(bitsMatch[1], 10);
-                        const nameMatch = tagPart.match(/(?:^|;)display-name=([^;]+)/);
-                        const cheeryUser = nameMatch ? nameMatch[1] : 'Ein Gentleman';
-                        const idMatch = tagPart.match(/(?:^|;)id=([^;]+)/);
-                        queueAlert('cheer-latest', { name: cheeryUser, amount: bits }, idMatch ? idMatch[1] : null);
-                    }
-                }
-            }
-        };
-        ws.onclose = () => setTimeout(() => connectTwitchIrcAlerts(chan), 5000);
-    }
-    connectTwitchIrcAlerts(channelName);
-
-    // --- 6. EMPFANGSKANAL D: FIREBASE & LOCALSTORAGE SYNC (VON 16:9 ALERTS) ---
-    // Wenn gentlemen_alerts.html im 16:9 Stream einen Alert empfängt (auch Follower!), wird er sofort synchronisiert:
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'gentlemen_live_alert_sync' && e.newValue) {
-            try {
-                const payload = JSON.parse(e.newValue);
-                if (payload && Date.now() - payload.ts < 8000) {
-                    queueAlert(payload.type, payload.data, 'sync_' + payload.ts);
-                }
-            } catch (err) {}
-        }
-    });
-
-    // Firebase Polling für Cross-PC / StreamElements Cloud-Sync
-    const FB_ALERT_URL = 'https://doppelxp-stream-default-rtdb.europe-west1.firebasedatabase.app/live_alert.json';
-    let lastFbAlertTs = Date.now();
-    setInterval(async () => {
-        try {
-            const res = await fetch(FB_ALERT_URL);
-            if (!res.ok) return;
-            const payload = await res.json();
-            if (payload && payload.ts && payload.ts > lastFbAlertTs && (Date.now() - payload.ts < 15000)) {
-                lastFbAlertTs = payload.ts;
-                queueAlert(payload.type, payload.data, 'fb_' + payload.ts);
-            }
-        } catch (e) {}
-    }, 2500);
-
-    // Globale Test-API (für Studio & Vorschau, inkl. postMessage für lokale file:// Iframes!)
     window.GentlemenVerticalAlerts = {
         trigger: (type, data) => queueAlert(type, data, 'manual_' + Date.now() + Math.random())
     };

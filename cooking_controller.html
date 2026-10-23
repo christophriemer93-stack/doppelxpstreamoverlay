@@ -624,7 +624,7 @@
 
         async function pullState() {
             try {
-                const res = await fetch(FB_KITCHEN_URL);
+                const res = await fetch(FB_KITCHEN_URL + '?t=' + Date.now(), { cache: 'no-store' });
                 if (res.ok) {
                     const remote = await res.json();
                     if (remote && remote.dishTitle) {
