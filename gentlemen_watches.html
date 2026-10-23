@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>The Gentlemen – Die Horologie des Salons</title>
+  <title>The Gentlemen â€“ Die Horologie des Salons</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <script src="watches_data.js"></script>
+  <script src="cloud_db.js"></script>
   <style>
     /* =========================================================
-       THE GENTLEMEN – DIE HOROLOGIE DES SALONS (WATCHES GAME)
+       THE GENTLEMEN â€“ DIE HOROLOGIE DES SALONS (WATCHES GAME)
        ========================================================= */
     * {
       box-sizing: border-box;
@@ -60,94 +60,95 @@
     .watch-box-overlay::before,
     .watch-box-overlay::after {
       content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, #c8a84b 30%, #f3ebd6 50%, #c8a84b 70%, transparent);
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #c8a84b;
+      pointer-events: none;
     }
+    .watch-box-overlay::before { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+    .watch-box-overlay::after { bottom: 8px; right: 8px; border-left: none; border-top: none; }
 
     .watch-inner {
       padding: 24px 28px;
       position: relative;
     }
 
-    /* Wasserzeichen */
-    .watch-inner::before {
-      content: '⏱';
-      position: absolute;
-      font-size: 190px;
-      color: rgba(200, 168, 75, 0.025);
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
-
-    /* Kopfzeile */
+    /* Kopfbereich */
     .watch-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      align-items: center;
+      border-bottom: 1px solid rgba(200, 168, 75, 0.25);
+      padding-bottom: 12px;
+      margin-bottom: 18px;
     }
 
     .gentleman-brand {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 4px;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 14px;
+      letter-spacing: 2px;
+      color: #c8a84b;
       text-transform: uppercase;
-      color: rgba(200, 168, 75, 0.8);
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .tier-badge {
       font-family: 'Montserrat', sans-serif;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 800;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
       padding: 4px 12px;
-      border-radius: 2px;
-      border: 1px solid rgba(200,168,75,0.4);
-      background: rgba(0,0,0,0.5);
+      border-radius: 3px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
 
-    .tier-1 { color: #dcdcdc; border-color: rgba(220,220,220,0.4); } /* Alltags-Klassiker */
-    .tier-2 { color: #72cf85; border-color: rgba(114,207,133,0.5); } /* Gehobenes Handwerk */
-    .tier-3 { color: #e5c96a; border-color: rgba(229,201,106,0.6); } /* Prestige & Ikonen */
-    .tier-4 { color: #d48df5; border-color: rgba(212,141,245,0.6); } /* Haute Horlogerie */
-    .tier-5 { color: #ff5566; border-color: rgba(255,85,102,0.8); box-shadow: 0 0 15px rgba(255,85,102,0.3); } /* Die Kronjuwelen */
+    /* Tier Farben */
+    .tier-1 { background: rgba(140, 155, 145, 0.2); border: 1px solid #9aa59d; color: #cfd8d2; }
+    .tier-2 { background: rgba(60, 120, 90, 0.25); border: 1px solid #4ade80; color: #86efac; }
+    .tier-3 { background: rgba(59, 130, 246, 0.25); border: 1px solid #60a5fa; color: #93c5fd; }
+    .tier-4 { background: rgba(168, 85, 247, 0.25); border: 1px solid #c084fc; color: #e9d5ff; }
+    .tier-5 {
+      background: linear-gradient(135deg, rgba(200, 168, 75, 0.4), rgba(229, 201, 106, 0.2));
+      border: 1px solid #f5e6b3;
+      color: #fff2cc;
+      box-shadow: 0 0 15px rgba(229, 201, 106, 0.4);
+      animation: goldGlow 2s infinite alternate;
+    }
 
-    /* Hauptinhalt: Bild links, Daten rechts */
+    @keyframes goldGlow {
+      from { box-shadow: 0 0 10px rgba(200, 168, 75, 0.4); }
+      to { box-shadow: 0 0 22px rgba(229, 201, 106, 0.9); }
+    }
+
+    /* Uhrenansicht Mitte */
     .watch-content {
       display: flex;
       gap: 24px;
       align-items: center;
-      margin: 14px 0 18px;
+      margin-bottom: 18px;
     }
 
     .watch-image-frame {
-      width: 140px;
-      height: 140px;
-      border: 1px solid rgba(200,168,75,0.4);
+      width: 170px;
+      height: 170px;
+      background: radial-gradient(circle, rgba(20, 35, 22, 0.9) 0%, rgba(8, 14, 9, 0.95) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.4);
       border-radius: 4px;
-      background: radial-gradient(circle, #1a2a19 0%, #0d160d 100%);
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 4px 15px rgba(0,0,0,0.6);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      flex-shrink: 0;
       position: relative;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
     }
 
     .watch-image {
-      width: 100%;
-      height: 100%;
+      max-width: 90%;
+      max-height: 90%;
       object-fit: contain;
-      padding: 6px;
-      box-sizing: border-box;
       filter: contrast(1.04) drop-shadow(0 4px 10px rgba(0,0,0,0.6));
       transition: transform 0.4s ease;
     }
@@ -192,7 +193,7 @@
       margin-left: 4px;
     }
 
-    /* Schätzpreis / Marktwert Box */
+    /* SchÃ¤tzpreis / Marktwert Box */
     .watch-price-box {
       margin-top: 14px;
       display: flex;
@@ -217,7 +218,7 @@
       text-shadow: 0 2px 10px rgba(229, 201, 106, 0.25);
     }
 
-    /* Fußzeile: Wer hat gezogen */
+    /* FuÃŸzeile: Wer hat gezogen */
     .watch-footer {
       display: flex;
       align-items: center;
@@ -251,170 +252,157 @@
       border-radius: 6px;
       box-shadow:
         0 0 0 1px rgba(0,0,0,0.9),
-        0 0 0 3px rgba(200, 168, 75, 0.2),
-        0 20px 60px rgba(0, 0, 0, 0.95),
+        0 15px 50px rgba(0,0,0,0.9),
         inset 0 1px 0 rgba(229, 201, 106, 0.25);
       opacity: 0;
-      transition: bottom 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
-      z-index: 95;
+      transition: bottom 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+      z-index: 90;
       overflow: hidden;
     }
 
     .tresor-overlay.show {
-      bottom: 35px;
+      bottom: 40px;
       opacity: 1;
     }
 
-    .tresor-overlay::before,
-    .tresor-overlay::after {
-      content: '';
-      display: block;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #c8a84b 30%, #f3ebd6 50%, #c8a84b 70%, transparent);
-    }
-
     .tresor-inner {
-      padding: 20px 22px;
+      padding: 22px 24px;
     }
 
     .tresor-header {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      border-bottom: 1px solid rgba(200,168,75,0.2);
-      padding-bottom: 10px;
+      gap: 14px;
+      border-bottom: 1px solid rgba(200, 168, 75, 0.2);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .tresor-avatar {
-      width: 42px;
-      height: 42px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
-      border: 1px solid #c8a84b;
+      border: 2px solid #c8a84b;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
       object-fit: cover;
-      background: #0a110a;
     }
 
     .tresor-avatar-fallback {
-      width: 42px;
-      height: 42px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
-      border: 1px solid #c8a84b;
-      background: #142215;
-      color: #e5c96a;
+      border: 2px solid #c8a84b;
+      background: #182819;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-family: 'Playfair Display', serif;
       font-weight: 700;
-      font-size: 16px;
-      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      color: #e5c96a;
     }
 
     .tresor-user-info {
       flex: 1;
-      overflow: hidden;
     }
 
     .tresor-username {
-      font-size: 18px;
+      font-family: 'Playfair Display', serif;
       font-weight: 700;
+      font-size: 19px;
       color: #f3ebd6;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      line-height: 1.2;
     }
 
     .tresor-rank-title {
       font-family: 'IM Fell English', serif;
       font-style: italic;
-      font-size: 12px;
-      color: rgba(200,168,75,0.8);
+      font-size: 13px;
+      color: #c8a84b;
     }
 
     .tresor-stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 16px;
+      gap: 12px;
+      margin-bottom: 18px;
     }
 
     .stat-card {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(200,168,75,0.2);
-      padding: 8px 12px;
-      border-radius: 3px;
+      background: rgba(8, 14, 9, 0.6);
+      border: 1px solid rgba(200, 168, 75, 0.2);
+      padding: 10px 12px;
+      border-radius: 4px;
+      text-align: center;
     }
 
     .stat-label {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: rgba(200,168,75,0.6);
-      margin-bottom: 2px;
-    }
-
-    .stat-value {
-      font-size: 16px;
-      font-weight: 700;
-      color: #e5c96a;
-    }
-
-    /* Vitrinen-Slot: Die 3 edelsten Uhren */
-    .vitrine-label {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 12px;
       color: rgba(200,168,75,0.7);
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .vitrine-slots {
-      display: flex;
-      gap: 8px;
-    }
-
-    .vitrine-slot-item {
-      flex: 1;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(200,168,75,0.25);
-      border-radius: 4px;
-      padding: 6px;
-      text-align: center;
-      position: relative;
-    }
-
-    .slot-img {
-      width: 100%;
-      height: 60px;
-      object-fit: contain;
-      background: rgba(0,0,0,0.4);
-      padding: 2px;
-      box-sizing: border-box;
-      border-radius: 2px;
-      border: 1px solid rgba(200,168,75,0.15);
       margin-bottom: 4px;
     }
 
+    .stat-value {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 17px;
+      color: #e5c96a;
+    }
+
+    .vitrine-label {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: #c8a84b;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .vitrine-slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .vitrine-slot-item {
+      background: rgba(8, 14, 9, 0.7);
+      border: 1px solid rgba(200, 168, 75, 0.25);
+      border-radius: 4px;
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .slot-img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      margin-bottom: 6px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+    }
+
     .slot-name {
-      font-size: 11px;
+      font-family: 'Playfair Display', serif;
       font-weight: 700;
-      color: #e8dcc0;
-      white-space: nowrap;
+      font-size: 10px;
+      color: #f3ebd6;
+      line-height: 1.2;
+      max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 2px;
+      white-space: nowrap;
     }
 
     .slot-val {
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 11px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
       color: #e5c96a;
+      font-weight: 700;
+      margin-top: 2px;
     }
 
     /* ---------------------------------------------------------
@@ -425,11 +413,11 @@
       top: -120px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(15, 25, 16, 0.95);
-      border: 1px solid rgba(200,168,75,0.5);
-      padding: 10px 24px;
+      background: rgba(15, 25, 16, 0.96);
+      border: 1px solid rgba(200,168,75,0.6);
+      padding: 12px 28px;
       border-radius: 30px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.85), 0 0 15px rgba(200,168,75,0.2);
       font-family: 'IM Fell English', serif;
       font-style: italic;
       font-size: 15px;
@@ -455,7 +443,7 @@
     }
 
     /* ---------------------------------------------------------
-       4. TESTLEISTE FÜR BROWSER (UNAUFFÄLLIG BEI OBS)
+       4. TESTLEISTE FÃœR BROWSER (UNAUFFÃ„LLIG BEI OBS)
        --------------------------------------------------------- */
     .test-station-bar {
       position: absolute;
@@ -495,15 +483,15 @@
 
   <!-- COOLDOWN POPUP -->
   <div class="cooldown-pill" id="cooldown-pill">
-    <span>Geduld, Gentleman <span class="cooldown-user" id="cd-user">User</span>. Der nächste Uhrmacher-Besuch ist erst in <span class="cooldown-time" id="cd-time">45 Min</span> möglich.</span>
+    <span id="cd-content">Geduld, Gentleman <span class="cooldown-user" id="cd-user">User</span>. Der nÃ¤chste Uhrmacher-Besuch ist erst in <span class="cooldown-time" id="cd-time">45 Min</span> mÃ¶glich.</span>
   </div>
 
   <!-- HAUPTKARTE: GEZOGENE UHR -->
   <div class="watch-box-overlay" id="watch-card">
     <div class="watch-inner">
       <div class="watch-header">
-        <div class="gentleman-brand">✦ Die Horologie des Salons ✦</div>
-        <div class="tier-badge tier-1" id="watch-tier-badge">Tier I – Alltags-Klassiker</div>
+        <div class="gentleman-brand">âœ¦ Die Horologie des Salons âœ¦</div>
+        <div class="tier-badge tier-1" id="watch-tier-badge">Tier I â€“ Alltags-Klassiker</div>
       </div>
 
       <div class="watch-content">
@@ -520,15 +508,15 @@
           </div>
 
           <div class="watch-price-box">
-            <div class="price-label">Geschätzter Marktwert:</div>
-            <div class="price-val" id="watch-price">£ 10.250</div>
+            <div class="price-label">GeschÃ¤tzter Marktwert:</div>
+            <div class="price-val" id="watch-price">Â£ 10.250</div>
           </div>
         </div>
       </div>
 
       <div class="watch-footer">
         <div>Neu in den Samt-Tresor aufgenommen von: <span class="watch-user-badge" id="watch-user">Chris</span></div>
-        <div>✦ Nr. <span id="watch-id">62</span> / 100 ✦</div>
+        <div>âœ¦ Nr. <span id="watch-id">62</span> / 100 âœ¦</div>
       </div>
     </div>
   </div>
@@ -541,7 +529,7 @@
         <div class="tresor-avatar-fallback" id="tresor-avatar-fallback">C</div>
         <div class="tresor-user-info">
           <div class="tresor-username" id="tresor-user">Chris</div>
-          <div class="tresor-rank-title" id="tresor-rank">Großmeister der Horologie</div>
+          <div class="tresor-rank-title" id="tresor-rank">GroÃŸmeister der Horologie</div>
         </div>
       </div>
 
@@ -552,18 +540,18 @@
         </div>
         <div class="stat-card">
           <div class="stat-label">Gesamtwert</div>
-          <div class="stat-value" id="tresor-total-value">£ 48.650</div>
+          <div class="stat-value" id="tresor-total-value">Â£ 48.650</div>
         </div>
       </div>
 
-      <div class="vitrine-label">✦ Die wertvollsten Zeitmesser ✦</div>
+      <div class="vitrine-label">âœ¦ Die wertvollsten Zeitmesser âœ¦</div>
       <div class="vitrine-slots" id="vitrine-slots">
-        <!-- Werden dynamisch mit bis zu 3 Prunkstücken befüllt -->
+        <!-- Werden dynamisch mit bis zu 3 PrunkstÃ¼cken befÃ¼llt -->
       </div>
     </div>
   </div>
 
-  <!-- TEST-LEISTE FÜR BROWSER -->
+  <!-- TEST-LEISTE FÃœR BROWSER -->
   <div class="test-station-bar">
     <button class="test-btn" onclick="testDrawWatch(1)">Tier 1 (Casio)</button>
     <button class="test-btn" onclick="testDrawWatch(36)">Tier 2 (Tudor)</button>
@@ -575,11 +563,1222 @@
 
   <script>
     // =========================================================
+    // 0. FEST EINGEBETTETE UHREN-DATENBANK (KEIN 404 MÃ–GLICH!)
+    // =========================================================
+/**
+ * DIE GENTLEMEN HOROLOGIE - 100 EXKLUSIVE UHREN
+ * Generierte Sammler-Datenbank
+ */
+const WATCHES_DATA = [
+  {
+    "id": 1,
+    "brand": "Casio",
+    "model": "Vintage F-91W",
+    "ref": "F-91W-1YER",
+    "price": 18,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1989",
+    "img": "watch_images/1.png"
+  },
+  {
+    "id": 2,
+    "brand": "Casio",
+    "model": "G-Shock Classic Square",
+    "ref": "DW-5600E-1VER",
+    "price": 95,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1987",
+    "img": "watch_images/2.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/6/64/CASIO_G-Shock_GW-M5610U.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 3,
+    "brand": "Seiko",
+    "model": "5 Sports Automatic",
+    "ref": "SRPD55K1",
+    "price": 280,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2019",
+    "img": "watch_images/3.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Seiko_5_Sports_SNZH53K1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 4,
+    "brand": "Orient",
+    "model": "Bambino Version 4",
+    "ref": "FAC08004D0",
+    "price": 220,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2016",
+    "img": "watch_images/4.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/a/af/Orient_Watch_-_Bambino_%28ER24005W%29_%2829121883374%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 5,
+    "brand": "Citizen",
+    "model": "Promaster Marine Diver",
+    "ref": "BN0150-28E",
+    "price": 249,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2015",
+    "img": "watch_images/5.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/c/ce/Citizen_Promaster_Automatic_NY0040-09EE_Diver_200_m.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 6,
+    "brand": "Tissot",
+    "model": "PRX Quartz 40mm",
+    "ref": "T137.410.11.041.00",
+    "price": 395,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2021",
+    "img": "watch_images/6.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/3/39/Tissot_PRX_35mm.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 7,
+    "brand": "Timex",
+    "model": "Q Timex Reissue Pepsi",
+    "ref": "TW2T80700",
+    "price": 179,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1979",
+    "img": "watch_images/7.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/3/38/Timex_Q_Reissue_ref._TW2V32100.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 8,
+    "brand": "Swatch",
+    "model": "Once Again Minimal",
+    "ref": "GB743",
+    "price": 65,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2010",
+    "img": "watch_images/8.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Swatch_Once_Again.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 9,
+    "brand": "Casio",
+    "model": "Edifice Classic Chrono",
+    "ref": "EFV-540D-1AV",
+    "price": 129,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2018",
+    "img": "watch_images/9.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/e/e6/Casio_Edifice_WR100M%2C_1811051918%2C_ako.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 10,
+    "brand": "Laco",
+    "model": "Augsburg 39 Fliegeruhr",
+    "ref": "861988",
+    "price": 390,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2018",
+    "img": "watch_images/10.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Laco_Faro_B-Muster_Beobachtungsuhr_Fliegeruhr_Pilotenuhr_2._WK_%28edited%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 11,
+    "brand": "Seiko",
+    "model": "SKX007 Diver Icon",
+    "ref": "SKX007K2",
+    "price": 450,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1996",
+    "img": "watch_images/11.jpg"
+  },
+  {
+    "id": 12,
+    "brand": "Citizen",
+    "model": "Tsuyosa Automatic Gelb",
+    "ref": "NJ0150-81Z",
+    "price": 299,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2022",
+    "img": "watch_images/12.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/b/ba/Dive_decompression_tables_%28Nitrox_version%29_plus_a_diving_watch_plus_a_diving_depth_gauge.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 13,
+    "brand": "Vostok",
+    "model": "Amphibia Scuba Dude",
+    "ref": "710059",
+    "price": 110,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1967",
+    "img": "watch_images/13.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/6/65/Vostok_Amphibia_Scubadude.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 14,
+    "brand": "Bulova",
+    "model": "Lunar Pilot Chronograph",
+    "ref": "96B251",
+    "price": 550,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1971",
+    "img": "watch_images/14.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Bulova_Lunar_Pilot.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 15,
+    "brand": "Orient",
+    "model": "Kamasu Mako III Sapphire",
+    "ref": "RA-AA0001B19B",
+    "price": 275,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2019",
+    "img": "watch_images/15.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/a/ae/ORIENT_New_Mako_Automatic_200M_Diver%27s_CEM75001B._%285921299415%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 16,
+    "brand": "Timex",
+    "model": "Marlin Mechanical Handaufzug",
+    "ref": "TW2T18200",
+    "price": 199,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1960",
+    "img": "watch_images/16.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/5/53/BwcMarlinNoSweep.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 17,
+    "brand": "Seiko",
+    "model": "Presage Cocktail Time Skydiving",
+    "ref": "SRPB43J1",
+    "price": 420,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2017",
+    "img": "watch_images/17.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/9/94/Seiko_SKX781_Orange_Monster_diver_watch_%282026-02-13%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 18,
+    "brand": "Casio",
+    "model": "G-Shock CasiOak All Black",
+    "ref": "GA-2100-1A1ER",
+    "price": 119,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2019",
+    "img": "watch_images/18.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/6/64/CASIO_G-Shock_GW-M5610U.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 19,
+    "brand": "Certina",
+    "model": "DS Action Diver Powermatic 80",
+    "ref": "C032.807.11.051.00",
+    "price": 790,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2021",
+    "img": "watch_images/19.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/4/41/Certina_DS-Podium.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 20,
+    "brand": "Hamilton",
+    "model": "Khaki Field Mechanical 38",
+    "ref": "H69439931",
+    "price": 595,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1969",
+    "img": "watch_images/20.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Hamilton_Khaki_Field_Mechanical_39.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 21,
+    "brand": "Seiko",
+    "model": "Prospex Turtle Diver",
+    "ref": "SRP777K1",
+    "price": 490,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1977",
+    "img": "watch_images/21.png",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/c/cf/Seiko_Prospex_SPB143J1.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 22,
+    "brand": "Tissot",
+    "model": "Heritage Visodate Automatic",
+    "ref": "T019.430.16.031.01",
+    "price": 625,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1954",
+    "img": "watch_images/22.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Tissot_Visodate%2C_anni_%2760.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 23,
+    "brand": "LIP",
+    "model": "Churchill T18 Tank",
+    "ref": "671014",
+    "price": 199,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1948",
+    "img": "watch_images/23.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Churchill_%281901%29_The_Crisis.djvu?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 24,
+    "brand": "Yema",
+    "model": "Superman Heritage French Diver",
+    "ref": "YSU2018A",
+    "price": 990,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1963",
+    "img": "watch_images/24.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Yema_Watch_Superman_GMT_Bronze.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 25,
+    "brand": "Swatch x Omega",
+    "model": "Bioceramic Moonswatch Mission to the Moon",
+    "ref": "SO33M100",
+    "price": 260,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2022",
+    "img": "watch_images/25.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/9/9a/MoonSwatch_collection.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 26,
+    "brand": "Baltic",
+    "model": "Aquascaphe Classic Black Cream",
+    "ref": "SB01",
+    "price": 650,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2018",
+    "img": "watch_images/26.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Balloon_watch_%282%29_-_geograph.org.uk_-_7846711.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 27,
+    "brand": "Seiko",
+    "model": "Prospex Alpinist Sunburst Green",
+    "ref": "SARB017",
+    "price": 750,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2006",
+    "img": "watch_images/27.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/8/82/Seiko_Prospex_Alpinist01bs.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 28,
+    "brand": "Lorier",
+    "model": "Neptune Series IV Diver",
+    "ref": "NEP-IV-BLK",
+    "price": 499,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2022",
+    "img": "watch_images/28.jpg"
+  },
+  {
+    "id": 29,
+    "brand": "Mido",
+    "model": "Ocean Star 200 Calibre 80",
+    "ref": "M026.430.11.051.00",
+    "price": 980,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "1944",
+    "img": "watch_images/29.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/0/03/Mido-Ocean-Star-GMT.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 30,
+    "brand": "Steinhart",
+    "model": "Ocean One Vintage Military",
+    "ref": "103-0294",
+    "price": 460,
+    "tier": 1,
+    "tierName": "Alltags-Klassiker",
+    "year": "2012",
+    "img": "watch_images/30.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/2/26/Ocean_Whitefish_%28Caulolatilus_princeps%29_at_the_California_Academy_of_Sciences.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 31,
+    "brand": "Sinn",
+    "model": "104 St Sa I Fliegerklassiker",
+    "ref": "104.010",
+    "price": 1450,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2013",
+    "img": "watch_images/31.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Twinning_at_work.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 32,
+    "brand": "Nomos Glashütte",
+    "model": "Tangente Datum Handaufzug",
+    "ref": "130",
+    "price": 2100,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "1992",
+    "img": "watch_images/32.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/7/70/Nomos_Tangente_neomatik.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 33,
+    "brand": "Longines",
+    "model": "Spirit Zulu Time GMT Chronometer",
+    "ref": "L3.812.4.63.6",
+    "price": 3150,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2022",
+    "img": "watch_images/33.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Longines_Spirit_Zulu_Time.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 34,
+    "brand": "Oris",
+    "model": "Aquis Date Calibre 400 In-House",
+    "ref": "01 400 7763 4135",
+    "price": 3500,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2020",
+    "img": "watch_images/34.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Oris_Aquis_Depth_Gauge.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 35,
+    "brand": "TAG Heuer",
+    "model": "Aquaracer Professional 300",
+    "ref": "WBP201A.BA0632",
+    "price": 3200,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2021",
+    "img": "watch_images/35.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/3/34/Tag_heuer_aquaracer_alfowzan.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 36,
+    "brand": "Tudor",
+    "model": "Black Bay 58 Navy Blue",
+    "ref": "79030B",
+    "price": 3900,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2020",
+    "img": "watch_images/36.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/6/62/Tudor_Rose_Tea_Rooms_Sign%2C_Barbican.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 37,
+    "brand": "Grand Seiko",
+    "model": "Heritage Snowflake Spring Drive",
+    "ref": "SBGA211",
+    "price": 5800,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2010",
+    "img": "watch_images/37.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Grand_Seiko_Automatic_Hi-Beat.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 38,
+    "brand": "Junghans",
+    "model": "Max Bill Chronoscope Bauhaus",
+    "ref": "027/4501.01",
+    "price": 1990,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "1961",
+    "img": "watch_images/38.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Junghans_Max_Bill_Uhr.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 39,
+    "brand": "Rado",
+    "model": "Captain Cook Automatic Vintage",
+    "ref": "R32505313",
+    "price": 2200,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "1962",
+    "img": "watch_images/39.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/d/de/RADO_Captain_Cook_Redition_.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 40,
+    "brand": "Bell & Ross",
+    "model": "BR 03-92 Instrument Cockpit",
+    "ref": "BR0392-BL-ST/SRB",
+    "price": 3600,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2006",
+    "img": "watch_images/40.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/1/1e/BellandRoss_Watch.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 41,
+    "brand": "Baume & Mercier",
+    "model": "Clifton Baumatic Chronometer 5 Days",
+    "ref": "M0A10518",
+    "price": 2950,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2018",
+    "img": "watch_images/41.jpg"
+  },
+  {
+    "id": 42,
+    "brand": "Doxa",
+    "model": "SUB 300T Professional Orange",
+    "ref": "840.10.351.10",
+    "price": 1990,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "1967",
+    "img": "watch_images/42.png",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/0/04/Doxa-logo.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 43,
+    "brand": "Fortis",
+    "model": "Flieger F-41 Automatic Kosmonaut",
+    "ref": "F.422.0008",
+    "price": 2400,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "1987",
+    "img": "watch_images/43.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/3/34/Fortis_Flieger_GMT.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 44,
+    "brand": "Maurice Lacroix",
+    "model": "Aikon Automatic 42mm Royal Blue",
+    "ref": "AI6008-SS002-430-1",
+    "price": 2150,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2018",
+    "img": "watch_images/44.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/8/8f/2023101004_Maurice_Lacroix_Zehntelsekundenzeiger_2023.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 45,
+    "brand": "Longines",
+    "model": "Legend Diver Heritage Compressor",
+    "ref": "L3.774.4.50.0",
+    "price": 2500,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "1960",
+    "img": "watch_images/45.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Wikipedia-DE-Longines-Legend-Diver-Bronze-1024.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 46,
+    "brand": "Tudor",
+    "model": "Pelagos Titanium 500M Diver",
+    "ref": "25600TB",
+    "price": 4750,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2012",
+    "img": "watch_images/46.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Tudor_Pelagos_for_Carolina_Watch_Club_Limited_Edition.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 47,
+    "brand": "Nomos Glashütte",
+    "model": "Club Campus 38 Nacht",
+    "ref": "738",
+    "price": 1500,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2017",
+    "img": "watch_images/47.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/0/06/Watch_hands_of_Nomos_Glash%C3%BCtte_Metro_watch_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 48,
+    "brand": "Oris",
+    "model": "Big Crown Pointer Date Bronze",
+    "ref": "01 754 7741 3167",
+    "price": 2200,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "1938",
+    "img": "watch_images/48.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/5/51/ORIS_HIGH_MECH_%2816565102404%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 49,
+    "brand": "Sinn",
+    "model": "U1 Taucheruhr Deutscher U-Boot-Stahl",
+    "ref": "1010.010",
+    "price": 2350,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2005",
+    "img": "watch_images/49.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Philosophical_Transactions_-_Volume_014.djvu?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 50,
+    "brand": "TAG Heuer",
+    "model": "Carrera Calibre 5 Day-Date",
+    "ref": "WAR201E.BA0723",
+    "price": 2900,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "1963",
+    "img": "watch_images/50.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/e/e4/TAG_Heuer_Carrera_Calibre_5%2C_anni_2010.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 51,
+    "brand": "Zodiac",
+    "model": "Super Sea Wolf 53 Compression Diver",
+    "ref": "ZO9266",
+    "price": 1495,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "1953",
+    "img": "watch_images/51.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Zodiac_super_sea_wolf_COSC_2024_a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 52,
+    "brand": "Mühle Glashütte",
+    "model": "SAR Rescue-Timer Seenotretter",
+    "ref": "M1-41-03-KB",
+    "price": 1950,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2002",
+    "img": "watch_images/52.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Diving_watch_SAR_Rescue_Timer_from_M%C3%BChle_Glash%C3%BCtte_%28edited%2C_without_background%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 53,
+    "brand": "Montblanc",
+    "model": "1858 Geosphere Worldtime Abenteuer",
+    "ref": "119286",
+    "price": 5600,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2018",
+    "img": "watch_images/53.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/4/48/Montblanc_-_btv1b10487115p.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 54,
+    "brand": "Grand Seiko",
+    "model": "Elegance SBGW231 Hand-Wound Ivory",
+    "ref": "SBGW231",
+    "price": 4300,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2017",
+    "img": "watch_images/54.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Grand_Seiko_Automatic_Hi-Beat.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 55,
+    "brand": "Bremont",
+    "model": "Supermarine S302 GMT Fliegeruhr",
+    "ref": "S302-BK-R-S",
+    "price": 3950,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2021",
+    "img": "watch_images/55.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/6/6b/BREMONT_WATCH_COMPANY_MAX_HOLSTE_MH.1521M_BROUSSARD_G-HOUR_%2852242050372%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 56,
+    "brand": "Alpina",
+    "model": "Seastrong Diver 300 Heritage",
+    "ref": "AL-525S4H6",
+    "price": 1695,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "1969",
+    "img": "watch_images/56.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Alpino_triangle_-_all_clear_sign.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 57,
+    "brand": "Tudor",
+    "model": "Black Bay Chrono Panda Dial",
+    "ref": "79360N",
+    "price": 5450,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2021",
+    "img": "watch_images/57.jpg"
+  },
+  {
+    "id": 58,
+    "brand": "Longines",
+    "model": "Master Collection Mondphase Chrono",
+    "ref": "L2.673.4.78.3",
+    "price": 3600,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2005",
+    "img": "watch_images/58.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/3/39/Longines_Master_Retrograde.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 59,
+    "brand": "Frederique Constant",
+    "model": "Highlife Perpetual Calendar Ewiger Kalender",
+    "ref": "FC-775S4S6",
+    "price": 8995,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2020",
+    "img": "watch_images/59.png"
+  },
+  {
+    "id": 60,
+    "brand": "Sinn",
+    "model": "EZM 3 Einsatzzeitmesser Polizei & Spezialeinheit",
+    "ref": "603.010",
+    "price": 1980,
+    "tier": 2,
+    "tierName": "Gehobenes Handwerk",
+    "year": "2001",
+    "img": "watch_images/60.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/e/ec/TESTAF-Sinn_EZM10_EZM9_857LHC.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 61,
+    "brand": "Omega",
+    "model": "Speedmaster Professional Moonwatch",
+    "ref": "310.30.42.50.01.002",
+    "price": 7600,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1969",
+    "img": "watch_images/61.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/1/15/Speedmaster_%2823456608783%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 62,
+    "brand": "Rolex",
+    "model": "Submariner Date Keramik Cerachrom",
+    "ref": "126610LN",
+    "price": 10250,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1953",
+    "img": "watch_images/62.jpg"
+  },
+  {
+    "id": 63,
+    "brand": "Breitling",
+    "model": "Navitimer B01 Chronograph 43 Fliegerlegende",
+    "ref": "AB0138241G1P1",
+    "price": 8950,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1952",
+    "img": "watch_images/63.jpg"
+  },
+  {
+    "id": 64,
+    "brand": "Cartier",
+    "model": "Santos de Cartier Medium Stahl",
+    "ref": "WSSA0029",
+    "price": 7350,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1904",
+    "img": "watch_images/64.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/7/79/Cartier_Santos_wristwatch.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 65,
+    "brand": "IWC Schaffhausen",
+    "model": "Pilot's Watch Chronograph 41",
+    "ref": "IW388101",
+    "price": 7900,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1936",
+    "img": "watch_images/65.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/4/4b/IWC_Vintage_Collection_Jubilee_Edition.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 66,
+    "brand": "Panerai",
+    "model": "Luminor Marina 1950 3 Days Kronenschutz",
+    "ref": "PAM01312",
+    "price": 8400,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1950",
+    "img": "watch_images/66.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/f/f9/PANERAI_%2829802698304%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 67,
+    "brand": "Omega",
+    "model": "Seamaster Diver 300M James Bond 007 Edition",
+    "ref": "210.90.42.20.01.001",
+    "price": 9900,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1993",
+    "img": "watch_images/67.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/6/60/Wojciech_Kilar_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 68,
+    "brand": "Rolex",
+    "model": "Datejust 41 Wimbledon Zifferblatt Riffellünette",
+    "ref": "126334",
+    "price": 10800,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1945",
+    "img": "watch_images/68.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/8/81/Rolex_Datejust_126234.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 69,
+    "brand": "Jaeger-LeCoultre",
+    "model": "Reverso Classic Monoface Wendeuhr",
+    "ref": "Q2618430",
+    "price": 8100,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1931",
+    "img": "watch_images/69.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/7/70/Jaeger-LeCoultre-Reverso.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 70,
+    "brand": "TAG Heuer",
+    "model": "Monaco Calibre 11 Steve McQueen Le Mans",
+    "ref": "CAW211P.FC6356",
+    "price": 7750,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1969",
+    "img": "watch_images/70.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/f/fd/TAG_Heuer_Monaco_40th_Anniversary_re-edition.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 71,
+    "brand": "Cartier",
+    "model": "Tank Must de Cartier XL Guilloche",
+    "ref": "WSTA0040",
+    "price": 4850,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1917",
+    "img": "watch_images/71.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/d/df/Cartier_Tank.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 72,
+    "brand": "Zenith",
+    "model": "Chronomaster Original 1/10th Sekunde El Primero",
+    "ref": "03.3200.3600/69.M3200",
+    "price": 9900,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1969",
+    "img": "watch_images/72.jpg"
+  },
+  {
+    "id": 73,
+    "brand": "Rolex",
+    "model": "Explorer II Polar White Orange Hand",
+    "ref": "226570",
+    "price": 9650,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1971",
+    "img": "watch_images/73.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Rolex_Explorer_II_%28edited%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 74,
+    "brand": "IWC Schaffhausen",
+    "model": "Portugieser Automatic 40 Kleine Sekunde",
+    "ref": "IW358304",
+    "price": 7600,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1939",
+    "img": "watch_images/74.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/e/e8/IWC_Portuguese_Automatic_%28cropped%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 75,
+    "brand": "Breitling",
+    "model": "Superocean Heritage B20 42 Mesh Armband",
+    "ref": "AB2010121B1A1",
+    "price": 5500,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1957",
+    "img": "watch_images/75.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Breitling_steelfish.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 76,
+    "brand": "Glashütte Original",
+    "model": "PanoMaticLunar Mondphase Panoramadatum",
+    "ref": "1-90-02-46-32-35",
+    "price": 11200,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "2002",
+    "img": "watch_images/76.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Glasshuette_MG_2613.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 77,
+    "brand": "Rolex",
+    "model": "GMT-Master II 'Pepsi' Jubilee Zweifarb-Keramik",
+    "ref": "126710BLRO",
+    "price": 10900,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1955",
+    "img": "watch_images/77.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Rolex_GMT_Master_II_126710BLRO.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 78,
+    "brand": "Hublot",
+    "model": "Classic Fusion Titanium 42mm H-Schrauben",
+    "ref": "542.NX.1171.RX",
+    "price": 7700,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "2010",
+    "img": "watch_images/78.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Warsaw%2C_Hublot_Boutique.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 79,
+    "brand": "Chopard",
+    "model": "Mille Miglia GTS Power Control Racing",
+    "ref": "168566-3001",
+    "price": 7140,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "1988",
+    "img": "watch_images/79.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/6/68/Chopard_GT_XL_Mille_Miglia_2010.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 80,
+    "brand": "Omega",
+    "model": "Aqua Terra 150M Teakwood Dial Chronometer",
+    "ref": "220.10.41.21.03.001",
+    "price": 6700,
+    "tier": 3,
+    "tierName": "Prestige & Ikonen",
+    "year": "2002",
+    "img": "watch_images/80.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Omega_Seamaster_Aqua_Terra.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 81,
+    "brand": "Audemars Piguet",
+    "model": "Royal Oak 'Jumbo' Extra-Thin Petite Tapisserie",
+    "ref": "16202ST.OO.1240ST.01",
+    "price": 34200,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1972",
+    "img": "watch_images/81.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/0/05/Audemars_Piguet_Royal_Oak_ref._15202.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 82,
+    "brand": "Patek Philippe",
+    "model": "Nautilus Stahl Horizontale Riffelung",
+    "ref": "5711/1A-010",
+    "price": 34890,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1976",
+    "img": "watch_images/82.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/7/74/Patek-Philippe-Nautilus-5711.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 83,
+    "brand": "Vacheron Constantin",
+    "model": "Overseas Automatic Genfer Siegel",
+    "ref": "4500V/110A-B128",
+    "price": 25600,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1977",
+    "img": "watch_images/83.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/7/72/Decorazione_del_fondello_del_Vacheron_Constantin_Overseas_prima_generazione%2C_fine_anni_Novanta.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 84,
+    "brand": "A. Lange & Söhne",
+    "model": "Lange 1 Handaufzug Dezentrales Zifferblatt",
+    "ref": "191.032",
+    "price": 41800,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1994",
+    "img": "watch_images/84.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Lange_1_Moon_Phase_%2850386634128%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 85,
+    "brand": "Rolex",
+    "model": "Cosmograph Daytona 'Panda' Chronograph",
+    "ref": "126500LN",
+    "price": 15100,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1963",
+    "img": "watch_images/85.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Rolex_Cosmograph_Daytona_Panda.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 86,
+    "brand": "Breguet",
+    "model": "Classique 7147 Grand Feu Emaille-Zifferblatt",
+    "ref": "7147BB/29/9WU",
+    "price": 23200,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1775",
+    "img": "watch_images/86.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Breguet_classique_9067-P4140420-black.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 87,
+    "brand": "Patek Philippe",
+    "model": "Aquanaut 'Jumbo' Tropical Strap",
+    "ref": "5167A-001",
+    "price": 24190,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1997",
+    "img": "watch_images/87.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/6/67/Patek_Philippe_Aquanaut_Advanced_Research_ref._5650G_limitato_a_500_pezzi.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 88,
+    "brand": "Blancpain",
+    "model": "Fifty Fathoms Automatique Taucherpionier",
+    "ref": "5015 1130 52A",
+    "price": 16400,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1953",
+    "img": "watch_images/88.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/8/81/Blancpain.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 89,
+    "brand": "H. Moser & Cie.",
+    "model": "Streamliner Centre Seconds Matrix Green Fumé",
+    "ref": "6200-1200",
+    "price": 22900,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "2020",
+    "img": "watch_images/89.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/1/10/Lenin%27s_watches_%28Moser%2C_1900s%2C_GIM%29_01_by_shakko.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 90,
+    "brand": "F.P. Journe",
+    "model": "Chronomètre Souverain 18K Roségold-Werk",
+    "ref": "CS-RG-PLAT",
+    "price": 48000,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "2005",
+    "img": "watch_images/90.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Revue_illustr%C3%A9e%2C_ann%C3%A9e_9%2C_volume_18%2C_num%C3%A9ros_205_%C3%A0_216%2C_2e_semestre_1894.djvu?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 91,
+    "brand": "Audemars Piguet",
+    "model": "Royal Oak Offshore Chronograph Keramik",
+    "ref": "26420SO.OO.A002CA.01",
+    "price": 43500,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1993",
+    "img": "watch_images/91.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Audemars_Piguet_Royal_Oak_Offshore_Diver.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 92,
+    "brand": "Vacheron Constantin",
+    "model": "Historiques American 1921 Schräges Zifferblatt",
+    "ref": "82035/000R-9359",
+    "price": 39800,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1921",
+    "img": "watch_images/92.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Vacheron_Constantin_Historique_222.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 93,
+    "brand": "Rolex",
+    "model": "Day-Date 40 'President' 950er Platin Eisblau",
+    "ref": "228236-0011",
+    "price": 63200,
+    "tier": 4,
+    "tierName": "Haute Horlogerie",
+    "year": "1956",
+    "img": "watch_images/93.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/0/02/Rolex_Day-Date_Lacquered_Stella_Dial.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 94,
+    "brand": "Patek Philippe",
+    "model": "Grandmaster Chime Reversible 20 Komplikationen",
+    "ref": "6300G-010",
+    "price": 3100000,
+    "tier": 5,
+    "tierName": "Die Kronjuwelen",
+    "year": "2014",
+    "img": "watch_images/94.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/e/ea/Patek_Philippe_Grandmaster_Chime_ref._5175R_realizzato_nel_2014_in_soli_7_esemplari_per_i_175_anni_di_fondazione_della_Maison.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 95,
+    "brand": "A. Lange & Söhne",
+    "model": "Datograph Perpetual Tourbillon Ewiger Kalender",
+    "ref": "740.056",
+    "price": 330000,
+    "tier": 5,
+    "tierName": "Die Kronjuwelen",
+    "year": "2016",
+    "img": "watch_images/95.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/3/37/Grande_complication_42500.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 96,
+    "brand": "Richard Mille",
+    "model": "RM 011 Felipe Massa Flyback Chronograph Titan",
+    "ref": "RM011-FM",
+    "price": 280000,
+    "tier": 5,
+    "tierName": "Die Kronjuwelen",
+    "year": "2007",
+    "img": "watch_images/96.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/2/28/RM_030_Automatic.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 97,
+    "brand": "Jacob & Co.",
+    "model": "Astronomia Tourbillon Baguette Diamanten 3D-Erde",
+    "ref": "AT100.40.RO.SD.B",
+    "price": 1150000,
+    "tier": 5,
+    "tierName": "Die Kronjuwelen",
+    "year": "2014",
+    "img": "watch_images/97.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/b/b9/PL_Astor_-_Podr%C3%B3%C5%BC_na_Jowisza.djvu?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 98,
+    "brand": "Rolex",
+    "model": "Daytona 'Paul Newman' Ref 6239 Original Auktion",
+    "ref": "6239 Exotic Dial",
+    "price": 17750000,
+    "tier": 5,
+    "tierName": "Die Kronjuwelen",
+    "year": "1968",
+    "img": "watch_images/98.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/0/08/Rolex_Daytona_Cosmograph.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 99,
+    "brand": "F.P. Journe",
+    "model": "Tourbillon Souverain Remontoir d'Egalité T38",
+    "ref": "T-38-PT",
+    "price": 920000,
+    "tier": 5,
+    "tierName": "Die Kronjuwelen",
+    "year": "1999",
+    "img": "watch_images/99.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/0/01/Reclus_-_L%E2%80%99%C3%89volution%2C_la_r%C3%A9volution_et_l%E2%80%99id%C3%A9al_anarchique.djvu?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  },
+  {
+    "id": 100,
+    "brand": "Patek Philippe",
+    "model": "Henry Graves Supercomplication Gold Taschenuhr",
+    "ref": "Graves 1933",
+    "price": 24000000,
+    "tier": 5,
+    "tierName": "Die Kronjuwelen",
+    "year": "1933",
+    "img": "watch_images/100.jpg",
+    "remote_img": "https://upload.wikimedia.org/wikipedia/commons/1/18/Patek_Philippe_p1070011.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original"
+  }
+];
+
+if (typeof window !== 'undefined') {
+  window.WATCHES_DATA = WATCHES_DATA;
+  window.WATCHES_DB = WATCHES_DATA;
+}
+
+
+    // =========================================================
     // 1. GLOBALE EINSTELLUNGEN & SPEICHER-SYSTEM
     // =========================================================
-    const COOLDOWN_MINUTES = 60; // Exakt 60 Minuten Cooldown pro Viewer
+    const COOLDOWN_MINUTES = 60; // 60 Minuten Cooldown fÃ¼r normale Viewer
     const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
     const STORAGE_KEY = 'gentlemen_watches_vault_v1';
+    const STREAMER_ACCOUNTS = ['d0ppelxp', 'chris', 'max', 'christophriemer93'];
+
+    // Luxus-Taschenuhr SVG Fallback falls ein Bild nicht lÃ¤dt
+    const WATCH_FALLBACK_SVG = 'data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="100" r="92" fill="%230c140c" stroke="%23c8a84b" stroke-width="6"/><circle cx="100" cy="100" r="86" fill="%23142215" stroke="%231a2e1d" stroke-width="2"/><circle cx="100" cy="25" r="3" fill="%23e5c96a"/><circle cx="175" cy="100" r="3" fill="%23e5c96a"/><circle cx="100" cy="175" r="3" fill="%23e5c96a"/><circle cx="25" cy="100" r="3" fill="%23e5c96a"/><line x1="100" y1="100" x2="100" y2="45" stroke="%23c8a84b" stroke-width="3" stroke-linecap="round"/><line x1="100" y1="100" x2="140" y2="100" stroke="%23c8a84b" stroke-width="2.5" stroke-linecap="round"/><line x1="100" y1="100" x2="80" y2="135" stroke="%23e5c96a" stroke-width="1.5" stroke-linecap="round"/><circle cx="100" cy="100" r="5" fill="%23f5e6b3"/><text x="100" y="75" font-family="serif" font-size="9" fill="%23c8a84b" text-anchor="middle">CHRONOMETRE</text><text x="100" y="130" font-family="serif" font-style="italic" font-size="8" fill="%23c8a84b" text-anchor="middle">Gentlemen</text></svg>';
 
     // Viewer Vault Data: { [username]: { lastDraw: timestamp, watches: [ watchId, ... ] } }
     let vaultData = {};
@@ -604,7 +1803,7 @@
     // 2. SELTENHEITS-WAHRSCHEINLICHKEITEN (DROP RATES)
     // =========================================================
     // Tier 1: 50%, Tier 2: 30%, Tier 3: 14%, Tier 4: 5%, Tier 5: 1%
-    const WATCHES_DB = window.WATCHES_DB || window.WATCHES_DATA || [];
+    const WATCHES_DB = (typeof WATCHES_DATA !== 'undefined' && WATCHES_DATA.length > 0) ? WATCHES_DATA : (window.WATCHES_DB || []);
 
     function rollRandomWatch() {
       if (!WATCHES_DB || WATCHES_DB.length === 0) return null;
@@ -652,6 +1851,7 @@
     const vitrineSlots = document.getElementById('vitrine-slots');
 
     const cooldownPill = document.getElementById('cooldown-pill');
+    const cdContentEl = document.getElementById('cd-content');
     const cdUserEl = document.getElementById('cd-user');
     const cdTimeEl = document.getElementById('cd-time');
 
@@ -660,15 +1860,15 @@
     let cdHideTimer = null;
 
     function formatPound(num) {
-      return '£ ' + Number(num).toLocaleString('de-DE');
+      return 'Â£ ' + Number(num).toLocaleString('de-DE');
     }
 
     function getRankTitle(count, totalValue) {
       if (totalValue >= 5000000) return 'Lord der Haute Horlogerie';
       if (totalValue >= 500000) return 'Erlauchter Kronen-Kollektor';
-      if (count >= 25) return 'Großmeister des Salons';
+      if (count >= 25) return 'GroÃŸmeister des Salons';
       if (count >= 10) return 'Passionierter Chronometrist';
-      if (count >= 5) return 'Gutsherr mit feinem Gespür';
+      if (count >= 5) return 'Gutsherr mit feinem GespÃ¼r';
       return 'Novize des Uhrmacher-Handwerks';
     }
 
@@ -679,9 +1879,11 @@
       watchImg.onerror = function() {
         if (watch.remote_img && watchImg.src !== watch.remote_img) {
           watchImg.src = watch.remote_img;
+        } else {
+          watchImg.src = WATCH_FALLBACK_SVG;
         }
       };
-      watchImg.src = watch.img;
+      watchImg.src = watch.img || watch.remote_img || WATCH_FALLBACK_SVG;
       watchBrand.textContent = watch.brand;
       watchModel.textContent = watch.model;
       watchRef.textContent = watch.ref;
@@ -692,19 +1894,19 @@
 
       // Tier Badge
       watchTierBadge.className = `tier-badge tier-${watch.tier}`;
-      watchTierBadge.textContent = `Tier ${watch.tier} – ${watch.tierName}`;
+      watchTierBadge.textContent = `Tier ${watch.tier} â€“ ${watch.tierName}`;
 
       watchCard.classList.add('show');
 
       if (watchHideTimer) clearTimeout(watchHideTimer);
       watchHideTimer = setTimeout(() => {
         watchCard.classList.remove('show');
-      }, 10000); // 10 Sekunden edle Präsentation
+      }, 10000); // 10 Sekunden edle PrÃ¤sentation
     }
 
     // --- TRESOR ZEIGEN ---
     async function displayUserTresor(user, avatarUrl = null) {
-      const cleanUser = user.toLowerCase().trim();
+      const cleanUser = (user || 'Gentleman').toLowerCase().trim();
       const uData = vaultData[cleanUser] || { lastDraw: 0, watches: [] };
 
       tresorUser.textContent = user;
@@ -729,18 +1931,19 @@
       tresorTotalVal.textContent = formatPound(totalVal);
       tresorRank.textContent = getRankTitle(totalCount, totalVal);
 
-      // Top 3 Uhren nach Preis sortiert für die Vitrine
+      // Top 3 Uhren nach Preis sortiert fÃ¼r die Vitrine
       const top3 = [...userWatchObjects].sort((a,b) => b.price - a.price).slice(0, 3);
       vitrineSlots.innerHTML = '';
 
       if (top3.length === 0) {
-        vitrineSlots.innerHTML = '<div style="font-family: \'IM Fell English\', serif; font-style: italic; font-size: 13px; color: rgba(200,168,75,0.6); width: 100%; text-align: center; padding: 10px 0;">Der Tresor ist noch unberührt. Ziehe deine erste Uhr mit !watch</div>';
+        vitrineSlots.innerHTML = '<div style="font-family: \'IM Fell English\', serif; font-style: italic; font-size: 13px; color: rgba(200,168,75,0.6); width: 100%; text-align: center; padding: 10px 0;">Der Tresor ist noch unberÃ¼hrt. Ziehe deine erste Uhr mit !uhr</div>';
       } else {
         top3.forEach(w => {
           const item = document.createElement('div');
           item.className = 'vitrine-slot-item';
+          const imgSrc = w.img || w.remote_img || WATCH_FALLBACK_SVG;
           item.innerHTML = `
-            <img src="${w.img}" class="slot-img">
+            <img src="${imgSrc}" class="slot-img" onerror="this.src='${WATCH_FALLBACK_SVG}'">
             <div class="slot-name">${w.brand}</div>
             <div class="slot-val">${formatPound(w.price)}</div>
           `;
@@ -758,9 +1961,17 @@
     // --- COOLDOWN POPUP ---
     function displayCooldown(user, remainingMs) {
       const mins = Math.ceil(remainingMs / (60 * 1000));
-      cdUserEl.textContent = user;
-      cdTimeEl.textContent = `${mins} Minute${mins > 1 ? 'n' : ''}`;
+      cdContentEl.innerHTML = `Geduld, Gentleman <span class="cooldown-user">${user}</span>. Der nÃ¤chste Uhrmacher-Besuch ist erst in <span class="cooldown-time">${mins} Minute${mins > 1 ? 'n' : ''}</span> mÃ¶glich.`;
 
+      cooldownPill.classList.add('show');
+      if (cdHideTimer) clearTimeout(cdHideTimer);
+      cdHideTimer = setTimeout(() => {
+        cooldownPill.classList.remove('show');
+      }, 6000);
+    }
+
+    function displayCustomNotice(htmlText) {
+      cdContentEl.innerHTML = htmlText;
       cooldownPill.classList.add('show');
       if (cdHideTimer) clearTimeout(cdHideTimer);
       cdHideTimer = setTimeout(() => {
@@ -771,8 +1982,9 @@
     // =========================================================
     // 4. BEFEHLS-VERARBEITUNG (!watch / !uhr & !tresor)
     // =========================================================
-    function handleWatchCommand(user) {
-      const cleanUser = user.toLowerCase().trim();
+    function handleWatchCommand(user, force = false) {
+      console.log("[Uhrenspiel] !uhr aufgerufen von:", user, "force:", force);
+      const cleanUser = (user || 'Gentleman').toLowerCase().trim();
       const now = Date.now();
 
       if (!vaultData[cleanUser]) {
@@ -781,22 +1993,49 @@
 
       const uData = vaultData[cleanUser];
       const timePassed = now - uData.lastDraw;
+      const isStreamer = STREAMER_ACCOUNTS.includes(cleanUser) || urlParams.get('nocd') === '1' || urlParams.get('test') === '1';
 
-      // Cooldown Prüfung
-      if (timePassed < COOLDOWN_MS) {
+      // Cooldown PrÃ¼fung (Ã¼bersprungen fÃ¼r Streamer oder bei !uhr force/test)
+      if (!force && !isStreamer && timePassed < COOLDOWN_MS) {
+        console.log("[Uhrenspiel] Cooldown aktiv fÃ¼r:", user);
         displayCooldown(user, COOLDOWN_MS - timePassed);
         return;
       }
 
-      // Ziehung durchführen
-      const drawnWatch = rollRandomWatch();
-      if (!drawnWatch) return;
+      // Ziehung durchfÃ¼hren
+      let drawnWatch = rollRandomWatch();
+      if (!drawnWatch) {
+        drawnWatch = WATCHES_DB[0] || {
+          id: 62,
+          brand: "Rolex",
+          model: "Submariner Date 41",
+          ref: "126610LN",
+          price: 10250,
+          tier: 3,
+          tierName: "Salon-Prestige",
+          year: "1953",
+          img: "watch_images/62.jpg"
+        };
+      }
 
       uData.lastDraw = now;
       if (!uData.watches.includes(drawnWatch.id)) {
         uData.watches.push(drawnWatch.id);
       }
       saveVault();
+
+      // In Firebase Cloud sichern falls verfÃ¼gbar
+      if (window.CloudDB && typeof window.CloudDB.saveWatch === 'function') {
+        window.CloudDB.saveWatch({
+          name: drawnWatch.brand + " " + drawnWatch.model,
+          sub: "Ref. " + drawnWatch.ref,
+          value: formatPound(drawnWatch.price),
+          rarity: drawnWatch.tier >= 4 ? "mythic" : (drawnWatch.tier === 3 ? "legendary" : "rare"),
+          rarityLabel: drawnWatch.tierName,
+          owner: user,
+          date: "Live im Stream gezogen!"
+        });
+      }
 
       displayDrawnWatch(user, drawnWatch);
     }
@@ -809,12 +2048,12 @@
     // 5. TEST-STATION-FUNKTIONEN
     // =========================================================
     function testDrawWatch(id) {
-      const w = WATCHES_DB.find(item => item.id === id);
+      const w = WATCHES_DB.find(item => item.id === id) || WATCHES_DB[0];
       displayDrawnWatch('Lord Chris', w);
     }
 
     function testTresor() {
-      // Test-Tresor füllen
+      // Test-Tresor fÃ¼llen
       const cleanUser = 'chris';
       vaultData[cleanUser] = {
         lastDraw: Date.now(),
@@ -877,12 +2116,25 @@
             }
 
             if (!chatText) continue;
-            const cmd = chatText.toLowerCase();
+            const cmd = chatText.toLowerCase().trim();
 
-            if (cmd === '!watch' || cmd === '!uhr' || cmd.startsWith('!watch ') || cmd.startsWith('!uhr ')) {
-              handleWatchCommand(displayName);
-            } else if (cmd === '!tresor' || cmd === '!sammlung' || cmd === '!vitrine') {
-              handleTresorCommand(displayName);
+            if (cmd === '!uhr reset' || cmd === '!watch reset' || cmd === '!reset') {
+              const target = displayName.toLowerCase().trim();
+              if (vaultData[target]) {
+                vaultData[target].lastDraw = 0;
+                saveVault();
+              }
+              displayCustomNotice(`âœ¦ Cooldown fÃ¼r <span class="cooldown-user">${displayName}</span> wurde zurÃ¼ckgesetzt! Du kannst jetzt mit !uhr ziehen.`);
+            } else if (cmd === '!watch' || cmd === '!uhr' || cmd.startsWith('!watch ') || cmd.startsWith('!uhr ')) {
+              const isForce = cmd.includes('force') || cmd.includes('test');
+              handleWatchCommand(displayName, isForce);
+            } else if (cmd === '!tresor' || cmd === '!sammlung' || cmd === '!vitrine' || cmd.startsWith('!tresor ') || cmd.startsWith('!sammlung ')) {
+              let targetUser = displayName;
+              const parts = chatText.split(' ');
+              if (parts.length > 1 && parts[1].trim()) {
+                targetUser = parts[1].replace('@', '').trim();
+              }
+              handleTresorCommand(targetUser);
             }
           }
         }
