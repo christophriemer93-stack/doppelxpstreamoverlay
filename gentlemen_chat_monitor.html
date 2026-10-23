@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Salon Chat">
+  <meta name="theme-color" content="#070c08">
+  <title>DOPPEL XP – Salon Chat &amp; Event Monitor (Handy / Tablet)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #060a07;
+      --bg-panel: #0d160e;
+      --bg-card: #121f14;
+      --bg-card-sub: #1e1315;
+      --bg-card-reward: #1c1809;
+      --gold-primary: #c8a84b;
+      --gold-bright: #e5c96a;
+      --gold-dim: #8c7431;
+      --text-cream: #f3ebd6;
+      --text-muted: #95a896;
+      --border-gold: rgba(200, 168, 75, 0.38);
+      --border-bright: rgba(229, 201, 106, 0.7);
+      --msg-font-size: 15px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(27, 77, 46, 0.28), transparent 65%),
+        radial-gradient(circle at 50% 100%, rgba(200, 168, 75, 0.12), transparent 60%);
+      color: var(--text-cream);
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Pinstripe overlay */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(90deg, rgba(200, 168, 75, 0.02) 0px, rgba(200, 168, 75, 0.02) 1px, transparent 1px, transparent 36px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* =========================================================
+       1. HEADER & STATUS LEISTE
+       ========================================================= */
+    header {
+      position: relative;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(13, 22, 14, 0.98) 0%, rgba(8, 14, 9, 0.96) 100%);
+      border-bottom: 1.5px solid var(--border-gold);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      padding: 10px 14px;
+      padding-top: max(10px, env(safe-area-inset-top));
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .top-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .crest-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #182b1b 0%, #0d170e 100%);
+      border: 1.5px solid var(--gold-bright);
+      color: var(--gold-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 0 0 10px rgba(229, 201, 106, 0.35);
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--gold-bright);
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    .brand-text .channel-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-icon {
+      background: rgba(18, 31, 20, 0.85);
+      border: 1px solid var(--border-gold);
+      color: var(--text-cream);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-height: 34px;
+    }
+
+    .btn-icon:hover, .btn-icon:active {
+      background: var(--gold-primary);
+      color: #060a07;
+      border-color: var(--gold-bright);
+    }
+
+    .btn-icon.active {
+      background: rgba(229, 201, 106, 0.22);
+      border-color: var(--gold-bright);
+      color: var(--gold-bright);
+    }
+
+    .status-pills-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 10px;
+    }
+
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #888;
+      display: inline-block;
+    }
+
+    .status-dot.online {
+      background: #4ade80;
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.7);
+    }
+
+    .status-dot.connecting {
+      background: #fbbf24;
+      animation: pulseDot 1s infinite alternate;
+    }
+
+    @keyframes pulseDot {
+      from { opacity: 0.4; }
+      to { opacity: 1; }
+    }
+
+    .font-size-ctrls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(10, 18, 11, 0.85);
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(200, 168, 75, 0.25);
+    }
+
+    .font-btn {
+      background: transparent;
+      border: none;
+      color: var(--gold-bright);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 2px 6px;
+      cursor: pointer;
+    }
+
+    /* =========================================================
+       2. TOP-ROW: LETZTE 3 EVENTS (FOLLOW, SUB, KANALPUNKTE ETC.)
+       ========================================================= */
+    .events-bar-section {
+      position: relative;
+      z-index: 8;
+      background: rgba(8, 14, 9, 0.94);
+      border-bottom: 1px solid var(--border-gold);
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .events-bar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold-bright);
+    }
+
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .events-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 6px;
+      }
+    }
+
+    .event-card {
+      background: linear-gradient(145deg, #121d13 0%, #0a110b 100%);
+      border: 1px solid var(--border-gold);
+      border-radius: 6px;
+      padding: 7px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .event-card.newest {
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 14px rgba(229, 201, 106, 0.3), inset 0 0 10px rgba(229, 201, 106, 0.1);
+      animation: highlightPop 0.6s ease;
+    }
+
+    @keyframes highlightPop {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .event-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .event-badge-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      color: var(--gold-bright);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .event-card.reward-event .event-badge-tag { color: #fbbf24; }
+    .event-card.sub-event .event-badge-tag { color: #f43f5e; }
+    .event-card.cheer-event .event-badge-tag { color: #38bdf8; }
+    .event-card.raid-event .event-badge-tag { color: #c084fc; }
+
+    .event-time {
+      font-size: 8px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .event-username {
+      font-family: 'Playfair Display', serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-cream);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    .event-detail {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .event-card.reward-event .event-detail { color: #fef08a; font-weight: 600; }
+
+    /* =========================================================
+       3. CHAT STREAM BEREICH
+       ========================================================= */
+    .chat-wrapper {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      z-index: 5;
+    }
+
+    .chat-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px 14px;
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Message Item */
+    .chat-msg {
+      background: linear-gradient(145deg, rgba(16, 27, 18, 0.94) 0%, rgba(10, 17, 11, 0.96) 100%);
+      border: 1px solid rgba(200, 168, 75, 0.28);
+      border-left: 3.5px solid var(--gold-primary);
+      border-radius: 6px;
+      padding: 8px 12px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      animation: msgSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      font-size: var(--msg-font-size);
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    @keyframes msgSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chat-msg-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      line-height: 1.2;
+    }
+
+    .badges-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      vertical-align: middle;
+    }
+
+    .chat-badge {
+      height: 18px;
+      min-width: 18px;
+      border-radius: 3px;
+      vertical-align: middle;
+      display: inline-block;
+    }
+
+    .author-name {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      color: var(--gold-bright);
+      font-size: calc(var(--msg-font-size) - 1px);
+    }
+
+    .msg-timestamp {
+      font-size: 10px;
+      color: rgba(200, 168, 75, 0.5);
+      margin-left: auto;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .chat-msg-body {
+      color: var(--text-cream);
+      font-family: 'IM Fell English', Georgia, serif;
+      font-size: var(--msg-font-size);
+      letter-spacing: 0.2px;
+    }
+
+    /* 7TV, BTTV & Twitch Emotes */
+    .chat-emote {
+      display: inline-block;
+      vertical-align: middle;
+      height: 30px;
+      width: auto;
+      margin: -2px 2px 0 2px;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+    }
+
+    /* =========================================================
+       4. SPEZIAL-NACHRICHTEN (KANALPUNKTE, SUBS, BITS)
+       ========================================================= */
+    /* 🪙 KANALPUNKTE-EINLÖSUNG */
+    .chat-msg.msg-channel-points {
+      background: linear-gradient(135deg, rgba(32, 28, 12, 0.96) 0%, rgba(20, 17, 7, 0.98) 100%);
+      border: 1.5px solid #e5c96a;
+      border-left: 5px solid #facc15;
+      box-shadow: 0 0 18px rgba(234, 179, 8, 0.35), 0 6px 20px rgba(0,0,0,0.8);
+    }
+
+    .reward-banner-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(90deg, rgba(234, 179, 8, 0.25), rgba(200, 168, 75, 0.1));
+      border: 1px solid rgba(250, 204, 21, 0.5);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fde047;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 2px;
+    }
+
+    /* ⭐ SUB / RESUB / GIFT-SUB */
+    .chat-msg.msg-sub {
+      background: linear-gradient(135deg, rgba(42, 16, 22, 0.96) 0%, rgba(22, 8, 11, 0.98) 100%);
+      border: 1.5px solid #f43f5e;
+      border-left: 5px solid #fb7185;
+      box-shadow: 0 0 16px rgba(244, 63, 94, 0.3);
+    }
+
+    .sub-banner-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(244, 63, 94, 0.25);
+      border: 1px solid #f43f5e;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fecdd3;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    /* 💎 BITS / CHEER */
+    .chat-msg.msg-cheer {
+      background: linear-gradient(135deg, rgba(14, 28, 38, 0.96) 0%, rgba(7, 15, 22, 0.98) 100%);
+      border: 1.5px solid #38bdf8;
+      border-left: 5px solid #0ea5e9;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
+    }
+
+    /* 🚀 RAID */
+    .chat-msg.msg-raid {
+      background: linear-gradient(135deg, rgba(32, 16, 42, 0.96) 0%, rgba(16, 8, 22, 0.98) 100%);
+      border: 1.5px solid #c084fc;
+      border-left: 5px solid #a855f7;
+    }
+
+    /* FLOATING SCROLL-TO-BOTTOM BUTTON */
+    .scroll-bottom-btn {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(40px);
+      opacity: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, #e5c96a 0%, #b89230 100%);
+      color: #060a07;
+      border: 1px solid #fff0b3;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 12px rgba(229, 201, 106, 0.5);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 20;
+    }
+
+    .scroll-bottom-btn.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* =========================================================
+       5. TEST-MODAL & EINSTELLUNGEN
+       ========================================================= */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-content {
+      background: linear-gradient(180deg, #132215 0%, #09120a 100%);
+      border: 1.5px solid var(--gold-bright);
+      border-radius: 12px;
+      max-width: 460px;
+      width: 100%;
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-gold);
+      padding-bottom: 8px;
+    }
+
+    .modal-header h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      color: var(--gold-bright);
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-cream);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .test-btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .test-act-btn {
+      background: #182819;
+      color: var(--text-cream);
+      border: 1px solid rgba(200, 168, 75, 0.4);
+      padding: 9px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .test-act-btn:hover, .test-act-btn:active {
+      background: var(--gold-primary);
+      color: #060a07;
+      border-color: var(--gold-bright);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       1. HEADER MIT STATUS, WAKELOCK & VOLLBILD
+       ========================================================= -->
+  <header>
+    <div class="top-header-row">
+      <div class="brand-box">
+        <div class="crest-icon">XP</div>
+        <div class="brand-text">
+          <h1>THE GENTLEMEN</h1>
+          <div class="channel-tag">SALON CHAT &bull; <span id="channelNameDisplay">#d0ppelxp</span></div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn-icon" id="wakeLockBtn" onclick="toggleWakeLock()" title="Verhindert, dass das Handy-Display ausgeht">
+          <span id="wakeLockIcon">📱</span> <span id="wakeLockText">Display an</span>
+        </button>
+        <button class="btn-icon" onclick="toggleFullscreen()" title="Vollbild-Modus">
+          ⛶ Vollbild
+        </button>
+        <button class="btn-icon" onclick="openTestModal()" title="Simulator & Test">
+          ✦ Test
+        </button>
+      </div>
+    </div>
+
+    <div class="status-pills-row">
+      <div class="status-group">
+        <span class="status-indicator">
+          <span class="status-dot connecting" id="twitchDot"></span>
+          <span>Twitch IRC</span>
+        </span>
+        <span class="status-indicator">
+          <span class="status-dot connecting" id="seDot"></span>
+          <span>Alerts &amp; Events</span>
+        </span>
+        <span class="status-indicator" style="color: #e5c96a;">
+          <span id="emoteCountBadge">7TV / BTTV bereit</span>
+        </span>
+      </div>
+
+      <div class="font-size-ctrls">
+        <span style="font-size:9px;color:var(--text-muted);font-weight:700;">TEXT</span>
+        <button class="font-btn" onclick="changeFontSize(-1)" title="Schrift kleiner">A-</button>
+        <button class="font-btn" onclick="changeFontSize(1)" title="Schrift größer">A+</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       2. DIE LETZTEN 3 EVENTS (TOP-LEISTE)
+       ========================================================= -->
+  <section class="events-bar-section">
+    <div class="events-bar-header">
+      <span>✦ LETZTE 3 SALON-EREIGNISSE (FOLLOW &bull; SUB &bull; KANALPUNKTE &bull; BITS) ✦</span>
+      <span id="eventCountLabel" style="color:var(--text-muted);">Echtzeit-Empfang</span>
+    </div>
+
+    <div class="events-grid" id="eventsGrid">
+      <!-- 3 Dynamische Karten -->
+      <div class="event-card" id="evCard0">
+        <div class="event-badge-row">
+          <span class="event-badge-tag">✦ WARTET</span>
+          <span class="event-time">--</span>
+        </div>
+        <div class="event-username">Noch kein Event</div>
+        <div class="event-detail">Bereit für den Stream</div>
+      </div>
+
+      <div class="event-card" id="evCard1">
+        <div class="event-badge-row">
+          <span class="event-badge-tag">✦ WARTET</span>
+          <span class="event-time">--</span>
+        </div>
+        <div class="event-username">Noch kein Event</div>
+        <div class="event-detail">Bereit für den Stream</div>
+      </div>
+
+      <div class="event-card" id="evCard2">
+        <div class="event-badge-row">
+          <span class="event-badge-tag">✦ WARTET</span>
+          <span class="event-time">--</span>
+        </div>
+        <div class="event-username">Noch kein Event</div>
+        <div class="event-detail">Bereit für den Stream</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       3. CHAT STREAM
+       ========================================================= -->
+  <main class="chat-wrapper">
+    <div class="chat-scroll-area" id="chatScrollArea">
+      <!-- Chatnachrichten laufen hier dynamisch ein -->
+    </div>
+
+    <button class="scroll-bottom-btn" id="scrollBottomBtn" onclick="scrollToBottom(true)">
+      <span>⬇ Neueste Nachrichten</span>
+      <span id="unreadBadge" style="background:#060a07;color:#e5c96a;padding:1px 6px;border-radius:10px;font-size:10px;">+1</span>
+    </button>
+  </main>
+
+  <!-- =========================================================
+       4. TEST & SIMULATIONS MODAL
+       ========================================================= -->
+  <div class="modal-overlay" id="testModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>✦ SALON SIMULATOR &amp; TESTS ✦</h3>
+        <button class="modal-close-btn" onclick="closeTestModal()">&times;</button>
+      </div>
+
+      <p style="font-size:11px;color:var(--text-muted);line-height:1.5;">
+        Teste die Live-Anzeige von 7TV/BTTV Emotes, Kanalpunkte-Einlösungen und den letzten 3 Events auf deinem Handy/Tablet:
+      </p>
+
+      <div class="test-btn-grid">
+        <button class="test-act-btn" onclick="simReward()">🪙 Kanalpunkte (Hydrate)</button>
+        <button class="test-act-btn" onclick="simFollow()">👤 Neuer Follower</button>
+        <button class="test-act-btn" onclick="simSub()">⭐ Neuer Abonnent</button>
+        <button class="test-act-btn" onclick="simGiftSub()">🎁 Gift-Sub Bombe</button>
+        <button class="test-act-btn" onclick="simCheer()">💎 500 Bits Spende</button>
+        <button class="test-act-btn" onclick="simRaid()">🚀 Raid (48 Zuseher)</button>
+        <button class="test-act-btn" onclick="simEmoteChat()">💬 7TV &amp; BTTV Emote Chat</button>
+        <button class="test-act-btn" onclick="clearChat()">🗑️ Chat leeren</button>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="btn-icon" style="background:var(--gold-primary);color:#060a07;font-weight:800;" onclick="closeTestModal()">Fertig</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       5. JAVASCRIPT: IRC, 7TV, BTTV, ALERTS & KANALPUNKTE
+       ========================================================= -->
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const CHANNEL = (urlParams.get('channel') || 'd0ppelxp').toLowerCase().replace('#', '');
+    const TWITCH_USER_ID = '1096773228'; // d0ppelxp Twitch ID
+    const SE_TOKEN = urlParams.get('token') || 'CRQBE-BXXw5s6_3svxRorpLEpGruRwGyZO20Dl8untBOo7D_';
+
+    document.getElementById('channelNameDisplay').textContent = `#${CHANNEL}`;
+
+    // --- 1. EMOTE STORAGE & FETCHER (7TV, BTTV, CUSTOM) ---
+    const emoteMap = new Map(); // name -> url
+
+    // Eure Graphic-Novel Salon Emotes
+    const customSalonEmotes = {
+      'doppelBoss': 'badge_emote_assets/emote_01_boss.png',
+      'doppelProst': 'badge_emote_assets/emote_02_prost.png',
+      'doppelHype': 'badge_emote_assets/emote_03_hype.png',
+      'doppelGG': 'badge_emote_assets/emote_04_gg.png',
+      'doppelLUL': 'badge_emote_assets/emote_05_lul.png',
+      'doppelCash': 'badge_emote_assets/emote_06_cash.png',
+      'doppelSus': 'badge_emote_assets/emote_07_sus.png'
+    };
+    Object.keys(customSalonEmotes).forEach(k => emoteMap.set(k, customSalonEmotes[k]));
+
+    async function loadAllEmotes() {
+      let count = 0;
+      try {
+        // 1. 7TV Channel Emotes
+        const r7Channel = await fetch(`https://7tv.io/v3/users/twitch/${TWITCH_USER_ID}`);
+        if (r7Channel.ok) {
+          const d7c = await r7Channel.json();
+          if (d7c && d7c.emote_set && d7c.emote_set.emotes) {
+            d7c.emote_set.emotes.forEach(e => {
+              if (e.name && e.data && e.data.host && e.data.host.url) {
+                emoteMap.set(e.name, `https:${e.data.host.url}/2x.webp`);
+                count++;
+              }
+            });
+          }
+        }
+      } catch (e) {}
+
+      try {
+        // 2. 7TV Global Emotes
+        const r7Global = await fetch('https://7tv.io/v3/emote-sets/global');
+        if (r7Global.ok) {
+          const d7g = await r7Global.json();
+          if (d7g && d7g.emotes) {
+            d7g.emotes.forEach(e => {
+              if (e.name && e.data && e.data.host && e.data.host.url) {
+                if (!emoteMap.has(e.name)) {
+                  emoteMap.set(e.name, `https:${e.data.host.url}/2x.webp`);
+                  count++;
+                }
+              }
+            });
+          }
+        }
+      } catch (e) {}
+
+      try {
+        // 3. BTTV Channel & Shared Emotes
+        const rBttv = await fetch(`https://api.betterttv.net/3/cached/users/twitch/${TWITCH_USER_ID}`);
+        if (rBttv.ok) {
+          const dBttv = await rBttv.json();
+          const list = [ ...(dBttv.channelEmotes || []), ...(dBttv.sharedEmotes || []) ];
+          list.forEach(e => {
+            if (e.code && e.id) {
+              if (!emoteMap.has(e.code)) {
+                emoteMap.set(e.code, `https://cdn.betterttv.net/emote/${e.id}/2x.webp`);
+                count++;
+              }
+            }
+          });
+        }
+      } catch (e) {}
+
+      try {
+        // 4. BTTV Global Emotes
+        const rBttvGlobal = await fetch('https://api.betterttv.net/3/cached/emotes/global');
+        if (rBttvGlobal.ok) {
+          const dBg = await rBttvGlobal.json();
+          if (Array.isArray(dBg)) {
+            dBg.forEach(e => {
+              if (e.code && e.id && !emoteMap.has(e.code)) {
+                emoteMap.set(e.code, `https://cdn.betterttv.net/emote/${e.id}/2x.webp`);
+                count++;
+              }
+            });
+          }
+        }
+      } catch (e) {}
+
+      document.getElementById('emoteCountBadge').textContent = `7TV / BTTV (${emoteMap.size} Emotes geladen)`;
+      console.log(`[Salon Chat] ${emoteMap.size} Emotes registriert.`);
+    }
+
+    loadAllEmotes();
+
+    // --- 2. DIE LETZTEN 3 EVENTS SPEICHER & ANZEIGE ---
+    const STORAGE_EVENTS_KEY = 'gentlemen_recent_events_v2';
+    let recentEvents = [];
+
+    try {
+      const saved = localStorage.getItem(STORAGE_EVENTS_KEY);
+      if (saved) recentEvents = JSON.parse(saved);
+    } catch (e) {}
+
+    function pushEvent(eventData) {
+      // eventData: { type: 'follow'|'sub'|'reward'|'cheer'|'raid'|'tip', title: string, user: string, detail: string, timestamp: number }
+      eventData.timestamp = eventData.timestamp || Date.now();
+      recentEvents.unshift(eventData);
+      if (recentEvents.length > 20) recentEvents.pop();
+
+      try {
+        localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(recentEvents));
+      } catch (e) {}
+
+      renderRecentEvents(true);
+    }
+
+    function timeAgo(ts) {
+      if (!ts) return 'gerade eben';
+      const sec = Math.floor((Date.now() - ts) / 1000);
+      if (sec < 60) return 'gerade eben';
+      const min = Math.floor(sec / 60);
+      if (min < 60) return `vor ${min}m`;
+      const hrs = Math.floor(min / 60);
+      return `vor ${hrs}h`;
+    }
+
+    function renderRecentEvents(animateNewest = false) {
+      for (let i = 0; i < 3; i++) {
+        const card = document.getElementById(`evCard${i}`);
+        const ev = recentEvents[i];
+
+        if (!ev) {
+          card.className = 'event-card';
+          card.innerHTML = `
+            <div class="event-badge-row">
+              <span class="event-badge-tag">✦ WARTET</span>
+              <span class="event-time">--</span>
+            </div>
+            <div class="event-username">Kein Event</div>
+            <div class="event-detail">Bereit für Stream</div>
+          `;
+          continue;
+        }
+
+        let badgeType = '✦ EVENT';
+        let typeClass = '';
+        if (ev.type === 'reward') { badgeType = '🪙 KANALPUNKTE'; typeClass = 'reward-event'; }
+        else if (ev.type === 'sub') { badgeType = '⭐ SUB'; typeClass = 'sub-event'; }
+        else if (ev.type === 'follower') { badgeType = '👤 FOLLOWER'; typeClass = 'follow-event'; }
+        else if (ev.type === 'cheer') { badgeType = '💎 BITS'; typeClass = 'cheer-event'; }
+        else if (ev.type === 'raid') { badgeType = '🚀 RAID'; typeClass = 'raid-event'; }
+        else if (ev.type === 'tip') { badgeType = '💰 SPENDE'; typeClass = 'tip-event'; }
+
+        card.className = `event-card ${typeClass} ${i === 0 && animateNewest ? 'newest' : ''}`;
+        card.innerHTML = `
+          <div class="event-badge-row">
+            <span class="event-badge-tag">${badgeType}</span>
+            <span class="event-time">${timeAgo(ev.timestamp)}</span>
+          </div>
+          <div class="event-username">${escapeHtml(ev.user)}</div>
+          <div class="event-detail">${escapeHtml(ev.detail || '')}</div>
+        `;
+      }
+    }
+
+    renderRecentEvents(false);
+    setInterval(() => renderRecentEvents(false), 30000);
+
+    // --- 3. BADGES & EMOTES PARSER ---
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderBadgesHtml(badgesRaw) {
+      if (!badgesRaw) return '';
+      // badgesRaw z. B. "broadcaster/1,subscriber/12,partner/1"
+      let html = '';
+      const parts = badgesRaw.split(',');
+
+      parts.forEach(b => {
+        const [badgeType, ver] = b.split('/');
+        if (badgeType === 'broadcaster') {
+          html += `<span class="chat-badge" style="background:#e5c96a;color:#060a07;padding:1px 5px;font-weight:900;font-size:10px;border-radius:3px;">👑 HOST</span>`;
+        } else if (badgeType === 'moderator') {
+          html += `<span class="chat-badge" style="background:#22c55e;color:#060a07;padding:1px 5px;font-weight:900;font-size:10px;border-radius:3px;">⚔️ MOD</span>`;
+        } else if (badgeType === 'vip') {
+          html += `<span class="chat-badge" style="background:#e879f9;color:#060a07;padding:1px 5px;font-weight:900;font-size:10px;border-radius:3px;">💎 VIP</span>`;
+        } else if (badgeType === 'subscriber') {
+          html += `<span class="chat-badge" style="background:#d97706;color:#fff;padding:1px 5px;font-weight:900;font-size:10px;border-radius:3px;">🏅 SUB</span>`;
+        } else if (badgeType === 'founder') {
+          html += `<span class="chat-badge" style="background:#3b82f6;color:#fff;padding:1px 5px;font-weight:900;font-size:10px;border-radius:3px;">🥇 1ST</span>`;
+        }
+      });
+      return html;
+    }
+
+    function parseMessageContent(text, twitchEmotesRaw) {
+      if (!text) return '';
+      // 1. Wenn Twitch Native Emotes da sind:
+      // z.B. emotes=25:0-4,12-16/1902:6-10
+      let words = text.split(' ');
+      let renderedWords = [];
+
+      words.forEach(w => {
+        const cleanWord = w.trim();
+        if (emoteMap.has(cleanWord)) {
+          const url = emoteMap.get(cleanWord);
+          renderedWords.push(`<img class="chat-emote" src="${url}" alt="${cleanWord}" title="${cleanWord}" loading="lazy">`);
+        } else {
+          renderedWords.push(escapeHtml(w));
+        }
+      });
+
+      return renderedWords.join(' ');
+    }
+
+    // --- 4. CHAT AREA MANAGEMENT (SCROLL & ADD) ---
+    const chatScroll = document.getElementById('chatScrollArea');
+    const scrollBtn = document.getElementById('scrollBottomBtn');
+    const unreadBadge = document.getElementById('unreadBadge');
+    let isUserScrolledUp = false;
+    let unreadCount = 0;
+    const MAX_MESSAGES = 140;
+
+    chatScroll.addEventListener('scroll', () => {
+      const distFromBottom = chatScroll.scrollHeight - chatScroll.scrollTop - chatScroll.clientHeight;
+      if (distFromBottom > 75) {
+        isUserScrolledUp = true;
+      } else {
+        isUserScrolledUp = false;
+        unreadCount = 0;
+        scrollBtn.classList.remove('visible');
+      }
+    });
+
+    function scrollToBottom(smooth = true) {
+      chatScroll.scrollTo({
+        top: chatScroll.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
+      isUserScrolledUp = false;
+      unreadCount = 0;
+      scrollBtn.classList.remove('visible');
+    }
+
+    function addChatMessage(data) {
+      // data: { user, color, badges, text, isReward, rewardTitle, isSub, isCheer, bits, timestamp }
+      const div = document.createElement('div');
+      div.className = 'chat-msg';
+
+      if (data.isReward) div.classList.add('msg-channel-points');
+      if (data.isSub) div.classList.add('msg-sub');
+      if (data.isCheer) div.classList.add('msg-cheer');
+      if (data.isRaid) div.classList.add('msg-raid');
+
+      const d = new Date(data.timestamp || Date.now());
+      const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      const userColor = data.color || '#e5c96a';
+
+      let headerHtml = '';
+      if (data.isReward) {
+        headerHtml = `
+          <div class="reward-banner-pill">
+            <span>🪙 KANALPUNKTE-BELOHNUNG</span>
+            <span style="color:#fff;">&bull; ${escapeHtml(data.rewardTitle || 'Einlösung')}</span>
+          </div>
+        `;
+      } else if (data.isSub) {
+        headerHtml = `
+          <div class="sub-banner-pill">
+            <span>⭐ SALON-ABONNEMENT</span>
+            <span style="color:#fff;">&bull; ${escapeHtml(data.subDetail || 'Neuer Abonnent')}</span>
+          </div>
+        `;
+      }
+
+      div.innerHTML = `
+        ${headerHtml}
+        <div class="chat-msg-header">
+          <div class="badges-box">${renderBadgesHtml(data.badges)}</div>
+          <span class="author-name" style="color: ${userColor};">${escapeHtml(data.user)}</span>
+          <span class="msg-timestamp">${timeStr}</span>
+        </div>
+        <div class="chat-msg-body">${data.renderedHtml || parseMessageContent(data.text, data.emotes)}</div>
+      `;
+
+      chatScroll.appendChild(div);
+
+      // Max Messages Limit
+      while (chatScroll.children.length > MAX_MESSAGES) {
+        chatScroll.removeChild(chatScroll.firstChild);
+      }
+
+      if (isUserScrolledUp) {
+        unreadCount++;
+        unreadBadge.textContent = `+${unreadCount}`;
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollToBottom(false);
+      }
+    }
+
+    // --- 5. TWITCH IRC WEBSOCKET (ECHTE NACHRICHTEN & KANALPUNKTE) ---
+    let ircSocket = null;
+    const twitchDot = document.getElementById('twitchDot');
+
+    function connectTwitchIrc() {
+      twitchDot.className = 'status-dot connecting';
+      ircSocket = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+      ircSocket.onopen = () => {
+        twitchDot.className = 'status-dot online';
+        ircSocket.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership');
+        ircSocket.send('PASS SCHMOOPIIE');
+        ircSocket.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+        ircSocket.send(`JOIN #${CHANNEL}`);
+        console.log(`[Salon Chat] Verbunden mit Twitch #${CHANNEL}`);
+      };
+
+      ircSocket.onmessage = (e) => {
+        const lines = e.data.split('\r\n');
+        for (let line of lines) {
+          if (!line) continue;
+          if (line.startsWith('PING')) {
+            ircSocket.send('PONG :tmi.twitch.tv');
+            continue;
+          }
+
+          // 1. PRIVMSG (Normale Chatnachricht ODER Kanalpunkte-Einlösung mit Text)
+          if (line.includes('PRIVMSG')) {
+            const rawMatch = line.match(/^@([^ ]+) :([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.*)$/);
+            if (!rawMatch) continue;
+
+            const tagsStr = rawMatch[1];
+            const senderNick = rawMatch[2];
+            const msgText = rawMatch[3];
+
+            // Tags parsen
+            const tags = {};
+            tagsStr.split(';').forEach(p => {
+              const [k, v] = p.split('=');
+              tags[k] = v;
+            });
+
+            const displayName = tags['display-name'] || senderNick;
+            const userColor = tags['color'] || '#e5c96a';
+            const badges = tags['badges'] || '';
+            const customRewardId = tags['custom-reward-id']; // WICHTIG: Kanalpunkte-Belohnung!
+            const msgId = tags['msg-id'];
+            const bits = tags['bits'] ? parseInt(tags['bits'], 10) : 0;
+
+            const isReward = Boolean(customRewardId || msgId === 'highlighted-message');
+            const rewardName = isReward ? (msgId === 'highlighted-message' ? 'Hervorgehobene Nachricht' : 'Kanalpunkte-Einlösung') : '';
+
+            // Wenn es eine Kanalpunkte-Einlösung ist, auch in die Top-3-Events Leiste pushen!
+            if (isReward) {
+              pushEvent({
+                type: 'reward',
+                user: displayName,
+                detail: rewardName + (msgText ? `: "${msgText}"` : ''),
+                timestamp: Date.now()
+              });
+            } else if (bits > 0) {
+              pushEvent({
+                type: 'cheer',
+                user: displayName,
+                detail: `${bits} Bits gespendet!`,
+                timestamp: Date.now()
+              });
+            }
+
+            addChatMessage({
+              user: displayName,
+              color: userColor,
+              badges: badges,
+              text: msgText,
+              emotes: tags['emotes'],
+              isReward: isReward,
+              rewardTitle: rewardName,
+              isCheer: bits > 0,
+              bits: bits,
+              timestamp: Date.now()
+            });
+          }
+
+          // 2. USERNOTICE (Sub, Resub, Subgift, Raid)
+          else if (line.includes('USERNOTICE')) {
+            const tagMatch = line.match(/^@([^ ]+) /);
+            if (!tagMatch) continue;
+            const tags = {};
+            tagMatch[1].split(';').forEach(p => {
+              const [k, v] = p.split('=');
+              tags[k] = v;
+            });
+
+            const msgId = tags['msg-id'];
+            const user = tags['display-name'] || tags['login'] || 'Ein Gentleman';
+            const sysMsg = (tags['system-msg'] || '').replace(/\\s/g, ' ');
+
+            if (msgId === 'sub' || msgId === 'resub') {
+              const months = tags['msg-param-cumulative-months'] || 1;
+              pushEvent({
+                type: 'sub',
+                user: user,
+                detail: `Abo Monat ${months}`,
+                timestamp: Date.now()
+              });
+              addChatMessage({
+                user: user,
+                isSub: true,
+                subDetail: `Monat ${months}`,
+                text: sysMsg,
+                timestamp: Date.now()
+              });
+            } else if (msgId === 'subgift' || msgId === 'submysterygift') {
+              const count = tags['msg-param-mass-gift-count'] || 1;
+              pushEvent({
+                type: 'sub',
+                user: user,
+                detail: `${count} Gift-Abo(s) spendiert!`,
+                timestamp: Date.now()
+              });
+            } else if (msgId === 'raid') {
+              const count = tags['msg-param-viewerCount'] || '10+';
+              pushEvent({
+                type: 'raid',
+                user: user,
+                detail: `Raid mit ${count} Gefährten`,
+                timestamp: Date.now()
+              });
+            }
+          }
+        }
+      };
+
+      ircSocket.onclose = () => {
+        twitchDot.className = 'status-dot';
+        setTimeout(connectTwitchIrc, 4000);
+      };
+    }
+
+    connectTwitchIrc();
+
+    // --- 6. STREAMELEMENTS REALTIME WEBSOCKET (FOLLOWS, SUBS, TIPS & REDEMPTIONS) ---
+    const seDot = document.getElementById('seDot');
+
+    function connectStreamElements() {
+      seDot.className = 'status-dot connecting';
+      const seWs = new WebSocket('wss://realtime.streamelements.com/socket.io/?EIO=3&transport=websocket');
+      let authSent = false;
+      let ping = null;
+
+      seWs.onopen = () => {
+        ping = setInterval(() => {
+          if (seWs.readyState === WebSocket.OPEN) seWs.send('2');
+        }, 22000);
+      };
+
+      seWs.onmessage = (e) => {
+        const msg = String(e.data || '');
+        if ((msg === '40' || msg.startsWith('0{')) && !authSent) {
+          authSent = true;
+          seWs.send('42' + JSON.stringify(['authenticate', { method: 'apikey', token: SE_TOKEN }]));
+          return;
+        }
+
+        if (msg.startsWith('42')) {
+          try {
+            const parsed = JSON.parse(msg.slice(2));
+            const evName = parsed[0];
+            const payload = parsed[1] || {};
+
+            if (evName === 'authenticated') {
+              seDot.className = 'status-dot online';
+              console.log('[Salon Chat] StreamElements Realtime verbunden!');
+              return;
+            }
+
+            // Echtes Event oder Test-Emulate
+            if (evName === 'event' || evName === 'event:test') {
+              const type = String(payload.type || payload.listener || '').toLowerCase();
+              const data = payload.data || payload.event || payload;
+              const name = data.name || data.displayName || data.username || 'Ein Gentleman';
+
+              if (type.includes('follower')) {
+                pushEvent({ type: 'follower', user: name, detail: 'Neuer Gefährte', timestamp: Date.now() });
+              } else if (type.includes('sub')) {
+                const months = data.amount || data.months || 1;
+                pushEvent({ type: 'sub', user: name, detail: `Abonnent (${months} Mon.)`, timestamp: Date.now() });
+              } else if (type.includes('tip') || type.includes('donation')) {
+                const amt = data.amount || 5;
+                pushEvent({ type: 'tip', user: name, detail: `${amt}€ Zuwendung`, timestamp: Date.now() });
+              } else if (type.includes('raid')) {
+                const v = data.amount || data.viewers || '10+';
+                pushEvent({ type: 'raid', user: name, detail: `Raid mit ${v} Zusehern`, timestamp: Date.now() });
+              } else if (type.includes('cheer') || type.includes('bits')) {
+                const b = data.amount || 100;
+                pushEvent({ type: 'cheer', user: name, detail: `${b} Bits`, timestamp: Date.now() });
+              } else if (type.includes('redemption') || type.includes('reward')) {
+                const rTitle = data.item || data.reward || 'Kanalpunkte Belohnung';
+                pushEvent({ type: 'reward', user: name, detail: rTitle, timestamp: Date.now() });
+                addChatMessage({
+                  user: name,
+                  isReward: true,
+                  rewardTitle: rTitle,
+                  text: data.message || '',
+                  timestamp: Date.now()
+                });
+              }
+            }
+          } catch (err) {}
+        }
+      };
+
+      seWs.onclose = () => {
+        seDot.className = 'status-dot';
+        clearInterval(ping);
+        setTimeout(connectStreamElements, 5000);
+      };
+    }
+
+    connectStreamElements();
+
+    // --- 7. WAKELOCK (BILDSCHIRM ANLASSEN FÜR TABLET/HANDY) ---
+    let wakeLockSentinel = null;
+    const wakeLockBtn = document.getElementById('wakeLockBtn');
+    const wakeLockText = document.getElementById('wakeLockText');
+
+    async function toggleWakeLock() {
+      if ('wakeLock' in navigator) {
+        if (wakeLockSentinel !== null) {
+          wakeLockSentinel.release();
+          wakeLockSentinel = null;
+          wakeLockBtn.classList.remove('active');
+          wakeLockText.textContent = 'Display normal';
+        } else {
+          try {
+            wakeLockSentinel = await navigator.wakeLock.request('screen');
+            wakeLockBtn.classList.add('active');
+            wakeLockText.textContent = 'Display dauerhaft an';
+            wakeLockSentinel.addEventListener('release', () => {
+              wakeLockSentinel = null;
+              wakeLockBtn.classList.remove('active');
+              wakeLockText.textContent = 'Display normal';
+            });
+          } catch (e) {
+            alert("WakeLock konnte nicht aktiviert werden.");
+          }
+        }
+      } else {
+        alert("WakeLock wird auf diesem Browser nicht unterstützt. Bitte in den Handy-Einstellungen den Bildschirm-Timeout erhöhen.");
+      }
+    }
+
+    // Auto-WakeLock versuchen bei Interaktion
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && wakeLockBtn.classList.contains('active')) {
+        toggleWakeLock();
+      }
+    });
+
+    // --- 8. VOLLBILD MODUS ---
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // --- 9. FONT SIZE CONTROLS ---
+    let currentFontSize = 15;
+    function changeFontSize(delta) {
+      currentFontSize = Math.max(12, Math.min(26, currentFontSize + delta));
+      document.documentElement.style.setProperty('--msg-font-size', `${currentFontSize}px`);
+    }
+
+    // --- 10. SIMULATOR & TEST MODAL ---
+    function openTestModal() { document.getElementById('testModal').classList.add('open'); }
+    function closeTestModal() { document.getElementById('testModal').classList.remove('open'); }
+
+    function simReward() {
+      const rewards = ['Hydrate! Schluck Wasser trinken', '10 Liegestütze!', 'VIP Lounge Zutritt', 'Ehren-Toast auf den Chat'];
+      const users = ['Lord_Pearson', 'Bobby_Glass', 'Lady_Danbury', 'Arthur_Shelby'];
+      const r = rewards[Math.floor(Math.random() * rewards.length)];
+      const u = users[Math.floor(Math.random() * users.length)];
+
+      pushEvent({
+        type: 'reward',
+        user: u,
+        detail: r,
+        timestamp: Date.now()
+      });
+
+      addChatMessage({
+        user: u,
+        isReward: true,
+        rewardTitle: r,
+        text: 'Wohl bekomm\'s, meine Herren!',
+        timestamp: Date.now()
+      });
+    }
+
+    function simFollow() {
+      const u = 'Sir_Wellington_' + Math.floor(Math.random() * 90 + 10);
+      pushEvent({ type: 'follower', user: u, detail: 'Neuer Gefährte', timestamp: Date.now() });
+    }
+
+    function simSub() {
+      const u = 'Countess_Elena';
+      const m = Math.floor(Math.random() * 12 + 1);
+      pushEvent({ type: 'sub', user: u, detail: `Abo Monat ${m}`, timestamp: Date.now() });
+      addChatMessage({ user: u, isSub: true, subDetail: `Monat ${m}`, text: 'Auf ein weiteres glorreiches Jahr im Salon! KEKW', timestamp: Date.now() });
+    }
+
+    function simGiftSub() {
+      const u = 'Mickey_Pearson';
+      pushEvent({ type: 'sub', user: u, detail: '5 Gift-Abos spendiert!', timestamp: Date.now() });
+      addChatMessage({ user: u, isSub: true, subDetail: '5 Gift-Abos', text: 'Champagner für die gesamte Gesellschaft!', timestamp: Date.now() });
+    }
+
+    function simCheer() {
+      const u = 'Tommy_Syndicate';
+      pushEvent({ type: 'cheer', user: u, detail: '500 Bits spendiert!', timestamp: Date.now() });
+      addChatMessage({ user: u, isCheer: true, text: 'Sauber gespielt alter Freund! doppelGG', timestamp: Date.now() });
+    }
+
+    function simRaid() {
+      const u = 'Lord_Raidmeister';
+      pushEvent({ type: 'raid', user: u, detail: 'Raid mit 48 Gefährten!', timestamp: Date.now() });
+    }
+
+    function simEmoteChat() {
+      const msgs = [
+        { u: 'Chris_Fan', t: 'Der Schuss saß perfekt! KEKW doppelHype' },
+        { u: 'Max_Supporter', t: 'Erstklassiges Tasting heute catJAM doppelProst' },
+        { u: 'Arthur_Pendelton', t: 'Wie viele Fasane hat er jetzt?! Sadge' },
+        { u: 'Lady_Victoria', t: 'Absoluter Ehrenmann im Chat! doppelBoss' }
+      ];
+      const m = msgs[Math.floor(Math.random() * msgs.length)];
+      addChatMessage({ user: m.u, text: m.t, badges: 'subscriber/6', timestamp: Date.now() });
+    }
+
+    function clearChat() {
+      chatScroll.innerHTML = '';
+      closeTestModal();
+    }
+
+    // Willkommensnachricht
+    setTimeout(() => {
+      addChatMessage({
+        user: 'Salon-Butler',
+        badges: 'moderator/1',
+        text: 'Willkommen im DOPPEL XP Salon Chat Monitor. 7TV, BTTV & Kanalpunkte-Einlösungen sind scharfgeschaltet.',
+        timestamp: Date.now()
+      });
+    }, 400);
+  </script>
+</body>
+</html>
