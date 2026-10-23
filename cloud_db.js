@@ -147,6 +147,36 @@ const CloudDB = {
         } catch (e) {
             console.warn("[CloudDB] Fehler beim Sichern der Watchtime:", e);
         }
+    },
+
+    // -------------------------------------------------------------
+    // WORDLE / LEXIKON (GROSSLEXIKOGRAPH IN DER AHNENGALERIE)
+    // -------------------------------------------------------------
+    async getAllWordleUsers() {
+        try {
+            const res = await fetch(`${FIREBASE_BASE_URL}/wordle.json`, { cache: 'no-store' });
+            if (!res.ok) throw new Error("HTTP error " + res.status);
+            return await res.json() || {};
+        } catch (e) {
+            console.warn("[CloudDB] Konnte Wordle-Daten nicht aus Firebase laden:", e);
+            return {};
+        }
+    },
+
+    async updateWordleUser(username, record) {
+        try {
+            const cleanUser = username.toLowerCase().trim().replace(/[.#$\[\]\/]/g, '_');
+            await fetch(`${FIREBASE_BASE_URL}/wordle/${encodeURIComponent(cleanUser)}.json`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...record,
+                    lastSeen: Date.now()
+                })
+            });
+        } catch (e) {
+            console.warn("[CloudDB] Fehler beim Sichern der Wordle-Daten:", e);
+        }
     }
 };
 

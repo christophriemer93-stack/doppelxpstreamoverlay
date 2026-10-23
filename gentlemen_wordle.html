@@ -704,6 +704,7 @@
   <!-- =========================================================
        LOGIK & SPIELMECHANIK
        ========================================================= -->
+  <script src="cloud_db.js"></script>
   <script>
     // =========================================================
     // 0. CROSS-GAME COORDINATION (BroadcastChannel + LocalStorage)
@@ -811,8 +812,33 @@
     function saveDatabase() {
       try {
         localStorage.setItem('gentlemen_wordle_shared_v1', JSON.stringify(userDatabase));
+        if (window.CloudDB && typeof window.CloudDB.updateWordleUser === 'function') {
+          Object.keys(userDatabase).forEach(u => {
+            window.CloudDB.updateWordleUser(u, userDatabase[u]);
+          });
+        }
       } catch (e) {}
     }
+
+    async function syncWordleWithCloud() {
+      if (window.CloudDB && typeof window.CloudDB.getAllWordleUsers === 'function') {
+        try {
+          const cloudWords = await window.CloudDB.getAllWordleUsers();
+          if (cloudWords && typeof cloudWords === 'object') {
+            Object.keys(cloudWords).forEach(u => {
+              const c = cloudWords[u];
+              if (!userDatabase[u] || (c.totalSolved || 0) > (userDatabase[u].totalSolved || 0) || (c.totalAttempts || 0) > (userDatabase[u].totalAttempts || 0)) {
+                userDatabase[u] = c;
+              } else {
+                window.CloudDB.updateWordleUser(u, userDatabase[u]);
+              }
+            });
+            localStorage.setItem('gentlemen_wordle_shared_v1', JSON.stringify(userDatabase));
+          }
+        } catch (e) {}
+      }
+    }
+    syncWordleWithCloud();
 
     function getUserRecord(username) {
       const key = username.toLowerCase().trim();

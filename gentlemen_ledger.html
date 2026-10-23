@@ -491,6 +491,22 @@
             }
           }
         } catch(e) {}
+
+        // Wordle / Großlexikograph (Säule 3) aus Cloud synchronisieren
+        try {
+          if (typeof window.CloudDB.getAllWordleUsers === 'function') {
+            const wordleUsers = await window.CloudDB.getAllWordleUsers();
+            if (wordleUsers && typeof wordleUsers === 'object' && Object.keys(wordleUsers).length > 0) {
+              const currentWordle = JSON.parse(localStorage.getItem('gentlemen_wordle_shared_v1') || '{}');
+              Object.keys(wordleUsers).forEach(w => {
+                if (!currentWordle[w] || (wordleUsers[w].totalSolved || 0) > (currentWordle[w].totalSolved || 0)) {
+                  currentWordle[w] = wordleUsers[w];
+                }
+              });
+              localStorage.setItem('gentlemen_wordle_shared_v1', JSON.stringify(currentWordle));
+            }
+          }
+        } catch(e) {}
       }
     }
     initCloudWatchtime();
@@ -704,6 +720,7 @@
     let ledgerTimerInterval = null;
 
     async function showLedgerCard(durationMs = 12000, requesterInfo = null) {
+      await initCloudWatchtime();
       const leaders = getTopPerformers();
 
       // UI Befüllen
