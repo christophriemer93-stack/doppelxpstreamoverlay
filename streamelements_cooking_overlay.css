@@ -1,0 +1,784 @@
+/* =========================================================
+   THE GENTLEMEN – THE ESTATE KITCHEN FULL OVERLAY
+   Komplettes Kochstream-Szenenoverlay für StreamElements & OBS
+   Auflösung: 1920 x 1080 (CSS)
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: transparent;
+  font-family: 'Playfair Display', serif;
+}
+
+/* ---------------------------------------------------------
+   0. HINTERGRUND-EBENE MIT MASKE & GOLD-PARTIKELN
+   --------------------------------------------------------- */
+.overlay-background-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.bg-svg-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+}
+
+#particle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+  pointer-events: none;
+}
+
+/* HAUPT-CONTAINER (1920 x 1080) - 3 SPALTEN, MAXIMALE KAMERAS */
+.kitchen-scene {
+  position: relative;
+  z-index: 10;
+  width: 1920px;
+  height: 1080px;
+  background: transparent;
+  display: grid;
+  grid-template-columns: 320px 1160px 360px;
+  gap: 20px;
+  padding: 20px;
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------
+   1. LINKER FLÜGEL: KOMPAKTE MENÜKARTE & PHASEN
+   --------------------------------------------------------- */
+.menu-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 1040px;
+}
+
+.culinary-card.compact-card {
+  position: relative;
+  background: linear-gradient(155deg, rgba(9, 16, 9, 0.96) 0%, rgba(16, 30, 18, 0.97) 100%);
+  border: 1px solid rgba(200, 168, 75, 0.45);
+  border-radius: 4px;
+  padding: 16px 14px 12px;
+  color: #f3ebd6;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(229, 201, 106, 0.25);
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+
+.corner-ornament {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: #c8a84b;
+  border-style: solid;
+}
+.corner-ornament.top-left { top: 5px; left: 5px; border-width: 2px 0 0 2px; }
+.corner-ornament.top-right { top: 5px; right: 5px; border-width: 2px 2px 0 0; }
+.corner-ornament.bottom-left { bottom: 5px; left: 5px; border-width: 0 0 2px 2px; }
+.corner-ornament.bottom-right { bottom: 5px; right: 5px; border-width: 0 2px 2px 0; }
+
+.card-header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+.club-brand-sub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: #c8a84b;
+  margin-bottom: 3px;
+}
+.line-deco {
+  height: 1px;
+  width: 20px;
+  background: rgba(200, 168, 75, 0.5);
+}
+.course-subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(229, 201, 106, 0.85);
+  margin-bottom: 2px;
+}
+.dish-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.25;
+  color: #f3ebd6;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 6px 0 10px;
+}
+.ornament-divider::before,
+.ornament-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200, 168, 75, 0.35), transparent);
+}
+.divider-gem {
+  color: #c8a84b;
+  font-size: 9px;
+  padding: 0 6px;
+}
+
+/* PHASEN CONTAINER MIT AUTO-SCROLL VIEWPORT */
+.steps-container {
+  display: flex;
+  flex-direction: column;
+}
+.steps-headline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: rgba(200, 168, 75, 0.7);
+  border-bottom: 1px solid rgba(200, 168, 75, 0.15);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+.current-step-indicator {
+  color: #e5c96a;
+}
+
+/* Scroll-Viewport: Maximal 3 Schritte gleichzeitig sichtbar, scrollt sanft mit */
+.steps-scroll-viewport {
+  max-height: 114px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  position: relative;
+  scroll-behavior: smooth;
+}
+.steps-scroll-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.3s ease;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid transparent;
+  transition: all 0.25s ease;
+}
+.step-num-ring {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 700;
+  border: 1px solid rgba(200, 168, 75, 0.3);
+  color: rgba(200, 168, 75, 0.6);
+  background: rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+.step-text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(232, 220, 192, 0.7);
+  line-height: 1.25;
+}
+.step-item.completed {
+  opacity: 0.55;
+}
+.step-item.completed .step-num-ring {
+  background: rgba(40, 80, 45, 0.4);
+  border-color: #5ea869;
+  color: #72cf85;
+}
+.step-item.completed .step-text {
+  text-decoration: line-through;
+  color: rgba(200, 200, 200, 0.4);
+}
+.step-item.active {
+  background: linear-gradient(90deg, rgba(200, 168, 75, 0.18) 0%, rgba(13, 23, 14, 0.4) 100%);
+  border-color: rgba(200, 168, 75, 0.55);
+  box-shadow: 0 2px 8px rgba(200, 168, 75, 0.15);
+  transform: translateX(3px);
+}
+.step-item.active .step-num-ring {
+  background: #c8a84b;
+  border-color: #f3ebd6;
+  color: #0b140c;
+  box-shadow: 0 0 8px rgba(200, 168, 75, 0.6);
+}
+.step-item.active .step-text {
+  color: #f3ebd6;
+  font-weight: 700;
+}
+
+/* KOMPAKTER TIMER */
+.timer-section.compact-timer {
+  background: radial-gradient(circle at 50% 50%, rgba(20, 36, 22, 0.95) 0%, rgba(9, 15, 9, 0.98) 100%);
+  border: 1px solid rgba(200, 168, 75, 0.35);
+  border-radius: 4px;
+  padding: 8px 10px 6px;
+  margin: 8px 0 6px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+}
+.timer-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.timer-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 168, 75, 0.4);
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c8a84b;
+}
+.pocket-watch-icon { width: 16px; height: 16px; }
+.timer-info { flex: 1; }
+.timer-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: rgba(200, 168, 75, 0.7);
+}
+.timer-display {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #f3ebd6;
+  line-height: 1;
+}
+.timer-status-badge {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(200, 168, 75, 0.3);
+  color: rgba(200, 168, 75, 0.6);
+}
+.timer-section.running .timer-status-badge {
+  background: rgba(40, 90, 45, 0.6);
+  border-color: #5ea869;
+  color: #72cf85;
+}
+.timer-section.finished {
+  border-color: #ff5566;
+  animation: timerAlert 0.8s infinite alternate ease-in-out;
+}
+.timer-section.finished .timer-display { color: #ff5566; }
+.timer-section.finished .timer-status-badge { background: #ff5566; color: #fff; }
+
+.timer-progress-track {
+  width: 100%;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.6);
+  margin-top: 6px;
+  border-radius: 1px;
+  overflow: hidden;
+}
+.timer-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #c8a84b 0%, #f3ebd6 100%);
+  transition: width 0.3s linear;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: rgba(200, 168, 75, 0.5);
+  border-top: 1px solid rgba(200, 168, 75, 0.15);
+  padding-top: 6px;
+}
+.cmd-pill { color: rgba(229, 201, 106, 0.75); }
+.cmd-dot { opacity: 0.3; }
+
+/* ---------------------------------------------------------
+   1b. LINKER FLÜGEL: THE GENTLEMEN ALERTS (ORIGINAL SALON-CARD)
+   --------------------------------------------------------- */
+.alert-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  overflow: visible;
+  padding-bottom: 4px;
+}
+
+/* Main alert card - looks like a printed formal note/card */
+.alert-card {
+  width: 100%;
+  background: linear-gradient(160deg, #1c2a1c 0%, #243220 40%, #1c2a1c 100%);
+  border: 1px solid rgba(180, 140, 60, 0.4);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.5),
+    0 0 0 3px rgba(180,140,60,0.15),
+    0 8px 40px rgba(0,0,0,0.8),
+    inset 0 1px 0 rgba(180,140,60,0.2);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px) scale(0.96);
+  pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+}
+
+.alert-card.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Special Raid Alert Styling */
+.alert-card.raid-alert {
+  background: linear-gradient(160deg, #172417 0%, #2a3d24 45%, #182617 100%);
+  border: 1px solid rgba(229, 201, 106, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.8),
+    0 0 0 3px rgba(200,168,75,0.4),
+    0 0 35px rgba(200,168,75,0.35),
+    0 15px 50px rgba(0,0,0,0.9);
+  animation: raidAuraPulse 2.4s infinite alternate ease-in-out;
+}
+
+@keyframes raidAuraPulse {
+  0% {
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.8), 0 0 0 3px rgba(200,168,75,0.3), 0 0 25px rgba(200,168,75,0.25), 0 15px 50px rgba(0,0,0,0.9);
+  }
+  100% {
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.8), 0 0 0 4px rgba(229,201,106,0.6), 0 0 45px rgba(229,201,106,0.5), 0 15px 50px rgba(0,0,0,0.9);
+  }
+}
+
+/* Gold Foil Light Shimmer across Raid Card */
+.raid-shimmer {
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 235, 170, 0.22), transparent);
+  transform: skewX(-25deg);
+  pointer-events: none;
+  display: none;
+}
+.alert-card.raid-alert .raid-shimmer {
+  display: block;
+  animation: raidShimmerSweep 3s infinite ease-in-out;
+}
+@keyframes raidShimmerSweep {
+  0% { left: -100%; }
+  45% { left: 160%; }
+  100% { left: 160%; }
+}
+
+/* Viewer Pill for Raid */
+.raid-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(10, 16, 10, 0.88);
+  border: 1px solid rgba(229, 201, 106, 0.6);
+  border-radius: 20px;
+  padding: 5px 14px;
+  margin-top: 8px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.5);
+}
+.raid-pill-num {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 20px;
+  color: #e5c96a;
+  text-shadow: 0 0 12px rgba(229,201,106,0.6);
+}
+.raid-pill-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #f3ebd6;
+  text-transform: uppercase;
+}
+
+/* Golden top accent line */
+.alert-card::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(200,168,75,0.3) 10%, #c8a84b 30%, #d4a843 50%, #c8a84b 70%, rgba(200,168,75,0.3) 90%, transparent);
+}
+
+/* Golden bottom accent line */
+.alert-card::after {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(200,168,75,0.3) 10%, #c8a84b 30%, #d4a843 50%, #c8a84b 70%, rgba(200,168,75,0.3) 90%, transparent);
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+}
+
+.alert-inner {
+  padding: 18px 20px 20px;
+  position: relative;
+}
+
+/* Watermark crest in background */
+.alert-inner::before {
+  content: '✦';
+  position: absolute;
+  font-size: 110px;
+  color: rgba(200,168,75,0.04);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-family: serif;
+}
+
+/* Top divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,168,75,0.5));
+}
+.divider-line.right {
+  background: linear-gradient(90deg, rgba(200,168,75,0.5), transparent);
+}
+.divider-ornament {
+  font-size: 14px;
+  color: rgba(200,168,75,0.7);
+}
+
+/* Alert type label */
+.alert-type {
+  font-family: 'Playfair Display', serif;
+  font-size: 9.5px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: rgba(200,168,75,0.85);
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+/* Main message */
+.alert-message {
+  font-family: 'IM Fell English', serif;
+  font-size: 19px;
+  color: #e8dcc0;
+  text-align: center;
+  line-height: 1.35;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+}
+
+.alert-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 23px;
+  color: #c8a84b;
+  display: block;
+  text-shadow: 0 0 15px rgba(200,168,75,0.3);
+  margin-bottom: 2px;
+}
+
+/* Bottom signature area */
+.alert-footer {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(200,168,75,0.2);
+}
+.alert-signature {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 11.5px;
+  color: rgba(200,168,75,0.65);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------
+   2. MITTLERER BEREICH: MULTI-CAM FRAMES (16:9 PROPORTIONEN)
+   --------------------------------------------------------- */
+.center-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 1040px;
+}
+
+.cam-box {
+  position: relative;
+  background: transparent;
+}
+
+/* Hauptcam: 1160 x 652 px (exaktes 16:9) */
+.main-cam-box {
+  height: 652px;
+}
+
+.cam-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(200, 168, 75, 0.6);
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.95),
+    0 0 0 3px rgba(200, 168, 75, 0.25),
+    0 15px 40px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+}
+
+.corner-brass {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: #c8a84b;
+  border-style: solid;
+  z-index: 10;
+  pointer-events: none;
+}
+.corner-brass.top-left { top: 6px; left: 6px; border-width: 2px 0 0 2px; }
+.corner-brass.top-right { top: 6px; right: 6px; border-width: 2px 2px 0 0; }
+.corner-brass.bottom-left { bottom: 6px; left: 6px; border-width: 0 0 2px 2px; }
+.corner-brass.bottom-right { bottom: 6px; right: 6px; border-width: 0 2px 2px 0; }
+
+.cam-viewport {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+/* UNTERES RASTER: BOARD CAM (654 x 368 = 16:9) + ZUTATEN-KABINETT */
+.lower-stage-grid {
+  display: grid;
+  grid-template-columns: 654px 486px;
+  gap: 20px;
+  height: 368px;
+}
+
+.board-cam-box {
+  height: 100%;
+}
+
+/* ZUTATEN-KABINETT & MISE EN PLACE */
+.ingredients-card {
+  background: linear-gradient(155deg, rgba(9, 16, 9, 0.96) 0%, rgba(16, 30, 18, 0.97) 100%);
+  border: 1px solid rgba(200, 168, 75, 0.45);
+  border-radius: 4px;
+  padding: 18px 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(229, 201, 106, 0.25);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ingredients-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(200, 168, 75, 0.2);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.ingr-crest { color: #c8a84b; font-size: 11px; }
+.ingr-title {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #f3ebd6;
+}
+.ingr-badge {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: rgba(200, 168, 75, 0.15);
+  border: 1px solid rgba(200, 168, 75, 0.4);
+  padding: 2px 6px;
+  border-radius: 2px;
+  color: #e5c96a;
+}
+
+.ingredients-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 8px;
+}
+
+.ingr-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e8dcc0;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 9px 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(200, 168, 75, 0.15);
+  transition: all 0.2s ease;
+}
+.ingr-bullet {
+  color: #c8a84b;
+  font-size: 10px;
+}
+
+/* ---------------------------------------------------------
+   3. RECHTER FLÜGEL: KITCHEN-READABLE CHAT (VOLLE HÖHE)
+   --------------------------------------------------------- */
+.chat-column {
+  display: flex;
+  flex-direction: column;
+  height: 1040px;
+}
+
+.chat-card {
+  position: relative;
+  background: linear-gradient(155deg, rgba(9, 16, 9, 0.96) 0%, rgba(16, 30, 18, 0.97) 100%);
+  border: 1px solid rgba(200, 168, 75, 0.45);
+  border-radius: 4px;
+  padding: 16px 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(229, 201, 106, 0.25);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.chat-bubble {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(200, 168, 75, 0.25);
+  border-radius: 4px;
+  padding: 12px 14px;
+  animation: chatSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.chat-user-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.chat-badge {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+.badge-mod { background: #5ea869; color: #000; }
+.badge-sub { background: #c8a84b; color: #000; }
+.badge-vip { background: #d48df5; color: #000; }
+
+.chat-username {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: #e5c96a;
+  letter-spacing: 0.5px;
+}
+
+.chat-text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f3ebd6;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+/* ANIMATIONEN */
+@keyframes chatSlideIn {
+  0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes timerAlert {
+  0% { background: rgba(30, 10, 10, 0.95); }
+  100% { background: rgba(60, 15, 18, 0.98); }
+}

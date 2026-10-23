@@ -445,12 +445,9 @@
                 <div class="steps-list" id="steps-list"></div>
             </div>
 
-            <div class="cmd-hint-row">
-                <span>Chat-Regie:</span>
-                <span class="cmd-pill">!step 1-5</span>
-                <span class="cmd-pill">!next</span>
-                <span class="cmd-pill">!timer [min]</span>
-                <span class="cmd-pill">!gericht [Name]</span>
+            <div class="cmd-hint-row" id="vert-ingredients-line" style="overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                <span style="color:#e5c96a; font-weight:800;">❖ ZUTATEN:</span>
+                <span id="vert-ingr-text" style="color:#f3ebd6; font-family:'IM Fell English',serif; font-size:15px; letter-spacing:0.3px;">600g Dry Aged Ribeye · Rosmarin & Thymian · Rohmilchbutter · Périgord-Trüffel</span>
             </div>
         </div>
 
@@ -682,6 +679,94 @@
 
         renderSteps();
         connectTwitchIrc(channel);
+
+        // --- 3. CLOUD & HANDY-CONTROLLER SYNC (FIREBASE + LOCALSTORAGE) ---
+        const FB_KITCHEN_URL = 'https://doppelxp-stream-default-rtdb.europe-west1.firebasedatabase.app/kitchen_state.json';
+        const LOCAL_KEY = 'gentlemen_kitchen_state_v1';
+        let lastAppliedCloudTs = 0;
+        let bellPlayedForEndTs = 0;
+
+        function applyKitchenState(st) {
+            if (!st) return;
+            if (st.dishTitle) dishTitleEl.textContent = st.dishTitle;
+            if (st.courseName) courseNameEl.textContent = st.courseName;
+            if (Array.isArray(st.steps) && st.steps.length > 0) {
+                stepsData = st.steps;
+            }
+            if (typeof st.activeStep === 'number') {
+                currentActiveStep = st.activeStep;
+            }
+            renderSteps();
+
+            if (Array.isArray(st.ingredients) && st.ingredients.length > 0) {
+                const ingrEl = document.getElementById('vert-ingr-text');
+                if (ingrEl) ingrEl.textContent = st.ingredients.join(' · ');
+            }
+
+            if (st.timer) {
+                clearInterval(timerInterval);
+                timerLabelEl.textContent = st.timer.label || 'Garzeit';
+                timerTotalSeconds = Math.max(1, st.timer.totalSeconds || 600);
+
+                if (st.timer.running && st.timer.targetEndTimestamp) {
+                    const updateCloudTimer = () => {
+                        const rem = Math.max(0, Math.round((st.timer.targetEndTimestamp - Date.now()) / 1000));
+                        timerRemainingSeconds = rem;
+                        timerDisplayEl.textContent = formatTime(rem);
+                        const pct = (rem / timerTotalSeconds) * 100;
+                        timerBarEl.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+
+                        if (rem <= 0) {
+                            clearInterval(timerInterval);
+                            timerBadgeEl.textContent = 'FERTIG!';
+                            timerBadgeEl.className = 'timer-badge done';
+                            if (bellPlayedForEndTs !== st.timer.targetEndTimestamp) {
+                                bellPlayedForEndTs = st.timer.targetEndTimestamp;
+                                playBellSound();
+                            }
+                        } else {
+                            timerBadgeEl.textContent = 'LÄUFT';
+                            timerBadgeEl.className = 'timer-badge running';
+                        }
+                    };
+                    updateCloudTimer();
+                    timerInterval = setInterval(updateCloudTimer, 500);
+                } else {
+                    const rem = Math.max(0, st.timer.remainingSeconds ?? timerTotalSeconds);
+                    timerRemainingSeconds = rem;
+                    timerDisplayEl.textContent = formatTime(rem);
+                    timerBadgeEl.textContent = 'STANDBY';
+                    timerBadgeEl.className = 'timer-badge';
+                    const pct = (rem / timerTotalSeconds) * 100;
+                    timerBarEl.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+                }
+            }
+        }
+
+        async function pollKitchenCloud() {
+            try {
+                const res = await fetch(FB_KITCHEN_URL);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.updatedAt && data.updatedAt !== lastAppliedCloudTs) {
+                        lastAppliedCloudTs = data.updatedAt;
+                        applyKitchenState(data);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === LOCAL_KEY && e.newValue) {
+                try {
+                    const data = JSON.parse(e.newValue);
+                    if (data) applyKitchenState(data);
+                } catch (err) {}
+            }
+        });
+
+        pollKitchenCloud();
+        setInterval(pollKitchenCloud, 1500);
 
         // Globale API für Vorschau & Studio (inkl. postMessage für lokale file:// Iframes)
         window.CookingVertical = {

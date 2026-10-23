@@ -1,0 +1,192 @@
+<!-- =========================================================
+     THE GENTLEMEN – THE ESTATE KITCHEN FULL OVERLAY
+     Komplettes Kochstream-Szenenoverlay für StreamElements & OBS
+     Auflösung: 1920 x 1080 (Kompakte Menükarte mit Auto-Scroll)
+     ========================================================= -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="streamelements_cooking_overlay.css">
+
+<!-- 0. HINTERGRUND-MASKE & GOLDENE PARTIKEL (SOLID GREEN MIT ECHTEN 16:9 KAMERA-CUTOUTS) -->
+<div class="overlay-background-layer">
+  <svg class="bg-svg-canvas" width="1920" height="1080" viewBox="0 0 1920 1080">
+    <defs>
+      <radialGradient id="manorGreenGrad" cx="50%" cy="45%" r="75%">
+        <stop offset="0%" stop-color="#122514"/>
+        <stop offset="60%" stop-color="#0a150b"/>
+        <stop offset="100%" stop-color="#050a06"/>
+      </radialGradient>
+      <!-- Maske: Weiß = sichtbarer Salon, Schwarz = transparente Kamera-Fenster -->
+      <mask id="cameraCutoutsMask">
+        <rect width="1920" height="1080" fill="white"/>
+        <!-- Exakter 16:9 Ausschnitt für Hauptkamera (1160 x 652) -->
+        <rect x="360" y="20" width="1160" height="652" rx="4" fill="black"/>
+        <!-- Exakter 16:9 Ausschnitt für Schneidebrett/Herd (654 x 368) -->
+        <rect x="360" y="692" width="654" height="368" rx="4" fill="black"/>
+      </mask>
+    </defs>
+    <rect width="1920" height="1080" fill="url(#manorGreenGrad)" mask="url(#cameraCutoutsMask)"/>
+  </svg>
+
+  <canvas id="particle-canvas" width="1920" height="1080"></canvas>
+</div>
+
+<div class="kitchen-scene" id="kitchen-scene">
+
+  <!-- 1. LINKER FLÜGEL: KOMPAKTE MENÜKARTE (SCHLANKE FORM MIT AUTO-SCROLL) -->
+  <aside class="menu-column">
+    <div class="culinary-card compact-card" id="culinary-card">
+      <div class="corner-ornament top-left"></div>
+      <div class="corner-ornament top-right"></div>
+      <div class="corner-ornament bottom-left"></div>
+      <div class="corner-ornament bottom-right"></div>
+
+      <div class="card-header">
+        <div class="club-brand-sub">
+          <span class="line-deco"></span>
+          <span>ESTATE KITCHEN</span>
+          <span class="line-deco"></span>
+        </div>
+        <div class="course-subtitle" id="course-name">Hauptgang · Private Reserve</div>
+        <h1 class="dish-title" id="dish-title">Dry Aged Ribeye · Trüffeljus</h1>
+      </div>
+
+      <div class="ornament-divider">
+        <span class="divider-gem">❖</span>
+      </div>
+
+      <!-- KOMPAKTER PHASEN-CONTAINER MIT AUTO-SCROLL -->
+      <div class="steps-container">
+        <div class="steps-headline">
+          <span>ZUBEREITUNG</span>
+          <span class="current-step-indicator" id="step-count-label">Schritt 1 / 5</span>
+        </div>
+        <div class="steps-scroll-viewport">
+          <div class="steps-list" id="steps-list">
+            <!-- Dynamisch erzeugt -->
+          </div>
+        </div>
+      </div>
+
+      <!-- KOMPAKTER KÜCHEN-CHRONOMETER -->
+      <div class="timer-section compact-timer" id="timer-section">
+        <div class="timer-inner">
+          <div class="timer-icon-box">
+            <svg class="pocket-watch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="14" r="8"></circle>
+              <path d="M12 10v4l2.5 1.5"></path>
+              <path d="M12 6V3"></path>
+              <path d="M9 3h6"></path>
+            </svg>
+          </div>
+          <div class="timer-info">
+            <div class="timer-label" id="timer-label">KÜCHEN-TIMER</div>
+            <div class="timer-display" id="timer-display">10:00</div>
+          </div>
+          <div class="timer-status-badge" id="timer-badge">STANDBY</div>
+        </div>
+        <div class="timer-progress-track">
+          <div class="timer-progress-bar" id="timer-progress-bar"></div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <span class="cmd-pill">!step 1-8</span>
+        <span class="cmd-dot">•</span>
+        <span class="cmd-pill">!timer [min]</span>
+        <span class="cmd-dot">•</span>
+        <span class="cmd-pill">!gericht</span>
+      </div>
+    </div>
+
+    <!-- 2. THE GENTLEMEN ALERTS (ORIGINAL SALON-CARD) -->
+    <div class="alert-container">
+      <div id="alert-card" class="alert-card">
+        <div class="raid-shimmer"></div>
+        <div class="alert-inner">
+          <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-ornament">✦</div>
+            <div class="divider-line right"></div>
+          </div>
+          <div id="alert-type" class="alert-type">DOPPEL XP &bull; The Gentlemen</div>
+          <div id="alert-message" class="alert-message">...</div>
+          <div class="alert-footer">
+            <div class="footer-line"></div>
+            <span id="alert-signature" class="alert-signature">With compliments</span>
+            <div class="footer-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 2. ZENTRUM: MULTI-CAM FRAMES (16:9 PROPORTIONEN, PURE GOLD/MESSING-EINFASSUNG) -->
+  <main class="center-stage">
+    
+    <!-- HAUPTKAMERA (CHEF / TOTALVIEW) - 1160 x 652 px (16:9) -->
+    <section class="cam-box main-cam-box" id="box-main-cam">
+      <div class="cam-frame">
+        <div class="corner-brass top-left"></div>
+        <div class="corner-brass top-right"></div>
+        <div class="corner-brass bottom-left"></div>
+        <div class="corner-brass bottom-right"></div>
+        
+        <div class="cam-viewport" id="viewport-main-cam"></div>
+      </div>
+    </section>
+
+    <!-- UNTERER BEREICH: BOARD CAM + ZUTATEN-KABINETT -->
+    <div class="lower-stage-grid">
+      
+      <!-- SCHNEIDEBRETT / HERD KAMERA - 654 x 368 px (16:9) -->
+      <section class="cam-box board-cam-box" id="box-board-cam">
+        <div class="cam-frame">
+          <div class="corner-brass top-left"></div>
+          <div class="corner-brass top-right"></div>
+          <div class="corner-brass bottom-left"></div>
+          <div class="corner-brass bottom-right"></div>
+
+          <div class="cam-viewport" id="viewport-board-cam"></div>
+        </div>
+      </section>
+
+      <!-- DAS ZUTATEN-KABINETT (MISE EN PLACE CHECKLISTE) -->
+      <section class="ingredients-card">
+        <div class="ingredients-header">
+          <span class="ingr-crest">❖</span>
+          <span class="ingr-title">MISE EN PLACE</span>
+          <span class="ingr-badge">ZUTATEN</span>
+        </div>
+
+        <div class="ingredients-list" id="ingredients-list">
+          <div class="ingr-item"><span class="ingr-bullet">✦</span> 600g Dry Aged Ribeye (Prime Cut)</div>
+          <div class="ingr-item"><span class="ingr-bullet">✦</span> Frischer Rosmarin & Thymian</div>
+          <div class="ingr-item"><span class="ingr-bullet">✦</span> Rohmilchbutter & Schmalz</div>
+          <div class="ingr-item"><span class="ingr-bullet">✦</span> Schwarzer Périgord-Trüffel</div>
+          <div class="ingr-item"><span class="ingr-bullet">✦</span> Fleur de Sel & Tellicherry Pfeffer</div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 3. RECHTER FLÜGEL: KITCHEN-READABLE SALON CHAT (VOLLE HÖHE) -->
+  <aside class="chat-column">
+    <div class="chat-card">
+      <div class="corner-ornament top-left"></div>
+      <div class="corner-ornament top-right"></div>
+      <div class="corner-ornament bottom-left"></div>
+      <div class="corner-ornament bottom-right"></div>
+
+      <div class="chat-messages" id="chat-messages">
+        <!-- Dynamische Chat-Nachrichten -->
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script src="streamelements_cooking_overlay.js"></script>
