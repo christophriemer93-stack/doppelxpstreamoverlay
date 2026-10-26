@@ -249,7 +249,7 @@
   <div class="game-banner" id="gameBanner">
     <!-- Cover Art -->
     <div class="cover-container">
-      <img class="cover-img" id="gameCover" src="" alt="Game Box Art" onerror="showFallbackCover()">
+      <img class="cover-img" id="gameCover" src="" alt="Game Box Art" onerror="if(typeof showFallbackCover==='function')showFallbackCover()">
       <div class="cover-fallback" id="coverFallback" style="display: none;">✦</div>
     </div>
 

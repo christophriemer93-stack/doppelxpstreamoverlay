@@ -2,14 +2,14 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>The Gentlemen â€“ Die Horologie des Salons</title>
+  <title>The Gentlemen – Die Horologie des Salons</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IM+Fell+English:ital@0;1&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
   <script src="cloud_db.js"></script>
   <style>
     /* =========================================================
-       THE GENTLEMEN â€“ DIE HOROLOGIE DES SALONS (WATCHES GAME)
+       THE GENTLEMEN – DIE HOROLOGIE DES SALONS (WATCHES GAME)
        ========================================================= */
     * {
       box-sizing: border-box;
@@ -193,7 +193,7 @@
       margin-left: 4px;
     }
 
-    /* SchÃ¤tzpreis / Marktwert Box */
+    /* Schätzpreis / Marktwert Box */
     .watch-price-box {
       margin-top: 14px;
       display: flex;
@@ -218,7 +218,7 @@
       text-shadow: 0 2px 10px rgba(229, 201, 106, 0.25);
     }
 
-    /* FuÃŸzeile: Wer hat gezogen */
+    /* Fußzeile: Wer hat gezogen */
     .watch-footer {
       display: flex;
       align-items: center;
@@ -443,7 +443,7 @@
     }
 
     /* ---------------------------------------------------------
-       4. TESTLEISTE FÃœR BROWSER (UNAUFFÃ„LLIG BEI OBS)
+       4. TESTLEISTE FÜR BROWSER (UNAUFFÄLLIG BEI OBS)
        --------------------------------------------------------- */
     .test-station-bar {
       position: absolute;
@@ -483,15 +483,15 @@
 
   <!-- COOLDOWN POPUP -->
   <div class="cooldown-pill" id="cooldown-pill">
-    <span id="cd-content">Geduld, Gentleman <span class="cooldown-user" id="cd-user">User</span>. Der nÃ¤chste Uhrmacher-Besuch ist erst in <span class="cooldown-time" id="cd-time">45 Min</span> mÃ¶glich.</span>
+    <span id="cd-content">Geduld, Gentleman <span class="cooldown-user" id="cd-user">User</span>. Der nächste Uhrmacher-Besuch ist erst in <span class="cooldown-time" id="cd-time">45 Min</span> möglich.</span>
   </div>
 
   <!-- HAUPTKARTE: GEZOGENE UHR -->
   <div class="watch-box-overlay" id="watch-card">
     <div class="watch-inner">
       <div class="watch-header">
-        <div class="gentleman-brand">âœ¦ Die Horologie des Salons âœ¦</div>
-        <div class="tier-badge tier-1" id="watch-tier-badge">Tier I â€“ Alltags-Klassiker</div>
+        <div class="gentleman-brand">✦ Die Horologie des Salons ✦</div>
+        <div class="tier-badge tier-1" id="watch-tier-badge">Tier I – Alltags-Klassiker</div>
       </div>
 
       <div class="watch-content">
@@ -508,15 +508,15 @@
           </div>
 
           <div class="watch-price-box">
-            <div class="price-label">GeschÃ¤tzter Marktwert:</div>
-            <div class="price-val" id="watch-price">Â£ 10.250</div>
+            <div class="price-label">Geschätzter Marktwert:</div>
+            <div class="price-val" id="watch-price">£ 10.250</div>
           </div>
         </div>
       </div>
 
       <div class="watch-footer">
         <div>Neu in den Samt-Tresor aufgenommen von: <span class="watch-user-badge" id="watch-user">Chris</span></div>
-        <div>âœ¦ Nr. <span id="watch-id">62</span> / 100 âœ¦</div>
+        <div>✦ Nr. <span id="watch-id">62</span> / 100 ✦</div>
       </div>
     </div>
   </div>
@@ -529,7 +529,7 @@
         <div class="tresor-avatar-fallback" id="tresor-avatar-fallback">C</div>
         <div class="tresor-user-info">
           <div class="tresor-username" id="tresor-user">Chris</div>
-          <div class="tresor-rank-title" id="tresor-rank">GroÃŸmeister der Horologie</div>
+          <div class="tresor-rank-title" id="tresor-rank">Großmeister der Horologie</div>
         </div>
       </div>
 
@@ -540,18 +540,18 @@
         </div>
         <div class="stat-card">
           <div class="stat-label">Gesamtwert</div>
-          <div class="stat-value" id="tresor-total-value">Â£ 48.650</div>
+          <div class="stat-value" id="tresor-total-value">£ 48.650</div>
         </div>
       </div>
 
-      <div class="vitrine-label">âœ¦ Die wertvollsten Zeitmesser âœ¦</div>
+      <div class="vitrine-label">✦ Die wertvollsten Zeitmesser ✦</div>
       <div class="vitrine-slots" id="vitrine-slots">
-        <!-- Werden dynamisch mit bis zu 3 PrunkstÃ¼cken befÃ¼llt -->
+        <!-- Werden dynamisch mit bis zu 3 Prunkstücken befüllt -->
       </div>
     </div>
   </div>
 
-  <!-- TEST-LEISTE FÃœR BROWSER -->
+  <!-- TEST-LEISTE FÜR BROWSER -->
   <div class="test-station-bar">
     <button class="test-btn" onclick="testDrawWatch(1)">Tier 1 (Casio)</button>
     <button class="test-btn" onclick="testDrawWatch(36)">Tier 2 (Tudor)</button>
@@ -563,7 +563,7 @@
 
   <script>
     // =========================================================
-    // 0. FEST EINGEBETTETE UHREN-DATENBANK (KEIN 404 MÃ–GLICH!)
+    // 0. FEST EINGEBETTETE UHREN-DATENBANK (KEIN 404 MÖGLICH!)
     // =========================================================
 /**
  * DIE GENTLEMEN HOROLOGIE - 100 EXKLUSIVE UHREN
@@ -1772,12 +1772,12 @@ if (typeof window !== 'undefined') {
     // =========================================================
     // 1. GLOBALE EINSTELLUNGEN & SPEICHER-SYSTEM
     // =========================================================
-    const COOLDOWN_MINUTES = 60; // 60 Minuten Cooldown fÃ¼r normale Viewer
+    const COOLDOWN_MINUTES = 60; // 60 Minuten Cooldown für normale Viewer
     const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
     const STORAGE_KEY = 'gentlemen_watches_vault_v1';
     const STREAMER_ACCOUNTS = ['d0ppelxp', 'chris', 'max', 'christophriemer93'];
 
-    // Luxus-Taschenuhr SVG Fallback falls ein Bild nicht lÃ¤dt
+    // Luxus-Taschenuhr SVG Fallback falls ein Bild nicht lädt
     const WATCH_FALLBACK_SVG = 'data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="100" r="92" fill="%230c140c" stroke="%23c8a84b" stroke-width="6"/><circle cx="100" cy="100" r="86" fill="%23142215" stroke="%231a2e1d" stroke-width="2"/><circle cx="100" cy="25" r="3" fill="%23e5c96a"/><circle cx="175" cy="100" r="3" fill="%23e5c96a"/><circle cx="100" cy="175" r="3" fill="%23e5c96a"/><circle cx="25" cy="100" r="3" fill="%23e5c96a"/><line x1="100" y1="100" x2="100" y2="45" stroke="%23c8a84b" stroke-width="3" stroke-linecap="round"/><line x1="100" y1="100" x2="140" y2="100" stroke="%23c8a84b" stroke-width="2.5" stroke-linecap="round"/><line x1="100" y1="100" x2="80" y2="135" stroke="%23e5c96a" stroke-width="1.5" stroke-linecap="round"/><circle cx="100" cy="100" r="5" fill="%23f5e6b3"/><text x="100" y="75" font-family="serif" font-size="9" fill="%23c8a84b" text-anchor="middle">CHRONOMETRE</text><text x="100" y="130" font-family="serif" font-style="italic" font-size="8" fill="%23c8a84b" text-anchor="middle">Gentlemen</text></svg>';
 
     // Viewer Vault Data: { [username]: { lastDraw: timestamp, watches: [ watchId, ... ] } }
@@ -1915,15 +1915,15 @@ if (typeof window !== 'undefined') {
     let cdHideTimer = null;
 
     function formatPound(num) {
-      return 'Â£ ' + Number(num).toLocaleString('de-DE');
+      return '£ ' + Number(num).toLocaleString('de-DE');
     }
 
     function getRankTitle(count, totalValue) {
       if (totalValue >= 5000000) return 'Lord der Haute Horlogerie';
       if (totalValue >= 500000) return 'Erlauchter Kronen-Kollektor';
-      if (count >= 25) return 'GroÃŸmeister des Salons';
+      if (count >= 25) return 'Großmeister des Salons';
       if (count >= 10) return 'Passionierter Chronometrist';
-      if (count >= 5) return 'Gutsherr mit feinem GespÃ¼r';
+      if (count >= 5) return 'Gutsherr mit feinem Gespür';
       return 'Novize des Uhrmacher-Handwerks';
     }
 
@@ -1949,14 +1949,14 @@ if (typeof window !== 'undefined') {
 
       // Tier Badge
       watchTierBadge.className = `tier-badge tier-${watch.tier}`;
-      watchTierBadge.textContent = `Tier ${watch.tier} â€“ ${watch.tierName}`;
+      watchTierBadge.textContent = `Tier ${watch.tier} – ${watch.tierName}`;
 
       watchCard.classList.add('show');
 
       if (watchHideTimer) clearTimeout(watchHideTimer);
       watchHideTimer = setTimeout(() => {
         watchCard.classList.remove('show');
-      }, 10000); // 10 Sekunden edle PrÃ¤sentation
+      }, 10000); // 10 Sekunden edle Präsentation
     }
 
     // --- TRESOR ZEIGEN ---
@@ -2004,12 +2004,12 @@ if (typeof window !== 'undefined') {
       tresorTotalVal.textContent = formatPound(totalVal);
       tresorRank.textContent = getRankTitle(totalCount, totalVal);
 
-      // Top 3 Uhren nach Preis sortiert fÃ¼r die Vitrine
+      // Top 3 Uhren nach Preis sortiert für die Vitrine
       const top3 = [...userWatchObjects].sort((a,b) => b.price - a.price).slice(0, 3);
       vitrineSlots.innerHTML = '';
 
       if (top3.length === 0) {
-        vitrineSlots.innerHTML = '<div style="font-family: \'IM Fell English\', serif; font-style: italic; font-size: 13px; color: rgba(200,168,75,0.6); width: 100%; text-align: center; padding: 10px 0;">Der Tresor ist noch unberÃ¼hrt. Ziehe deine erste Uhr mit !uhr</div>';
+        vitrineSlots.innerHTML = '<div style="font-family: \'IM Fell English\', serif; font-style: italic; font-size: 13px; color: rgba(200,168,75,0.6); width: 100%; text-align: center; padding: 10px 0;">Der Tresor ist noch unberührt. Ziehe deine erste Uhr mit !uhr</div>';
       } else {
         top3.forEach(w => {
           const item = document.createElement('div');
@@ -2034,7 +2034,7 @@ if (typeof window !== 'undefined') {
     // --- COOLDOWN POPUP ---
     function displayCooldown(user, remainingMs) {
       const mins = Math.ceil(remainingMs / (60 * 1000));
-      cdContentEl.innerHTML = `Geduld, Gentleman <span class="cooldown-user">${user}</span>. Der nÃ¤chste Uhrmacher-Besuch ist erst in <span class="cooldown-time">${mins} Minute${mins > 1 ? 'n' : ''}</span> mÃ¶glich.`;
+      cdContentEl.innerHTML = `Geduld, Gentleman <span class="cooldown-user">${user}</span>. Der nächste Uhrmacher-Besuch ist erst in <span class="cooldown-time">${mins} Minute${mins > 1 ? 'n' : ''}</span> möglich.`;
 
       cooldownPill.classList.add('show');
       if (cdHideTimer) clearTimeout(cdHideTimer);
@@ -2068,14 +2068,14 @@ if (typeof window !== 'undefined') {
       const timePassed = now - uData.lastDraw;
       const isStreamer = STREAMER_ACCOUNTS.includes(cleanUser) || urlParams.get('nocd') === '1' || urlParams.get('test') === '1';
 
-      // Cooldown PrÃ¼fung (Ã¼bersprungen fÃ¼r Streamer oder bei !uhr force/test)
+      // Cooldown Prüfung (übersprungen für Streamer oder bei !uhr force/test)
       if (!force && !isStreamer && timePassed < COOLDOWN_MS) {
-        console.log("[Uhrenspiel] Cooldown aktiv fÃ¼r:", user);
+        console.log("[Uhrenspiel] Cooldown aktiv für:", user);
         displayCooldown(user, COOLDOWN_MS - timePassed);
         return;
       }
 
-      // Ziehung durchfÃ¼hren
+      // Ziehung durchführen
       let drawnWatch = rollRandomWatch();
       if (!drawnWatch) {
         drawnWatch = WATCHES_DB[0] || {
@@ -2137,7 +2137,7 @@ if (typeof window !== 'undefined') {
     }
 
     function testTresor() {
-      // Test-Tresor fÃ¼llen
+      // Test-Tresor füllen
       const cleanUser = 'chris';
       vaultData[cleanUser] = {
         lastDraw: Date.now(),
@@ -2208,7 +2208,7 @@ if (typeof window !== 'undefined') {
                 vaultData[target].lastDraw = 0;
                 saveVault();
               }
-              displayCustomNotice(`âœ¦ Cooldown fÃ¼r <span class="cooldown-user">${displayName}</span> wurde zurÃ¼ckgesetzt! Du kannst jetzt mit !uhr ziehen.`);
+              displayCustomNotice(`✦ Cooldown für <span class="cooldown-user">${displayName}</span> wurde zurückgesetzt! Du kannst jetzt mit !uhr ziehen.`);
             } else if (cmd === '!watch' || cmd === '!uhr' || cmd.startsWith('!watch ') || cmd.startsWith('!uhr ')) {
               const isForce = cmd.includes('force') || cmd.includes('test');
               handleWatchCommand(displayName, isForce);

@@ -329,7 +329,7 @@
       <!-- Avatar -->
       <div class="fc-avatar-wrapper">
         <div class="fc-avatar-frame" id="avatarFrame">
-          <img class="fc-avatar-img" id="avatarImg" src="" alt="Avatar" onerror="showFallbackAvatar()">
+          <img class="fc-avatar-img" id="avatarImg" src="" alt="Avatar" onerror="if(typeof showFallbackAvatar==='function')showFallbackAvatar()">
           <div class="fc-avatar-fallback" id="avatarFallback" style="display: none;">D</div>
         </div>
         <div class="fc-avatar-badge">✦</div>

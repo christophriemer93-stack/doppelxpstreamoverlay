@@ -940,7 +940,7 @@
     <div class="stash-inner">
       <div class="stash-header">
         <div class="stash-avatar-wrapper">
-          <img class="stash-avatar-img" id="stashAvatarImg" src="" alt="Avatar" onerror="showFallbackStashAvatar()">
+          <img class="stash-avatar-img" id="stashAvatarImg" src="" alt="Avatar" onerror="if(typeof showFallbackStashAvatar==='function')showFallbackStashAvatar()">
           <div class="stash-avatar-fallback" id="stashAvatarFallback" style="display: none;">D</div>
         </div>
         <div class="stash-user-info">

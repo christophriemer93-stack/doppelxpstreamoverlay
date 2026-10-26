@@ -656,7 +656,7 @@
     <div class="lexikon-inner">
       <div class="lexikon-header">
         <div class="lexikon-avatar-wrapper">
-          <img class="lexikon-avatar-img" id="lexikonAvatarImg" src="" alt="Avatar" onerror="showFallbackLexikonAvatar()">
+          <img class="lexikon-avatar-img" id="lexikonAvatarImg" src="" alt="Avatar" onerror="if(typeof showFallbackLexikonAvatar==='function')showFallbackLexikonAvatar()">
           <div class="lexikon-avatar-fallback" id="lexikonAvatarFallback" style="display: none;">D</div>
         </div>
         <div class="lexikon-user-info">
