@@ -226,6 +226,39 @@
             background: rgba(200,168,75,0.15);
         }
 
+        /* === ESTATE LEATHER CREST MEDALLION (MANOR LEDER-PRÄGUNG) === */
+        .estate-leather-medallion {
+            position: absolute;
+            right: 85px;
+            top: 135px;
+            width: 290px;
+            height: 290px;
+            border-radius: 50%;
+            filter: drop-shadow(0 18px 38px rgba(0,0,0,0.85)) drop-shadow(0 0 22px rgba(200,168,75,0.22));
+            z-index: 15;
+            pointer-events: none;
+            animation: crestGentleFloat 8s ease-in-out infinite;
+        }
+
+        .estate-leather-medallion .leather-crest-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+            display: block;
+        }
+
+        @keyframes crestGentleFloat {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                filter: drop-shadow(0 18px 38px rgba(0,0,0,0.85)) drop-shadow(0 0 20px rgba(200,168,75,0.2));
+            }
+            50% {
+                transform: translateY(-6px) rotate(0.4deg);
+                filter: drop-shadow(0 26px 48px rgba(0,0,0,0.95)) drop-shadow(0 0 32px rgba(229,201,106,0.35));
+            }
+        }
+
         /* ---- VERTICAL DIVIDER ---- */
         .v-divider {
             width: 1px;
@@ -261,9 +294,33 @@
             padding: 70px 70px 60px 60px;
             display: flex;
             flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* === GROSSE BLINDPRAEGUNG HINTER DEM CHAT (OPTION 2: 57% ANSCHNITT) === */
+        .chat-blind-deboss-bg {
+            position: absolute;
+            right: -340px;           /* Exakt ca. 57% Anschnitt an der rechten Kante */
+            top: 60px;              /* Vertikale Position im Chat-Panel */
+            width: 800px;           /* Großformatige Blindprägung */
+            height: auto;
+            pointer-events: none;
+            z-index: 1;             /* Liegt HINTER den Chat-Nachrichten */
+            opacity: 0.95;
+            transition: all 0.4s ease;
+        }
+
+        .chat-blind-deboss-bg img {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.75));
         }
 
         .chat-header-row {
+            position: relative;
+            z-index: 5;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -278,6 +335,8 @@
         .chat-header-row .ornament { color: rgba(200,168,75,0.6); }
 
         #chat-box {
+            position: relative;
+            z-index: 5;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -414,6 +473,11 @@
 
         <!-- RIGHT (Chat) -->
         <div class="right-panel">
+            <!-- GROSSE BLINDPRAEGUNG HINTER DEM CHAT (OPTION 2: BLICK NACH INNEN) -->
+            <div class="chat-blind-deboss-bg">
+                <img src="crest_blind_huge_inward.png" alt="Wappen Blindprägung" id="chatBlindDebossImg">
+            </div>
+
             <div class="chat-header-row">
                 <span class="ornament">✦</span>
                 Nachrichteneingang
@@ -472,7 +536,15 @@
         }
         drawBg();
 
-        // --- Countdown & Status ---
+        // --- Blindprägung hinter dem Chat ---
+        const debossImg = document.getElementById('chatBlindDebossImg');
+        if (debossImg) {
+            const urlP = new URLSearchParams(window.location.search);
+            if (urlP.get('deboss') === 'inward' || urlP.get('deboss') === '57') {
+                debossImg.src = 'crest_blind_huge_inward.png';
+            }
+        }
+
         let totalSeconds = COUNTDOWN_MINUTES * 60;
         const startSeconds = totalSeconds;
 
@@ -524,34 +596,175 @@
         setInterval(tick, 1000);
 
         // ============================================================
-        // CHAT (STREAMELEMENTS NATIV)
+        // CHAT ENGINE (7TV, BTTV, FFZ & TWITCH)
         // ============================================================
         const chatBox = document.getElementById('chat-box');
         const MAX_MSGS = 9;
         const MSG_LIFETIME = 90000; // 90 Sekunden
+        const DEFAULT_CHANNEL = 'd0ppelxp';
+        const DEFAULT_USER_ID = '1096773228';
 
-        window.addEventListener('onEventReceived', function (obj) {
-            if (!obj.detail || !obj.detail.event) return;
-            if (obj.detail.listener !== 'message') return;
+        const emoteMap = new Map();
+        const seenMsgIds = new Set();
 
-            const d = obj.detail.event.data;
-            if (!d) return;
+        const urlParams = new URLSearchParams(window.location.search);
+        const channelName = (urlParams.get('channel') || DEFAULT_CHANNEL).toLowerCase().replace('#', '');
 
-            // StreamElements liefert die Emotes (7TV, BTTV, Twitch) bereits fertig als HTML in renderedText:
-            const content = d.renderedText || d.text || '';
-            const name = d.displayName || d.nick || '?';
+        async function initEmoteEngine(userId = DEFAULT_USER_ID) {
+            try {
+                // 1. 7TV Channel Emotes
+                const r7c = await fetch(`https://7tv.io/v3/users/twitch/${userId}`);
+                if (r7c.ok) {
+                    const d7c = await r7c.json();
+                    const emotes = d7c?.emote_set?.emotes || [];
+                    emotes.forEach(e => {
+                        if (e.name && e.data?.host?.url) {
+                            emoteMap.set(e.name, `https:${e.data.host.url}/2x.webp`);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('[Emotes] 7TV Channel fetch error:', e);
+            }
 
-            addChat(name, content);
-        });
+            try {
+                // 2. 7TV Global Emotes
+                const r7g = await fetch('https://7tv.io/v3/emote-sets/global');
+                if (r7g.ok) {
+                    const d7g = await r7g.json();
+                    const emotes = d7g?.emotes || [];
+                    emotes.forEach(e => {
+                        if (e.name && e.data?.host?.url && !emoteMap.has(e.name)) {
+                            emoteMap.set(e.name, `https:${e.data.host.url}/2x.webp`);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('[Emotes] 7TV Global fetch error:', e);
+            }
 
-        function addChat(name, messageHtml) {
+            try {
+                // 3. BTTV Channel & Shared Emotes
+                const rbc = await fetch(`https://api.betterttv.net/3/cached/users/twitch/${userId}`);
+                if (rbc.ok) {
+                    const dbc = await rbc.json();
+                    const list = [ ...(dbc.channelEmotes || []), ...(dbc.sharedEmotes || []) ];
+                    list.forEach(e => {
+                        if (e.code && e.id && !emoteMap.has(e.code)) {
+                            emoteMap.set(e.code, `https://cdn.betterttv.net/emote/${e.id}/2x.webp`);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('[Emotes] BTTV Channel fetch error:', e);
+            }
+
+            try {
+                // 4. BTTV Global Emotes
+                const rbg = await fetch('https://api.betterttv.net/3/cached/emotes/global');
+                if (rbg.ok) {
+                    const dbg = await rbg.json();
+                    if (Array.isArray(dbg)) {
+                        dbg.forEach(e => {
+                            if (e.code && e.id && !emoteMap.has(e.code)) {
+                                emoteMap.set(e.code, `https://cdn.betterttv.net/emote/${e.id}/2x.webp`);
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                console.warn('[Emotes] BTTV Global fetch error:', e);
+            }
+
+            console.log(`[Emotes Start-Screen] ${emoteMap.size} Emotes geladen für #${channelName}`);
+        }
+
+        function esc(s) {
+            return String(s || '')
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function replaceEmoteWordsInHtml(html) {
+            if (!html) return '';
+            const segments = html.split(/(<[^>]*>)/g);
+            for (let i = 0; i < segments.length; i++) {
+                if (!segments[i].startsWith('<')) {
+                    const words = segments[i].split(/(\s+)/);
+                    for (let j = 0; j < words.length; j++) {
+                        const w = words[j];
+                        if (emoteMap.has(w)) {
+                            const url = emoteMap.get(w);
+                            words[j] = `<img class="chat-emote" src="${url}" alt="${esc(w)}" title="${esc(w)}" loading="lazy">`;
+                        }
+                    }
+                    segments[i] = words.join('');
+                }
+            }
+            return segments.join('');
+        }
+
+        function renderChatMessageHtml(data) {
+            if (!data) return '';
+
+            if (data.renderedText && typeof data.renderedText === 'string') {
+                return replaceEmoteWordsInHtml(data.renderedText);
+            }
+
+            const rawText = data.text || '';
+            if (!rawText) return '';
+
+            const twitchEmoteMap = new Map();
+            if (Array.isArray(data.emotes)) {
+                data.emotes.forEach(em => {
+                    if (em.name && em.id) {
+                        twitchEmoteMap.set(em.name, `https://static-cdn.jtvnw.net/emoticons/v2/${em.id}/default/dark/2.0`);
+                    }
+                });
+            } else if (typeof data.emotes === 'string' && data.emotes.trim().length > 0) {
+                data.emotes.split('/').forEach(group => {
+                    const [id, ranges] = group.split(':');
+                    if (id && ranges) {
+                        const firstRange = ranges.split(',')[0];
+                        const [start, end] = firstRange.split('-').map(Number);
+                        if (!isNaN(start) && !isNaN(end)) {
+                            const emName = rawText.substring(start, end + 1);
+                            if (emName) {
+                                twitchEmoteMap.set(emName, `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/2.0`);
+                            }
+                        }
+                    }
+                });
+            }
+
+            const tokens = rawText.split(/(\s+)/);
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                if (!token.trim()) continue;
+
+                if (twitchEmoteMap.has(token)) {
+                    const url = twitchEmoteMap.get(token);
+                    tokens[i] = `<img class="chat-emote" src="${url}" alt="${esc(token)}" title="${esc(token)}" loading="lazy">`;
+                } else if (emoteMap.has(token)) {
+                    const url = emoteMap.get(token);
+                    tokens[i] = `<img class="chat-emote" src="${url}" alt="${esc(token)}" title="${esc(token)}" loading="lazy">`;
+                } else {
+                    tokens[i] = esc(token);
+                }
+            }
+
+            return tokens.join('');
+        }
+
+        function addChat(name, messageHtml, color) {
             while (chatBox.children.length >= MAX_MSGS) {
                 chatBox.removeChild(chatBox.firstChild);
             }
             const el = document.createElement('div');
             el.className = 'chat-msg';
+            const colorStyle = color ? `style="color:${color};"` : '';
             el.innerHTML = `
-                <div class="chat-msg-name">${esc(name)}</div>
+                <div class="chat-msg-name" ${colorStyle}>${esc(name)}</div>
                 <div class="chat-msg-text">${messageHtml}</div>
             `;
             chatBox.appendChild(el);
@@ -562,10 +775,92 @@
             }, MSG_LIFETIME);
         }
 
-        function esc(s) {
-            return String(s)
-                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        function handleIncomingChat(data) {
+            if (!data) return;
+            const name = data.displayName || data.nick || '?';
+            const color = data.displayColor || data.color || '#c8a84b';
+            const html = renderChatMessageHtml(data);
+            addChat(name, html, color);
+        }
+
+        window.addEventListener('onWidgetLoad', function (obj) {
+            const providerId = obj?.detail?.channel?.providerId;
+            if (providerId) initEmoteEngine(providerId);
+        });
+
+        window.addEventListener('onEventReceived', function (obj) {
+            if (!obj.detail || !obj.detail.event) return;
+            if (obj.detail.listener !== 'message') return;
+
+            const d = obj.detail.event.data;
+            if (!d) return;
+
+            const dedupeKey = d.msgId || `${d.displayName || d.nick}:${d.text}`;
+            if (seenMsgIds.has(dedupeKey)) return;
+            seenMsgIds.add(dedupeKey);
+            setTimeout(() => seenMsgIds.delete(dedupeKey), 25000);
+
+            handleIncomingChat(d);
+        });
+
+        function connectTwitchIrc(channel) {
+            try {
+                const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+                ws.onopen = () => {
+                    ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+                    ws.send('PASS SCHMOOPIIE');
+                    ws.send(`NICK justinfan${Math.floor(Math.random() * 89999 + 10000)}`);
+                    ws.send(`JOIN #${channel}`);
+                };
+                ws.onmessage = (event) => {
+                    const lines = event.data.split('\r\n');
+                    for (let line of lines) {
+                        if (!line) continue;
+                        if (line.startsWith('PING')) {
+                            ws.send('PONG :tmi.twitch.tv');
+                            continue;
+                        }
+                        if (line.includes('PRIVMSG')) {
+                            const tagPart = line.split(' :')[0] || '';
+                            const msgMatch = line.match(/PRIVMSG #[^ :]+ :?(.*)$/);
+                            const text = msgMatch ? msgMatch[1] : '';
+
+                            const idMatch = tagPart.match(/id=([a-zA-Z0-9_-]+)/);
+                            const dedupeKey = idMatch ? idMatch[1] : (text + Date.now());
+
+                            if (seenMsgIds.has(dedupeKey)) return;
+                            seenMsgIds.add(dedupeKey);
+                            setTimeout(() => seenMsgIds.delete(dedupeKey), 25000);
+
+                            const nameMatch = tagPart.match(/display-name=([^;]+)/) || tagPart.match(/:([^!]+)!/);
+                            const user = nameMatch ? nameMatch[1] : 'Gast';
+                            const emotesMatch = tagPart.match(/emotes=([^;]*)/);
+                            const emotes = emotesMatch ? emotesMatch[1] : '';
+                            const colorMatch = tagPart.match(/color=([^;]+)/);
+                            const color = colorMatch ? colorMatch[1] : '';
+
+                            handleIncomingChat({
+                                displayName: user,
+                                text: text,
+                                emotes: emotes,
+                                color: color
+                            });
+                        }
+                    }
+                };
+                ws.onclose = () => setTimeout(() => connectTwitchIrc(channel), 5000);
+            } catch (e) {
+                console.warn('[Twitch IRC Start-Screen] Error:', e);
+            }
+        }
+
+        initEmoteEngine(DEFAULT_USER_ID);
+        connectTwitchIrc(channelName);
+
+        if (urlParams.get('test') === '1') {
+            setTimeout(() => {
+                testChat('Bobby Glass', 'Starten wir die Show! KEKW schaukel catJAM');
+            }, 1200);
         }
 
         // Vorschau-Test
