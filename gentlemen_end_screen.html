@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -999,44 +999,74 @@
                 .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
 
-        // Automatische Direktanbindung an die StreamElements-API für echte 30-Tage Subs & Follower
+        // Automatische Direktanbindung an die StreamElements-API (Sessions & Recents)
         async function fetchRealStreamElementsRecents() {
             try {
-                const res = await fetch(`https://api.streamelements.com/kappa/v2/activities/${SE_ACCOUNT_ID}?limit=100`, {
-                    headers: { 'Authorization': `Bearer ${SE_JWT}` }
+                // 1. StreamElements Sessions API abfragen (enthält echte subscriber-recent & follower-recent)
+                const res = await fetch(`https://api.streamelements.com/kappa/v2/sessions/${SE_ACCOUNT_ID}`, {
+                    headers: { 'Authorization': `apikey ${SE_JWT}` }
                 });
-                if (!res.ok) return;
+                if (!res.ok) {
+                    console.warn('[Endscreen] SE API Status:', res.status);
+                    return;
+                }
                 const json = await res.json();
-                const events = Array.isArray(json) ? json : (json.docs || json.activities || json.data || []);
-                if (!Array.isArray(events)) return;
-
+                const data = json.data || {};
                 const cutoff = Date.now() - THIRTY_DAYS_MS;
                 let added = 0;
 
-                events.forEach(e => {
-                    if (!e) return;
-                    const eventData = e.data || {};
-                    const name = eventData.displayName || eventData.username || e.username || eventData.name || e.name;
-                    if (!name) return;
+                // 2. Echte Abonnenten der letzten 30 Tage auswerten
+                const subRecents = Array.isArray(data['subscriber-recent']) ? data['subscriber-recent'] : [];
+                subRecents.forEach(item => {
+                    if (!item || !item.name) return;
+                    const name = String(item.name).trim();
                     if (DUMMY_NAMES.has(name.toLowerCase())) return;
 
-                    const time = e.createdAt ? new Date(e.createdAt).getTime() : 0;
-                    if (time < cutoff) return;
-
-                    const type = (e.type || '').toLowerCase();
-                    if (type === 'subscriber' || type === 'sub' || type === 'resub') {
-                        const months = extractSubMonths(eventData);
-                        const isGift = isGiftSub(eventData);
+                    const time = item.createdAt ? new Date(item.createdAt).getTime() : 0;
+                    if (time >= cutoff) {
+                        const months = extractSubMonths(item);
+                        const isGift = isGiftSub(item);
                         addSubscriber(name, time, months, isGift);
                         added++;
-                    } else if (type === 'follower' || type === 'follow') {
+                    }
+                });
+
+                // Falls subscriber-gifted-latest vorhanden (neuestes Gift-Abo):
+                if (data['subscriber-gifted-latest'] && data['subscriber-gifted-latest'].name) {
+                    const g = data['subscriber-gifted-latest'];
+                    const gName = String(g.name).trim();
+                    if (!DUMMY_NAMES.has(gName.toLowerCase())) {
+                        addSubscriber(gName, Date.now(), 1, true);
+                        added++;
+                    }
+                }
+
+                // 3. Echte Follower der letzten 30 Tage auswerten
+                const followRecents = Array.isArray(data['follower-recent']) ? data['follower-recent'] : [];
+                followRecents.forEach(item => {
+                    if (!item || !item.name) return;
+                    const name = String(item.name).trim();
+                    if (DUMMY_NAMES.has(name.toLowerCase())) return;
+
+                    const time = item.createdAt ? new Date(item.createdAt).getTime() : 0;
+                    if (time >= cutoff) {
                         addFollower(name, time);
                         added++;
                     }
                 });
 
+                // Falls follower-latest existiert und die Liste noch leer ist:
+                if (data['follower-latest'] && data['follower-latest'].name) {
+                    const f = data['follower-latest'];
+                    const fName = String(f.name).trim();
+                    if (!DUMMY_NAMES.has(fName.toLowerCase()) && historyData.followers.length === 0) {
+                        addFollower(fName, Date.now());
+                        added++;
+                    }
+                }
+
                 if (added > 0) {
-                    console.log(`[Endscreen] ${added} echte StreamElements-Aktivitäten der letzten 30 Tage geladen!`);
+                    console.log(`[Endscreen] ${added} echte StreamElements-Einträge geladen!`);
                     renderAll();
                 }
             } catch (err) {
