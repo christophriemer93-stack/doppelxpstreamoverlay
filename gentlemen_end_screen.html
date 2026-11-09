@@ -661,6 +661,18 @@
         // 3. 30-TAGE HISTORIE & SPEICHER-LOGIK
         // =========================================================
         const HISTORY_STORAGE_KEY = 'gentlemen_history_v1';
+        const SE_ACCOUNT_ID = '66654638be356b0a6587f9ab';
+        const SE_JWT = 'CRQBE-BXXw5s6_3svxRorpLEpGruRwGyZO20Dl8untBOo7D_';
+
+        // Placeholder-Namen aus alten Tests rigoros ausschließen:
+        const DUMMY_NAMES = new Set([
+            'lord_alastair', 'baron_balthasar', 'graf_von_krolock', 
+            'duke_of_wellington', 'duke_wellington', 'sir_arthur_pendleton', 'sir_arthur',
+            'lady_eleanor', 'sir_galahad', 'cpt_blackwood', 
+            'master_chamberlain', 'baroness_vane', 'count_percival',
+            'alexander_great', 'charles_kingsley', 'julian_vane', 
+            'benedict_c', 'victor_cross'
+        ]);
         const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
         let historyData = {
@@ -677,6 +689,19 @@
             } catch (e) {
                 historyData = { subs: [], followers: [] };
             }
+
+            // Dummy-Namen aus dem Speicher entfernen
+            if (Array.isArray(historyData.subs)) {
+                historyData.subs = historyData.subs.filter(s => s && s.name && !DUMMY_NAMES.has(s.name.toLowerCase()));
+            } else {
+                historyData.subs = [];
+            }
+            if (Array.isArray(historyData.followers)) {
+                historyData.followers = historyData.followers.filter(f => f && f.name && !DUMMY_NAMES.has(f.name.toLowerCase()));
+            } else {
+                historyData.followers = [];
+            }
+
             cleanExpiredEntries();
         }
 
@@ -971,9 +996,55 @@
                 .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
 
+        // Automatische Direktanbindung an die StreamElements-API für echte 30-Tage Subs & Follower
+        async function fetchRealStreamElementsRecents() {
+            try {
+                const res = await fetch(`https://api.streamelements.com/kappa/v2/activities/${SE_ACCOUNT_ID}?limit=100`, {
+                    headers: { 'Authorization': `Bearer ${SE_JWT}` }
+                });
+                if (!res.ok) return;
+                const events = await res.json();
+                if (!Array.isArray(events)) return;
+
+                const cutoff = Date.now() - THIRTY_DAYS_MS;
+                let added = 0;
+
+                events.forEach(e => {
+                    if (!e) return;
+                    const eventData = e.data || {};
+                    const name = eventData.displayName || eventData.username || e.username || eventData.name || e.name;
+                    if (!name) return;
+                    if (DUMMY_NAMES.has(name.toLowerCase())) return;
+
+                    const time = e.createdAt ? new Date(e.createdAt).getTime() : 0;
+                    if (time < cutoff) return;
+
+                    const type = (e.type || '').toLowerCase();
+                    if (type === 'subscriber' || type === 'sub' || type === 'resub') {
+                        const months = extractSubMonths(eventData);
+                        const isGift = isGiftSub(eventData);
+                        addSubscriber(name, time, months, isGift);
+                        added++;
+                    } else if (type === 'follower' || type === 'follow') {
+                        addFollower(name, time);
+                        added++;
+                    }
+                });
+
+                if (added > 0) {
+                    console.log(`[Endscreen] ${added} echte StreamElements-Aktivitäten der letzten 30 Tage geladen!`);
+                    renderAll();
+                }
+            } catch (err) {
+                console.warn('[Endscreen] SE API Direct Fetch:', err);
+            }
+        }
+
         // Start
         loadHistory();
         renderAll();
+        fetchRealStreamElementsRecents();
+        setInterval(fetchRealStreamElementsRecents, 60000);
         connectTwitchIrc(channelParam);
     </script>
 </body>
