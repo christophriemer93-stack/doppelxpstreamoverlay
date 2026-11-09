@@ -524,7 +524,6 @@
 
         <!-- 1. HEADER -->
         <div class="header-block">
-            <div class="estate-brand">✦ DOPPEL XP // THE GENTLEMEN ✦</div>
             <div class="outro-title">Das Geschäft ist besiegelt.</div>
             <div class="outro-subtitle">Die Bücher schließen sich für heute. Vielen Dank für Ihre geschätzte Anwesenheit.</div>
         </div>
@@ -660,7 +659,7 @@
         // =========================================================
         // 3. 30-TAGE HISTORIE & SPEICHER-LOGIK
         // =========================================================
-        const HISTORY_STORAGE_KEY = 'gentlemen_history_v1';
+        const HISTORY_STORAGE_KEY = 'gentlemen_history_v2';
         const SE_ACCOUNT_ID = '66654638be356b0a6587f9ab';
         const SE_JWT = 'CRQBE-BXXw5s6_3svxRorpLEpGruRwGyZO20Dl8untBOo7D_';
 
@@ -681,6 +680,10 @@
         };
 
         function loadHistory() {
+            try {
+                localStorage.removeItem('gentlemen_history_v1');
+                localStorage.removeItem('gentlemen_history');
+            } catch (e) {}
             try {
                 const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
                 if (saved) {
@@ -1003,7 +1006,8 @@
                     headers: { 'Authorization': `Bearer ${SE_JWT}` }
                 });
                 if (!res.ok) return;
-                const events = await res.json();
+                const json = await res.json();
+                const events = Array.isArray(json) ? json : (json.docs || json.activities || json.data || []);
                 if (!Array.isArray(events)) return;
 
                 const cutoff = Date.now() - THIRTY_DAYS_MS;
