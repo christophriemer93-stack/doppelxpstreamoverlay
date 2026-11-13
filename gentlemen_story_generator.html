@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Doppel XP Story">
-  <meta name="theme-color" content="#071008">
+  <meta name="theme-color" content="#050b06">
   <title>DOPPEL XP · Minimal Instagram Story Studio (1080×1920)</title>
   <link rel="icon" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
@@ -25,15 +25,18 @@
       --gold-hi: #f0d57e;
       --cream: #f4edd9;
       --dim: #a89f8b;
+      --ok: #6fe39c;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body {
       height: 100%;
-      background: radial-gradient(ellipse at 55% 0%, #112416 0%, #050b06 62%);
+      width: 100%;
+      background: #040905;
       color: var(--cream);
       font-family: 'Montserrat', sans-serif;
       font-size: 13px;
+      overscroll-behavior: none;
     }
 
     body {
@@ -41,6 +44,7 @@
       flex-direction: column;
       height: 100dvh;
       overflow: hidden;
+      background: radial-gradient(ellipse at 55% 0%, #112416 0%, #050b06 65%);
     }
 
     /* TOP BAR */
@@ -49,19 +53,20 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 8px 14px;
-      padding: 9px 16px;
+      gap: 8px 12px;
+      padding: 8px 16px;
       border-bottom: 1px solid var(--line);
-      background: rgba(6, 13, 8, 0.96);
-      backdrop-filter: blur(8px);
-      z-index: 20;
+      background: rgba(6, 13, 8, 0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 30;
       flex-shrink: 0;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       min-width: 0;
     }
 
@@ -73,7 +78,7 @@
       letter-spacing: 0.7px;
       padding: 5px 9px;
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 7px;
       white-space: nowrap;
       transition: 0.16s ease;
     }
@@ -85,46 +90,76 @@
 
     .brand-title-wrap h1 {
       font-family: 'Cinzel', serif;
-      font-size: 16px;
-      letter-spacing: 1.8px;
+      font-size: 15.5px;
+      letter-spacing: 1.7px;
       color: var(--gold-hi);
       line-height: 1.05;
       white-space: nowrap;
     }
     .brand-sub {
-      font-size: 10px;
+      font-size: 9.5px;
       color: var(--dim);
       letter-spacing: 0.9px;
       text-transform: uppercase;
       margin-top: 2px;
     }
 
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(14, 28, 17, 0.88);
+      border: 1px solid rgba(200, 168, 75, 0.35);
+      color: var(--cream);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-family: inherit;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: 0.15s ease;
+    }
+    .sync-pill:hover { border-color: var(--gold-hi); color: var(--gold-hi); }
+    .sync-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 8px rgba(111, 227, 156, 0.7);
+      flex-shrink: 0;
+    }
+    .sync-pill.syncing .sync-dot { background: var(--gold-hi); box-shadow: 0 0 8px rgba(240, 213, 126, 0.9); animation: pulseDot 0.9s infinite; }
+    .sync-pill.offline .sync-dot { background: #ef7d78; box-shadow: none; }
+    @keyframes pulseDot { 0%,100%{ transform:scale(1); opacity:1; } 50%{ transform:scale(1.35); opacity:.5; } }
+
     .top-actions {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
     .toggle-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       background: var(--panel-2);
       border: 1px solid var(--line);
       color: var(--cream);
-      border-radius: 6px;
+      border-radius: 7px;
       padding: 6px 9px;
       font-size: 11px;
       font-weight: 700;
       cursor: pointer;
       user-select: none;
       transition: 0.15s;
+      white-space: nowrap;
     }
     .toggle-pill input {
       accent-color: var(--gold-hi);
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       cursor: pointer;
     }
     .toggle-pill:hover { border-color: var(--gold-hi); }
@@ -182,7 +217,7 @@
     .workspace {
       flex: 1;
       display: grid;
-      grid-template-columns: 398px minmax(0, 1fr);
+      grid-template-columns: 400px minmax(0, 1fr);
       min-height: 0;
     }
 
@@ -194,36 +229,8 @@
       min-height: 0;
     }
 
-    /* Mobile Tabs Bar (auf Desktop ausgeblendet, sodass alles offen sichtbar ist) */
-    .mobile-tabs {
-      display: none;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 4px;
-      padding: 6px 8px;
-      background: rgba(5, 11, 6, 0.96);
-      border-bottom: 1px solid var(--line);
-      flex-shrink: 0;
-    }
-    .mob-tab-btn {
-      background: rgba(14, 28, 17, 0.72);
-      border: 1px solid rgba(200, 168, 75, 0.22);
-      color: var(--dim);
-      border-radius: 7px;
-      padding: 8px 4px;
-      font-family: inherit;
-      font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-    }
-    .mob-tab-btn.active {
-      color: var(--gold-hi);
-      border-color: var(--gold-hi);
-      background: linear-gradient(135deg, rgba(200, 168, 75, 0.24), rgba(14, 28, 17, 0.95));
-    }
+    .sheet-head { display: none; }
+    .mobile-dock { display: none; }
 
     .controls-scroll {
       flex: 1;
@@ -237,7 +244,7 @@
 
     .section-card {
       background: rgba(14, 28, 17, 0.72);
-      border: 1px solid rgba(200, 168, 75, 0.2);
+      border: 1px solid rgba(200, 168, 75, 0.22);
       border-radius: 9px;
       padding: 12px;
     }
@@ -315,7 +322,7 @@
       color: var(--gold-hi);
     }
     .chip-btn.active {
-      background: linear-gradient(135deg, rgba(200, 168, 75, 0.28), rgba(14, 29, 16, 0.95));
+      background: linear-gradient(135deg, rgba(200, 168, 75, 0.28), rgba(14, 28, 16, 0.95));
       border-color: var(--gold-hi);
       color: var(--gold-hi);
       box-shadow: 0 0 10px rgba(200, 168, 75, 0.2);
@@ -392,6 +399,17 @@
       background: rgba(200, 168, 75, 0.18);
     }
 
+    .cloud-box {
+      background: rgba(5, 11, 6, 0.72);
+      border: 1px solid rgba(200, 168, 75, 0.28);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font-size: 11px;
+      color: var(--cream);
+      line-height: 1.45;
+    }
+    .cloud-box strong { color: var(--gold-hi); }
+
     /* STAGE */
     .stage-pane {
       display: flex;
@@ -414,7 +432,7 @@
 
     .drag-switch {
       display: inline-flex;
-      background: var(--panel);
+      background: rgba(8, 17, 10, 0.88);
       border: 1px solid var(--line);
       border-radius: 7px;
       padding: 2px;
@@ -470,7 +488,7 @@
     }
     #storyCanvas:active { cursor: grabbing; }
 
-    /* NUR PREVIEW: IG SAFE ZONES */
+    /* NUR PREVIEW: DEZENTE IG SAFE ZONES (KEIN ROT-SCHLEIER ÜBER DEM BILD) */
     .safe-overlay {
       position: absolute;
       inset: 0;
@@ -483,8 +501,8 @@
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 13.02%;
-      background: rgba(217, 83, 79, 0.13);
-      border-bottom: 1.5px dashed rgba(255, 130, 125, 0.75);
+      background: rgba(0, 0, 0, 0.12);
+      border-bottom: 1px dashed rgba(255, 220, 150, 0.55);
       display: flex;
       align-items: flex-end;
       justify-content: center;
@@ -494,8 +512,8 @@
       position: absolute;
       bottom: 0; left: 0; right: 0;
       height: 17.71%;
-      background: rgba(217, 83, 79, 0.13);
-      border-top: 1.5px dashed rgba(255, 130, 125, 0.75);
+      background: rgba(0, 0, 0, 0.12);
+      border-top: 1px dashed rgba(255, 220, 150, 0.55);
       display: flex;
       align-items: flex-start;
       justify-content: center;
@@ -507,16 +525,16 @@
       bottom: 17.71%;
       left: 6.3%;
       right: 6.3%;
-      border-left: 1px dashed rgba(240, 213, 126, 0.45);
-      border-right: 1px dashed rgba(240, 213, 126, 0.45);
+      border-left: 1px dashed rgba(240, 213, 126, 0.34);
+      border-right: 1px dashed rgba(240, 213, 126, 0.34);
     }
     .safe-badge {
       font-size: 8px;
       font-weight: 800;
       letter-spacing: 0.6px;
       text-transform: uppercase;
-      color: rgba(255, 215, 215, 0.9);
-      background: rgba(15, 5, 5, 0.65);
+      color: rgba(255, 238, 195, 0.9);
+      background: rgba(7, 14, 9, 0.66);
       padding: 2px 6px;
       border-radius: 3px;
       white-space: nowrap;
@@ -553,8 +571,8 @@
     .save-modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(3, 8, 4, 0.88);
-      backdrop-filter: blur(8px);
+      background: rgba(3, 8, 4, 0.92);
+      backdrop-filter: blur(10px);
       display: none;
       align-items: center;
       justify-content: center;
@@ -599,7 +617,7 @@
       align-items: center;
     }
     .save-modal-img-wrap img {
-      max-height: 55dvh;
+      max-height: 56dvh;
       max-width: 100%;
       border-radius: 10px;
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -607,92 +625,233 @@
     }
 
     .mobile-only { display: none; }
+    .fullscreen-exit-btn { display: none; }
 
     /* ============================================================
-       HANDY-MODUS (STICKY PREVIEW + DAUMEN-TABS FÜR IPHONE & ANDROID)
+       HANDY VOLLBILD STUDIO (EDGE-TO-EDGE STORY CANVAS + SLIDE-UP SHEET)
        ============================================================ */
     @media (max-width: 920px) {
       .desktop-only { display: none !important; }
       .mobile-only { display: inline-flex; }
 
-      .topbar {
-        padding: 7px 10px;
-        gap: 6px;
-      }
-      .brand-title-wrap h1 {
-        font-size: 13px;
-        letter-spacing: 1px;
-      }
-      .brand-sub { display: none; }
-      .brand-link {
-        padding: 5px 8px;
-        font-size: 11px;
-      }
-      .top-actions {
-        gap: 5px;
-      }
-      .top-actions .btn {
-        padding: 7px 9px;
-        font-size: 11px;
-      }
-      .top-actions .toggle-pill {
-        padding: 5px 7px;
-        font-size: 10px;
+      body {
+        background: #020503;
       }
 
+      /* Schwebende halbtransparente Top-Leiste (verdeckt kein Bild) */
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: calc(env(safe-area-inset-top, 0px) + 8px) 10px 8px;
+        border-bottom: none;
+        background: linear-gradient(180deg, rgba(4, 9, 5, 0.86) 0%, rgba(4, 9, 5, 0.35) 75%, rgba(4, 9, 5, 0) 100%);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        z-index: 35;
+        gap: 6px;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+      .brand-title-wrap { display: none; }
+      .brand { gap: 6px; }
+      .brand-link {
+        padding: 7px 10px;
+        font-size: 12px;
+        background: rgba(10, 20, 12, 0.72);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 999px;
+      }
+      .sync-pill {
+        padding: 7px 10px;
+        background: rgba(10, 20, 12, 0.72);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      .top-actions { gap: 5px; flex-wrap: nowrap; }
+      .top-actions .btn,
+      .top-actions .toggle-pill {
+        padding: 7px 10px;
+        font-size: 11px;
+        border-radius: 999px;
+        background: rgba(10, 20, 12, 0.72);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      .top-actions .btn.gold {
+        background: linear-gradient(135deg, #f0d57e, #c8a84b);
+      }
+
+      /* Fullscreen Edge-to-Edge Story Stage */
       .workspace {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        min-height: 0;
+        display: block;
+        position: relative;
+        width: 100vw;
+        height: 100dvh;
       }
 
       .stage-pane {
-        order: 1;
-        flex: 0 0 auto;
-        padding: 7px 10px 6px;
-        gap: 6px;
-        border-bottom: 1px solid var(--line);
-        background: rgba(4, 10, 5, 0.72);
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100dvh;
+        padding: 0;
+        gap: 0;
+        background: #020503;
+        z-index: 1;
+        justify-content: center;
+        align-items: center;
       }
 
       .phone-frame {
-        height: clamp(195px, 34dvh, 320px);
-        padding: 4px;
-        border-radius: 16px;
+        width: min(100vw, calc(100dvh * 9 / 16));
+        height: min(100dvh, calc(100vw * 16 / 9));
+        max-width: 100vw;
+        max-height: 100dvh;
+        aspect-ratio: 9 / 16;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        background: #050b06;
       }
       .phone-screen {
-        border-radius: 12px;
+        border-radius: 0;
       }
+
+      /* Schwebende Micro-Leiste direkt über dem unteren Dock */
       .stage-toolbar {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 66px);
+        z-index: 32;
+        background: rgba(7, 15, 9, 0.76);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(200, 168, 75, 0.35);
+        border-radius: 999px;
+        padding: 4px 6px;
         gap: 5px;
+        flex-wrap: nowrap;
+        width: max-content;
+        max-width: calc(100vw - 16px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
       }
       .stage-toolbar .btn.small {
-        padding: 6px 8px;
-        font-size: 10.5px;
+        padding: 6px 10px;
+        font-size: 11px;
+        border-radius: 999px;
+      }
+      .drag-switch {
+        border-radius: 999px;
+        border: none;
+        background: rgba(0, 0, 0, 0.35);
       }
       .drag-switch button {
-        padding: 5px 8px;
-        font-size: 10.5px;
+        padding: 6px 10px;
+        font-size: 11px;
+        border-radius: 999px;
       }
       .stage-caption { display: none; }
 
+      /* Unteres Werkzeug-Dock + ausfahrbares Sheet */
       .controls-pane {
-        order: 2;
-        flex: 1;
-        min-height: 0;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 45;
+        background: transparent;
         border-right: none;
+        pointer-events: none;
       }
 
-      .mobile-tabs {
-        display: grid;
+      .controls-pane.sheet-open {
+        background: rgba(7, 15, 9, 0.94);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-top: 1.5px solid rgba(200, 168, 75, 0.5);
+        border-radius: 18px 18px 0 0;
+        box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.78);
+        pointer-events: auto;
+        max-height: 54dvh;
+      }
+
+      .sheet-head {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px 6px;
+        border-bottom: 1px solid rgba(200, 168, 75, 0.18);
+        flex-shrink: 0;
+      }
+      .controls-pane.sheet-open .sheet-head {
+        display: flex;
+      }
+      .sheet-title {
+        font-family: 'Cinzel', serif;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1.4px;
+        color: var(--gold-hi);
+        text-transform: uppercase;
       }
 
       .controls-scroll {
-        padding: 10px 11px 28px;
+        display: none;
+        padding: 10px 12px 14px;
+        max-height: calc(54dvh - 104px);
+      }
+      .controls-pane.sheet-open .controls-scroll {
+        display: flex;
       }
 
-      /* Mobile Tabs blenden jeweils nur die gewählte Karte ein */
+      /* Wenn Sheet offen ist: schwebende Stage-Toolbar verstecken */
+      body.mob-sheet-open .stage-toolbar {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .mobile-dock {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 5px;
+        padding: 8px 10px calc(env(safe-area-inset-bottom, 0px) + 9px);
+        background: linear-gradient(180deg, rgba(6, 13, 8, 0.85), rgba(4, 9, 5, 0.96));
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(200, 168, 75, 0.28);
+        pointer-events: auto;
+      }
+      .controls-pane.sheet-open .mobile-dock {
+        background: rgba(5, 11, 6, 0.98);
+      }
+
+      .mob-tab-btn {
+        background: rgba(14, 28, 17, 0.78);
+        border: 1px solid rgba(200, 168, 75, 0.24);
+        color: var(--dim);
+        border-radius: 10px;
+        padding: 8px 4px;
+        font-family: inherit;
+        font-size: 10.5px;
+        font-weight: 800;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+      }
+      .mob-tab-btn i { font-size: 13px; }
+      .mob-tab-btn.active {
+        color: var(--gold-hi);
+        border-color: var(--gold-hi);
+        background: linear-gradient(135deg, rgba(200, 168, 75, 0.28), rgba(14, 28, 17, 0.95));
+      }
+
       .section-card[data-mob-tab] {
         display: none;
       }
@@ -700,7 +859,38 @@
         display: block;
       }
 
-      /* Verhindert automatischen iOS-Zoom beim Antippen von Textfeldern */
+      /* Reine Vollbild-Ansicht ohne HUD (über [⛶] oder Doppeltipp) */
+      body.pure-fullscreen .topbar,
+      body.pure-fullscreen .stage-toolbar,
+      body.pure-fullscreen .controls-pane {
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
+      .fullscreen-exit-btn {
+        display: none;
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 0px) + 12px);
+        right: 12px;
+        z-index: 60;
+        background: rgba(8, 17, 10, 0.58);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(240, 213, 126, 0.45);
+        color: var(--gold-hi);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-family: inherit;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      body.pure-fullscreen .fullscreen-exit-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* Verhindert iOS Auto-Zoom beim Tippen */
       input[type="text"], textarea, select.ctrl-select {
         font-size: 16px !important;
         padding: 9px 11px;
@@ -723,6 +913,10 @@
       <a class="brand-link" href="gentlemen_master_dashboard.html" title="Zurück zum Salon Hub">
         <i class="fa-solid fa-arrow-left"></i> <span class="desktop-only">Salon Hub</span>
       </a>
+      <button type="button" class="sync-pill" id="headerSyncPill" onclick="openCloudPanel()" title="Cloud-Sync zwischen PC &amp; Handy öffnen">
+        <span class="sync-dot"></span>
+        <span id="headerSyncLabel">Cloud Sync</span>
+      </button>
       <div class="brand-title-wrap">
         <h1>DOPPEL XP &middot; STORY</h1>
         <div class="brand-sub">Minimal Editorial Instagram Story &middot; 1080 &times; 1920 px</div>
@@ -731,8 +925,8 @@
 
     <div class="top-actions">
       <label class="toggle-pill" title="Instagram Safe-Zone nur in der Vorschau einblenden">
-        <input type="checkbox" id="toggleSafeZone" checked onchange="updateGuides()">
-        <span>Safe-Zone</span>
+        <input type="checkbox" id="toggleSafeZone" onchange="updateGuides()">
+        <span>Safe</span>
       </label>
       <label class="toggle-pill desktop-only" title="Platzhalter für Instagram Link-/Umfrage-Sticker einblenden">
         <input type="checkbox" id="toggleStickerSpace" onchange="updateGuides()">
@@ -745,30 +939,29 @@
       <button class="btn desktop-only" id="btnCopyStory" onclick="copyStoryToClipboard()" title="Als PNG in Zwischenablage kopieren">
         <i class="fa-regular fa-copy"></i> Kopieren
       </button>
-      <button class="btn mobile-only" id="btnMobileShare" onclick="shareOrSaveMobile()" title="Direkt an Instagram / Fotos teilen">
-        <i class="fa-solid fa-share-nodes"></i> Teilen / IG
+      <button class="btn mobile-only" onclick="togglePureFullscreen()" title="Reine Vollbild-Vorschau ohne HUD">
+        <i class="fa-solid fa-expand"></i>
       </button>
-      <button class="btn gold" id="btnExportStory" onclick="exportStoryImage()">
-        <i class="fa-solid fa-download"></i> <span class="desktop-only">1080&times;1920 Exportieren</span><span class="mobile-only">Sichern</span>
+      <button class="btn gold mobile-only" id="btnMobileShare" onclick="shareOrSaveMobile()" title="Direkt an Instagram / Fotos teilen">
+        <i class="fa-solid fa-share-nodes"></i> Teilen
+      </button>
+      <button class="btn gold" id="btnExportStory" onclick="exportStoryImage()" title="1080×1920 Grafik speichern">
+        <i class="fa-solid fa-download"></i> <span class="desktop-only">1080&times;1920 Exportieren</span>
       </button>
     </div>
   </header>
 
+  <button type="button" class="fullscreen-exit-btn" onclick="togglePureFullscreen()">
+    <i class="fa-solid fa-compress"></i> Werkzeuge einblenden
+  </button>
+
   <main class="workspace">
-    <!-- STEUERUNG (DESKTOP: LISTE LINKS / HANDY: BOTTOM DOCK MIT TABS) -->
-    <aside class="controls-pane">
-      <div class="mobile-tabs" role="tablist" aria-label="Story Werkzeuge">
-        <button type="button" class="mob-tab-btn active" data-tab="text" onclick="switchMobileTab('text')">
-          <i class="fa-solid fa-font"></i> Text
-        </button>
-        <button type="button" class="mob-tab-btn" data-tab="photo" onclick="switchMobileTab('photo')">
-          <i class="fa-regular fa-image"></i> Foto
-        </button>
-        <button type="button" class="mob-tab-btn" data-tab="style" onclick="switchMobileTab('style')">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> Stil
-        </button>
-        <button type="button" class="mob-tab-btn" data-tab="tune" onclick="switchMobileTab('tune')">
-          <i class="fa-solid fa-sliders"></i> Fein
+    <!-- STEUERUNG (DESKTOP: SIDEBAR / HANDY: SLIDE-UP GLASS SHEET + DOCK) -->
+    <aside class="controls-pane" id="controlsPane">
+      <div class="sheet-head">
+        <span class="sheet-title" id="mobileSheetTitle">Story bearbeiten</span>
+        <button type="button" class="btn small gold" onclick="closeMobileSheet()">
+          <i class="fa-solid fa-check"></i> Fertig
         </button>
       </div>
 
@@ -778,7 +971,7 @@
           <div class="section-title">
             <span><i class="fa-regular fa-image"></i> Hintergrund-Foto</span>
             <div style="display:flex; gap:5px;">
-              <button class="btn small" onclick="resetPhotoFraming()" title="Zoom & Position zurücksetzen">Reset</button>
+              <button class="btn small" onclick="resetPhotoFraming()" title="Zoom &amp; Position zurücksetzen">Reset</button>
               <button class="btn small" onclick="clearPhotoToDark()" title="Foto entfernen (nur Manor Dark)">Ohne Foto</button>
             </div>
           </div>
@@ -786,7 +979,7 @@
           <label class="dropzone" id="photoDropzone">
             <input type="file" id="photoInput" accept="image/*">
             <strong>Foto auswählen oder hierher ziehen</strong>
-            <small>Galerie / Dateien · Am PC auch direkt <code>Strg+V</code></small>
+            <small>Galerie / Dateien · Wird automatisch zwischen Geräten gesynct</small>
           </label>
 
           <div class="field">
@@ -854,13 +1047,12 @@
         <!-- KARTE C: TEXT + CREATOR (CHRIS / MAX / DOPPEL XP) -->
         <section class="section-card mob-active" data-mob-tab="text">
           <div class="section-title">
-            <span><i class="fa-solid fa-user-check"></i> Creator &amp; Text (Safe Zone)</span>
+            <span><i class="fa-solid fa-user-check"></i> Creator &amp; Text</span>
             <button class="btn small" id="btnFetchPodcast" style="white-space:nowrap;" onclick="applyPodcastLiveIdea()" title="Aktuelle Respawn-Radio Folge live aus RSS laden">
               <i class="fa-solid fa-podcast"></i> Live Folge
             </button>
           </div>
 
-          <!-- Für Chris, Max oder gemeinsamen Kanal -->
           <div class="field" style="margin-top:0;">
             <label>Wer postet? <span>Speichert eigenes @Handle</span></label>
             <div class="row-3" id="profileButtons" style="margin-top:0;">
@@ -871,11 +1063,11 @@
           </div>
 
           <div class="preset-ideas">
-            <button class="idea-pill" onclick="applyIdeaPreset('live')">🔴 Live Teaser</button>
+            <button class="idea-pill" onclick="applyIdeaPreset('live')">🔴 Live</button>
             <button class="idea-pill" onclick="applyPodcastLiveIdea()">🎙️ Podcast</button>
             <button class="idea-pill" onclick="applyIdeaPreset('youtube')">🎬 YouTube</button>
             <button class="idea-pill" onclick="applyIdeaPreset('quote')">💬 Zitat</button>
-            <button class="idea-pill" onclick="applyIdeaPreset('clean_one')">✨ Nur 1 Satz</button>
+            <button class="idea-pill" onclick="applyIdeaPreset('clean_one')">✨ 1 Satz</button>
           </div>
 
           <div class="field">
@@ -900,7 +1092,37 @@ im Salon.</textarea>
           </div>
         </section>
 
-        <!-- KARTE D: FEINTUNING & POSITION -->
+        <!-- KARTE D: CLOUD SYNC ZWISCHEN GERÄTEN (MIT BILD) -->
+        <section class="section-card" data-mob-tab="sync" id="cloudSyncCard">
+          <div class="section-title">
+            <span><i class="fa-solid fa-cloud"></i> Cloud-Sync (PC &amp; Handy)</span>
+            <span id="cloudBadgeLabel" style="font-family:Montserrat,sans-serif; font-size:10px; color:var(--ok); font-weight:700;">Aktiv</span>
+          </div>
+
+          <div class="field" style="margin-top:0;">
+            <label>Sync-Kanal (wird live auf allen Geräten geladen)</label>
+            <div class="row-3" id="syncSlotButtons" style="margin-top:0;">
+              <button class="chip-btn active" data-slot="salon" onclick="switchSyncSlot('salon')">Doppel XP</button>
+              <button class="chip-btn" data-slot="chris" onclick="switchSyncSlot('chris')">Chris</button>
+              <button class="chip-btn" data-slot="max" onclick="switchSyncSlot('max')">Max</button>
+            </div>
+          </div>
+
+          <div class="cloud-box" id="cloudStatusBox" style="margin-top:8px;">
+            Verbinde mit Cloud-Speicher …
+          </div>
+
+          <div class="row-2" style="margin-top:8px;">
+            <button class="btn small gold" onclick="pushToCloud(true)">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Jetzt senden
+            </button>
+            <button class="btn small" onclick="pullFromCloud(true)">
+              <i class="fa-solid fa-cloud-arrow-down"></i> Jetzt laden
+            </button>
+          </div>
+        </section>
+
+        <!-- KARTE E: FEINTUNING & POSITION -->
         <section class="section-card" data-mob-tab="tune">
           <div class="section-title">
             <span><i class="fa-solid fa-sliders"></i> Position &amp; Feintuning</span>
@@ -935,13 +1157,32 @@ im Salon.</textarea>
           </div>
         </section>
       </div>
+
+      <!-- MOBILES DOCK GANZ UNTEN -->
+      <div class="mobile-dock" role="tablist" aria-label="Story Werkzeuge">
+        <button type="button" class="mob-tab-btn" data-tab="photo" onclick="switchMobileTab('photo')">
+          <i class="fa-regular fa-image"></i><span>Foto</span>
+        </button>
+        <button type="button" class="mob-tab-btn" data-tab="text" onclick="switchMobileTab('text')">
+          <i class="fa-solid fa-font"></i><span>Text</span>
+        </button>
+        <button type="button" class="mob-tab-btn" data-tab="style" onclick="switchMobileTab('style')">
+          <i class="fa-solid fa-wand-magic-sparkles"></i><span>Stil</span>
+        </button>
+        <button type="button" class="mob-tab-btn" data-tab="sync" onclick="switchMobileTab('sync')">
+          <i class="fa-solid fa-cloud"></i><span>Sync</span>
+        </button>
+        <button type="button" class="mob-tab-btn" data-tab="tune" onclick="switchMobileTab('tune')">
+          <i class="fa-solid fa-sliders"></i><span>Fein</span>
+        </button>
+      </div>
     </aside>
 
     <!-- LIVE 9:16 VORSCHAU -->
     <section class="stage-pane">
       <div class="stage-toolbar">
         <button class="btn small gold" onclick="triggerPhotoPicker()" title="Foto von Handy-Galerie oder PC auswählen">
-          <i class="fa-solid fa-camera"></i> Foto wählen
+          <i class="fa-solid fa-camera"></i> Foto
         </button>
         <div class="drag-switch" role="group" aria-label="Zieh-Modus auf Vorschau">
           <button id="modeDragPhoto" class="active" onclick="setDragMode('photo')">
@@ -956,12 +1197,12 @@ im Salon.</textarea>
         </button>
       </div>
 
-      <div class="phone-frame">
-        <div class="phone-screen">
+      <div class="phone-frame" id="phoneFrame">
+        <div class="phone-screen" id="phoneScreen">
           <canvas id="storyCanvas" width="1080" height="1920"></canvas>
 
           <!-- NUR PREVIEW: IG SAFE ZONES -->
-          <div class="safe-overlay" id="safeOverlay">
+          <div class="safe-overlay hidden" id="safeOverlay">
             <div class="safe-zone-top">
               <span class="safe-badge">IG Profil &amp; Balken</span>
             </div>
@@ -978,7 +1219,7 @@ im Salon.</textarea>
       </div>
 
       <div class="stage-caption">
-        <strong>1080 &times; 1920 px (9:16)</strong> &middot; Foto schieben &amp; zoomen &middot; <strong>Export ohne rote/goldene Hilfslinien</strong>
+        <strong>1080 &times; 1920 px (9:16)</strong> &middot; Foto schieben &amp; zoomen &middot; <strong>Automatischer Cloud-Sync mit Foto zwischen PC &amp; Handy</strong>
       </div>
     </section>
   </main>
@@ -988,7 +1229,7 @@ im Salon.</textarea>
     <div class="save-modal-card">
       <div class="save-modal-title">FERTIGE STORY (1080 &times; 1920 PX)</div>
       <div class="save-modal-hint">
-        <strong>Auf dem Handy:</strong> Bild unten kurz gedr&uuml;ckt halten &rarr; <em>&bdquo;In Fotos speichern&ldquo;</em> oder <em>&bdquo;Bild herunterladen&ldquo;</em>, danach einfach in Instagram Story hochladen.
+        <strong>Auf dem Handy:</strong> Bild unten kurz gedr&uuml;ckt halten &rarr; <em>&bdquo;In Fotos speichern&ldquo;</em> oder <em>&bdquo;Bild herunterladen&ldquo;</em>, danach direkt in Instagram Story hochladen.
       </div>
       <div class="save-modal-img-wrap">
         <img id="saveSheetPreviewImg" alt="Exportierte Instagram Story">
@@ -1007,8 +1248,13 @@ im Salon.</textarea>
     const SAFE_BOTTOM = 1580; // 1920 - 340
     const SAFE_SIDE = 82;
     const DEFAULT_RSS_URL = 'https://anchor.fm/s/ffc0bf0c/podcast/rss';
-    const STORAGE_KEY = 'gentlemen_story_studio_v2';
+    const STORAGE_KEY = 'gentlemen_story_studio_v3';
     const HANDLES_KEY = 'gentlemen_story_profile_handles_v1';
+    const SYNC_SLOT_KEY = 'gentlemen_story_sync_slot_v1';
+    const DEVICE_ID_KEY = 'gentlemen_story_device_id_v1';
+    const CLOUD_BASE = 'https://doppelxp-stream-default-rtdb.europe-west1.firebasedatabase.app/story_studio_v1';
+    const IDB_NAME = 'gentlemen_story_local_db';
+    const IDB_STORE = 'images';
 
     const CREATOR_PROFILES = {
       salon: {
@@ -1037,17 +1283,25 @@ im Salon.</textarea>
       }
     };
 
+    const SHEET_TITLES = {
+      photo: 'Hintergrund-Foto',
+      text: 'Text & Creator',
+      style: 'Minimal-Stil & Schrift',
+      sync: 'Cloud-Sync (PC & Handy)',
+      tune: 'Position & Feintuning'
+    };
+
     const profileHandles = {
       salon: CREATOR_PROFILES.salon.defaultHandle,
       chris: CREATOR_PROFILES.chris.defaultHandle,
       max: CREATOR_PROFILES.max.defaultHandle
     };
 
-    const state = {
-      activeProfile: 'salon', // salon | chris | max
-      layout: 'clean',        // clean | editorial | cinema | card
-      fontMix: 'playfair',    // playfair | cinzel | garamond | montserrat
-      photoFilter: 'manor',   // natural | manor | noir | mono
+    const DEFAULT_STATE = {
+      activeProfile: 'salon',
+      layout: 'clean',
+      fontMix: 'playfair',
+      photoFilter: 'manor',
       kicker: 'DOPPEL XP · HEUTE 19:30',
       headline: 'Heute Abend\nim Salon.',
       subline: 'Gute Manieren, feines Gameplay & beste Gesellschaft.',
@@ -1056,18 +1310,34 @@ im Salon.</textarea>
       shadowStrength: 60,
       scrim: 34,
       vignette: 45,
-      textZone: 'bottom',     // top | middle | bottom
-      textAlign: 'center',    // center | left
-      accentMode: 'white',    // white | gold_kicker
-      photoMode: 'dark_backdrop', // image | dark_backdrop
+      textZone: 'bottom',
+      textAlign: 'center',
+      accentMode: 'white',
+      photoMode: 'dark_backdrop',
       photoZoom: 100,
       photoOffsetX: 0,
       photoOffsetY: 0,
       textOffsetY: 0,
-      dragMode: 'photo'       // photo | text
+      dragMode: 'photo',
+      imageId: '',
+      updatedAt: 0
     };
 
+    const state = Object.assign({}, DEFAULT_STATE);
+
+    let activeSyncSlot = 'salon';
+    let DEVICE_ID = '';
+    let DEVICE_LABEL = detectDeviceLabel();
     let activeImage = null;
+    let activeImageDataUrl = '';
+    let loadedImageId = '';
+    let lastCloudMeta = null;
+    let pushDebounceTimer = null;
+    let cloudPollTimer = null;
+    let isSyncBusy = false;
+    let activeMobileTab = null;
+    let lastCanvasTapTs = 0;
+
     const activePointers = new Map();
     let dragBaseline = null;
     let pinchBaseline = null;
@@ -1075,16 +1345,53 @@ im Salon.</textarea>
     const canvas = document.getElementById('storyCanvas');
     const ctx = canvas.getContext('2d');
 
+    function detectDeviceLabel() {
+      const ua = navigator.userAgent || '';
+      if (/iPhone|iPad|iPod/i.test(ua)) return 'iPhone';
+      if (/Android/i.test(ua)) return 'Android';
+      if (/Windows|Macintosh|Linux/i.test(ua)) return 'PC';
+      return 'Gerät';
+    }
+
+    function ensureDeviceId() {
+      try {
+        let id = localStorage.getItem(DEVICE_ID_KEY);
+        if (!id) {
+          id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+          localStorage.setItem(DEVICE_ID_KEY, id);
+        }
+        return id;
+      } catch (e) {
+        return 'dev_mem_' + Math.random().toString(36).slice(2, 8);
+      }
+    }
+
     // ============================================================
     // INIT & FONTS
     // ============================================================
     document.addEventListener('DOMContentLoaded', async () => {
+      DEVICE_ID = ensureDeviceId();
       loadSavedState();
+
+      // Standard-Check Safe-Zone: auf Desktop eingeschaltet lassen, auf Handy standardmäßig sauber aus (1-Tap oben)
+      const safeChk = document.getElementById('toggleSafeZone');
+      if (safeChk) {
+        safeChk.checked = window.innerWidth > 920;
+      }
+      updateGuides();
+
       syncUiFromState();
       setupInteractions();
 
       await ensureFontsLoaded();
+
+      // Lokales Bild ggf. aus IndexedDB wiederherstellen
+      await restoreLocalImageIfMatching();
       renderStoryCanvas();
+
+      // Danach direkt Cloud-Sync prüfen & Start-Polling aktivieren
+      await syncOnStartup();
+      startCloudPolling();
     });
 
     async function ensureFontsLoaded() {
@@ -1101,7 +1408,453 @@ im Salon.</textarea>
     }
 
     // ============================================================
-    // FOTO LADEN & MULTI-TOUCH (PAN + PINCH-TO-ZOOM)
+    // INDEXEDDB HELPER FÜR OFFLINE-BILDER
+    // ============================================================
+    function openImageDb() {
+      return new Promise((resolve, reject) => {
+        if (typeof indexedDB === 'undefined') return reject(new Error('No IDB'));
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function idbPutImage(key, payload) {
+      try {
+        const db = await openImageDb();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(IDB_STORE, 'readwrite');
+          tx.objectStore(IDB_STORE).put(payload, key);
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+        });
+        db.close();
+      } catch (e) {}
+    }
+
+    async function idbGetImage(key) {
+      try {
+        const db = await openImageDb();
+        const val = await new Promise((resolve, reject) => {
+          const tx = db.transaction(IDB_STORE, 'readonly');
+          const req = tx.objectStore(IDB_STORE).get(key);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+        db.close();
+        return val || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function idbDeleteImage(key) {
+      try {
+        const db = await openImageDb();
+        await new Promise((resolve) => {
+          const tx = db.transaction(IDB_STORE, 'readwrite');
+          tx.objectStore(IDB_STORE).delete(key);
+          tx.oncomplete = resolve;
+          tx.onerror = resolve;
+        });
+        db.close();
+      } catch (e) {}
+    }
+
+    function loadDataUrlIntoImage(dataUrl) {
+      return new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = dataUrl;
+      });
+    }
+
+    async function restoreLocalImageIfMatching() {
+      if (!state.imageId) return;
+      const rec = await idbGetImage('slot_' + activeSyncSlot);
+      if (rec && rec.imageId === state.imageId && rec.dataUrl) {
+        try {
+          activeImage = await loadDataUrlIntoImage(rec.dataUrl);
+          activeImageDataUrl = rec.dataUrl;
+          loadedImageId = rec.imageId;
+          state.photoMode = 'image';
+        } catch (e) {}
+      }
+    }
+
+    // ============================================================
+    // BILD-KOMPRIMIERUNG & CLOUD SYNC (FIREBASE RTDB MIT FOTO!)
+    // ============================================================
+    function compressImageForCloud(img) {
+      const iw = img.naturalWidth || img.width || 1080;
+      const ih = img.naturalHeight || img.height || 1920;
+      const maxEdge = 1540;
+      const scale = Math.min(1, maxEdge / Math.max(iw, ih));
+      const tw = Math.max(1, Math.round(iw * scale));
+      const th = Math.max(1, Math.round(ih * scale));
+
+      const off = document.createElement('canvas');
+      off.width = tw;
+      off.height = th;
+      const octx = off.getContext('2d');
+      octx.drawImage(img, 0, 0, tw, th);
+
+      let url = off.toDataURL('image/jpeg', 0.84);
+      if (url.length > 680000) {
+        url = off.toDataURL('image/jpeg', 0.72);
+      }
+      if (url.length > 950000) {
+        const sc2 = Math.min(1, 1120 / Math.max(iw, ih));
+        off.width = Math.max(1, Math.round(iw * sc2));
+        off.height = Math.max(1, Math.round(ih * sc2));
+        octx.drawImage(img, 0, 0, off.width, off.height);
+        url = off.toDataURL('image/jpeg', 0.72);
+      }
+      return url;
+    }
+
+    function setSyncUiState(mode, shortText, detailHtml) {
+      const pill = document.getElementById('headerSyncPill');
+      const label = document.getElementById('headerSyncLabel');
+      const badge = document.getElementById('cloudBadgeLabel');
+      const box = document.getElementById('cloudStatusBox');
+
+      if (pill) {
+        pill.classList.remove('syncing', 'offline');
+        if (mode === 'syncing') pill.classList.add('syncing');
+        if (mode === 'offline') pill.classList.add('offline');
+      }
+      if (label && shortText) label.innerText = shortText;
+      if (badge && shortText) badge.innerText = shortText;
+      if (box && detailHtml) box.innerHTML = detailHtml;
+    }
+
+    function slotDocSnapshot() {
+      return {
+        activeProfile: state.activeProfile,
+        layout: state.layout,
+        fontMix: state.fontMix,
+        photoFilter: state.photoFilter,
+        kicker: state.kicker,
+        headline: state.headline,
+        subline: state.subline,
+        brandFooter: state.brandFooter,
+        fontSize: state.fontSize,
+        shadowStrength: state.shadowStrength,
+        scrim: state.scrim,
+        vignette: state.vignette,
+        textZone: state.textZone,
+        textAlign: state.textAlign,
+        accentMode: state.accentMode,
+        photoMode: state.photoMode,
+        photoZoom: state.photoZoom,
+        photoOffsetX: state.photoOffsetX,
+        photoOffsetY: state.photoOffsetY,
+        textOffsetY: state.textOffsetY,
+        imageId: state.imageId || '',
+        updatedAt: state.updatedAt || Date.now()
+      };
+    }
+
+    function formatTimeAgo(ts) {
+      if (!ts) return 'unbekannt';
+      const sec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+      if (sec < 10) return 'gerade eben';
+      if (sec < 60) return `vor ${sec} Sek.`;
+      const min = Math.floor(sec / 60);
+      if (min < 60) return `vor ${min} Min.`;
+      const hrs = Math.floor(min / 60);
+      if (hrs < 48) return `vor ${hrs} Std.`;
+      return new Date(ts).toLocaleDateString('de-DE');
+    }
+
+    function renderCloudBoxInfo(meta, prefix) {
+      const slotName = (CREATOR_PROFILES[activeSyncSlot] || CREATOR_PROFILES.salon).name;
+      if (!meta || !meta.updatedAt) {
+        return `<strong>Kanal ${slotName}:</strong> Noch kein Entwurf in der Cloud.<br>Sobald du ein Foto lädst oder Text änderst, wird er automatisch hochgeladen.`;
+      }
+      const hasImg = Boolean(meta.imageId);
+      const kbTxt = meta.photoKb ? ` (~${meta.photoKb} KB)` : '';
+      const hl = (meta.headlinePreview || '').replace(/\n+/g, ' ').slice(0, 38) || 'Ohne Text';
+      const who = meta.deviceLabel ? `${meta.deviceLabel}` : 'Gerät';
+      return `${prefix || '<strong>Synchron</strong>'} · Kanal <strong>${slotName}</strong><br>` +
+        `Stand: <strong>${formatTimeAgo(meta.updatedAt)}</strong> von ${who} &middot; Foto: <strong>${hasImg ? 'Ja' + kbTxt : 'Ohne Foto'}</strong><br>` +
+        `<span style="color:var(--dim);">„${escapeHtmlLite(hl)}“</span>`;
+    }
+
+    function escapeHtmlLite(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function scheduleCloudPush(withImage = false) {
+      if (pushDebounceTimer) clearTimeout(pushDebounceTimer);
+      pushDebounceTimer = setTimeout(() => {
+        pushToCloud(withImage);
+      }, withImage ? 250 : 700);
+    }
+
+    async function pushToCloud(includeImage = false) {
+      if (isSyncBusy) return;
+      isSyncBusy = true;
+      setSyncUiState('syncing', 'Sende …', null);
+
+      try {
+        const now = Date.now();
+        state.updatedAt = now;
+        saveLocalStateOnly();
+
+        const doc = slotDocSnapshot();
+        const kb = activeImageDataUrl ? Math.round(activeImageDataUrl.length / 1024) : 0;
+        const meta = {
+          updatedAt: now,
+          imageId: state.imageId || '',
+          photoKb: kb,
+          deviceId: DEVICE_ID,
+          deviceLabel: DEVICE_LABEL,
+          slot: activeSyncSlot,
+          headlinePreview: (state.headline || '').trim().slice(0, 50)
+        };
+
+        const slotUrl = `${CLOUD_BASE}/slots/${encodeURIComponent(activeSyncSlot)}`;
+
+        // 1. Wenn Bild neu/geaendert oder entfernt wurde: photo.json separat aktualisieren
+        if (includeImage) {
+          if (state.photoMode === 'image' && activeImageDataUrl && state.imageId) {
+            const photoResp = await fetch(`${slotUrl}/photo.json`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageId: state.imageId,
+                dataUrl: activeImageDataUrl,
+                updatedAt: now
+              })
+            });
+            if (!photoResp.ok) throw new Error('Foto-Upload HTTP ' + photoResp.status);
+          } else {
+            await fetch(`${slotUrl}/photo.json`, { method: 'DELETE' });
+          }
+        }
+
+        // 2. Text, Framing & Handles speichern (< 1 KB)
+        const docResp = await fetch(`${slotUrl}/doc.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(doc)
+        });
+        if (!docResp.ok) throw new Error('Doc-Upload HTTP ' + docResp.status);
+
+        const metaResp = await fetch(`${slotUrl}/meta.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(meta)
+        });
+        if (!metaResp.ok) throw new Error('Meta-Upload HTTP ' + metaResp.status);
+
+        await fetch(`${CLOUD_BASE}/handles.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(profileHandles)
+        }).catch(() => {});
+
+        lastCloudMeta = meta;
+        setSyncUiState('ok', 'Synced', renderCloudBoxInfo(meta, '<strong>☁ Gespeichert &amp; synchron</strong>'));
+      } catch (err) {
+        console.warn('Cloud Push fehlgeschlagen:', err);
+        setSyncUiState('offline', 'Lokal', '<strong>Offline / Fehler:</strong> Entwurf ist sicher lokal auf diesem Gerät gespeichert.');
+      } finally {
+        isSyncBusy = false;
+      }
+    }
+
+    async function pullFromCloud(manual = false) {
+      if (isSyncBusy && !manual) return false;
+      isSyncBusy = true;
+      if (manual) setSyncUiState('syncing', 'Lade …', null);
+
+      try {
+        const slotUrl = `${CLOUD_BASE}/slots/${encodeURIComponent(activeSyncSlot)}`;
+        const metaResp = await fetch(`${slotUrl}/meta.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (!metaResp.ok) throw new Error('HTTP ' + metaResp.status);
+        const meta = await metaResp.json();
+
+        // Handles optional mit synchronisieren
+        try {
+          const hResp = await fetch(`${CLOUD_BASE}/handles.json?t=${Date.now()}`, { cache: 'no-store' });
+          if (hResp.ok) {
+            const hData = await hResp.json();
+            if (hData && typeof hData === 'object') {
+              Object.assign(profileHandles, hData);
+              localStorage.setItem(HANDLES_KEY, JSON.stringify(profileHandles));
+            }
+          }
+        } catch (e) {}
+
+        if (!meta || !meta.updatedAt) {
+          setSyncUiState('ok', 'Bereit', renderCloudBoxInfo(null));
+          if (manual) showToast('Noch kein Entwurf in diesem Cloud-Kanal.');
+          return false;
+        }
+
+        lastCloudMeta = meta;
+        const isNewer = (Number(meta.updatedAt) || 0) > (Number(state.updatedAt) || 0);
+        const isOtherDevice = meta.deviceId !== DEVICE_ID;
+        const imageChanged = Boolean(meta.imageId) && meta.imageId !== loadedImageId;
+
+        if (!manual && !isNewer && !imageChanged) {
+          setSyncUiState('ok', 'Synced', renderCloudBoxInfo(meta));
+          return false;
+        }
+
+        if (!manual && !isOtherDevice && !imageChanged && state.updatedAt > 0) {
+          setSyncUiState('ok', 'Synced', renderCloudBoxInfo(meta));
+          return false;
+        }
+
+        setSyncUiState('syncing', 'Lade …', null);
+        const docResp = await fetch(`${slotUrl}/doc.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (!docResp.ok) throw new Error('Doc HTTP ' + docResp.status);
+        const doc = await docResp.json();
+        if (!doc || typeof doc !== 'object') return false;
+
+        const targetImgId = doc.imageId || '';
+        if (targetImgId && targetImgId !== loadedImageId) {
+          const photoResp = await fetch(`${slotUrl}/photo.json?t=${Date.now()}`, { cache: 'no-store' });
+          if (photoResp.ok) {
+            const photoObj = await photoResp.json();
+            if (photoObj && photoObj.dataUrl) {
+              activeImage = await loadDataUrlIntoImage(photoObj.dataUrl);
+              activeImageDataUrl = photoObj.dataUrl;
+              loadedImageId = targetImgId;
+              await idbPutImage('slot_' + activeSyncSlot, {
+                imageId: targetImgId,
+                dataUrl: photoObj.dataUrl,
+                updatedAt: doc.updatedAt
+              });
+            }
+          }
+        } else if (!targetImgId) {
+          activeImage = null;
+          activeImageDataUrl = '';
+          loadedImageId = '';
+          await idbDeleteImage('slot_' + activeSyncSlot);
+        }
+
+        Object.assign(state, doc);
+        state.photoMode = activeImage ? 'image' : 'dark_backdrop';
+        saveLocalStateOnly();
+        syncUiFromState();
+        renderStoryCanvas();
+
+        setSyncUiState('ok', 'Synced', renderCloudBoxInfo(meta, '<strong>☁ Aus Cloud geladen</strong>'));
+        if (manual || isOtherDevice) {
+          showToast(`Stand von ${meta.deviceLabel || 'anderem Gerät'} geladen${activeImage ? ' (inkl. Foto)' : ''}!`);
+        }
+        return true;
+      } catch (err) {
+        console.warn('Cloud Pull Fehler:', err);
+        setSyncUiState('offline', 'Offline', '<strong>Cloud gerade nicht erreichbar:</strong> Lokaler Stand aktiv.');
+        return false;
+      } finally {
+        isSyncBusy = false;
+      }
+    }
+
+    async function syncOnStartup() {
+      const pulled = await pullFromCloud(false);
+      if (!pulled && state.updatedAt > 0 && lastCloudMeta === null) {
+        // Lokaler Stand existierte schon, Cloud war noch leer -> direkt hochladen
+        await pushToCloud(Boolean(activeImageDataUrl));
+      } else if (!pulled) {
+        setSyncUiState('ok', 'Synced', renderCloudBoxInfo(lastCloudMeta));
+      }
+    }
+
+    async function switchSyncSlot(slotKey) {
+      if (pushDebounceTimer) {
+        clearTimeout(pushDebounceTimer);
+        pushDebounceTimer = null;
+      }
+      saveLocalStateOnly();
+
+      activeSyncSlot = slotKey;
+      try { localStorage.setItem(SYNC_SLOT_KEY, slotKey); } catch (e) {}
+
+      activeImage = null;
+      activeImageDataUrl = '';
+      loadedImageId = '';
+      lastCloudMeta = null;
+
+      Object.assign(state, DEFAULT_STATE);
+      const slotCfg = CREATOR_PROFILES[slotKey] || CREATOR_PROFILES.salon;
+      state.activeProfile = slotKey;
+      state.kicker = slotCfg.kicker;
+      state.brandFooter = profileHandles[slotKey] !== undefined ? profileHandles[slotKey] : slotCfg.defaultHandle;
+
+      loadSlotLocalDraft(slotKey);
+      syncUiFromState();
+
+      await restoreLocalImageIfMatching();
+      const loadedFromCloud = await pullFromCloud(true);
+      if (!loadedFromCloud) {
+        renderStoryCanvas();
+        showToast(`Sync-Kanal „${slotCfg.name}“ aktiv.`);
+      }
+    }
+
+    function openCloudPanel() {
+      if (window.innerWidth <= 920) {
+        switchMobileTab('sync', true);
+      } else {
+        const card = document.getElementById('cloudSyncCard');
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function startCloudPolling() {
+      if (cloudPollTimer) clearInterval(cloudPollTimer);
+      cloudPollTimer = setInterval(() => {
+        if (document.visibilityState !== 'visible') return;
+        if (activePointers.size > 0 || isSyncBusy) return;
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+        checkCloudMetaLight();
+      }, 6000);
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          checkCloudMetaLight();
+        }
+      });
+      window.addEventListener('focus', () => {
+        checkCloudMetaLight();
+      });
+    }
+
+    async function checkCloudMetaLight() {
+      if (isSyncBusy) return;
+      try {
+        const metaResp = await fetch(`${CLOUD_BASE}/slots/${encodeURIComponent(activeSyncSlot)}/meta.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (!metaResp.ok) return;
+        const meta = await metaResp.json();
+        if (!meta || !meta.updatedAt) return;
+        if ((Number(meta.updatedAt) || 0) > (Number(state.updatedAt) || 0) && meta.deviceId !== DEVICE_ID) {
+          await pullFromCloud(false);
+        } else {
+          lastCloudMeta = meta;
+          setSyncUiState('ok', 'Synced', renderCloudBoxInfo(meta));
+        }
+      } catch (e) {}
+    }
+
+    // ============================================================
+    // FOTO LADEN & MULTI-TOUCH (PAN + PINCH-TO-ZOOM + FULLSCREEN)
     // ============================================================
     function triggerPhotoPicker() {
       const inp = document.getElementById('photoInput');
@@ -1110,15 +1863,20 @@ im Salon.</textarea>
 
     function clearPhotoToDark() {
       activeImage = null;
+      activeImageDataUrl = '';
+      loadedImageId = '';
+      state.imageId = '';
       state.photoMode = 'dark_backdrop';
       state.photoZoom = 100;
       state.photoOffsetX = 0;
       state.photoOffsetY = 0;
+      state.updatedAt = Date.now();
       const inp = document.getElementById('photoInput');
       if (inp) inp.value = '';
+      idbDeleteImage('slot_' + activeSyncSlot);
       syncUiFromState();
       renderStoryCanvas();
-      saveState();
+      saveState(true);
       showToast('Foto entfernt – sauberer Manor Dark Hintergrund aktiv.');
     }
 
@@ -1127,16 +1885,31 @@ im Salon.</textarea>
       const reader = new FileReader();
       reader.onload = (ev) => {
         const im = new Image();
-        im.onload = () => {
-          activeImage = im;
+        im.onload = async () => {
+          const compressedUrl = compressImageForCloud(im);
+          const cleanImg = await loadDataUrlIntoImage(compressedUrl).catch(() => im);
+          const newImgId = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+          activeImage = cleanImg;
+          activeImageDataUrl = compressedUrl;
+          loadedImageId = newImgId;
+          state.imageId = newImgId;
           state.photoMode = 'image';
           state.photoZoom = 100;
           state.photoOffsetX = 0;
           state.photoOffsetY = 0;
+          state.updatedAt = Date.now();
+
+          await idbPutImage('slot_' + activeSyncSlot, {
+            imageId: newImgId,
+            dataUrl: compressedUrl,
+            updatedAt: state.updatedAt
+          });
+
           syncUiFromState();
           renderStoryCanvas();
-          saveState();
-          showToast('Foto geladen – einfach direkt ziehen & zoomen!');
+          saveState(true);
+          showToast('Foto geladen & in Cloud synchronisiert!');
         };
         im.src = ev.target.result;
       };
@@ -1177,8 +1950,11 @@ im Salon.</textarea>
         }
       });
 
-      // 1-Finger Drag (Foto oder Text) + 2-Finger Pinch-to-Zoom (auf Smartphone!)
+      // 1-Finger Drag + 2-Finger Pinch-to-Zoom + Tap außerhalb schließt Mobile Sheet + Doppeltipp für reines Vollbild
       canvas.addEventListener('pointerdown', (e) => {
+        if (window.innerWidth <= 920 && document.body.classList.contains('mob-sheet-open')) {
+          closeMobileSheet();
+        }
         try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
         activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
@@ -1187,6 +1963,7 @@ im Salon.</textarea>
           dragBaseline = {
             startX: e.clientX,
             startY: e.clientY,
+            moved: false,
             origPhotoX: state.photoOffsetX,
             origPhotoY: state.photoOffsetY,
             origTextY: state.textOffsetY
@@ -1216,10 +1993,14 @@ im Salon.</textarea>
         }
 
         if (activePointers.size === 1 && dragBaseline) {
+          const rawDx = e.clientX - dragBaseline.startX;
+          const rawDy = e.clientY - dragBaseline.startY;
+          if (Math.hypot(rawDx, rawDy) > 5) dragBaseline.moved = true;
+
           const rect = canvas.getBoundingClientRect();
           const scale = STORY_W / Math.max(1, rect.width);
-          const dx = (e.clientX - dragBaseline.startX) * scale;
-          const dy = (e.clientY - dragBaseline.startY) * scale;
+          const dx = rawDx * scale;
+          const dy = rawDy * scale;
 
           if (state.dragMode === 'text') {
             state.textOffsetY = Math.max(-520, Math.min(520, Math.round(dragBaseline.origTextY + dy)));
@@ -1232,16 +2013,30 @@ im Salon.</textarea>
       });
 
       const endPointer = (e) => {
+        const wasTap = dragBaseline && !dragBaseline.moved && activePointers.size === 1;
         activePointers.delete(e.pointerId);
         if (activePointers.size < 2) pinchBaseline = null;
         if (activePointers.size === 0) {
+          const moved = dragBaseline && dragBaseline.moved;
           dragBaseline = null;
-          saveState();
+          if (moved) {
+            state.updatedAt = Date.now();
+            saveState(false);
+          } else if (wasTap && window.innerWidth <= 920) {
+            const now = Date.now();
+            if (now - lastCanvasTapTs < 320) {
+              togglePureFullscreen();
+              lastCanvasTapTs = 0;
+            } else {
+              lastCanvasTapTs = now;
+            }
+          }
         } else if (activePointers.size === 1) {
           const remaining = Array.from(activePointers.values())[0];
           dragBaseline = {
             startX: remaining.x,
             startY: remaining.y,
+            moved: true,
             origPhotoX: state.photoOffsetX,
             origPhotoY: state.photoOffsetY,
             origTextY: state.textOffsetY
@@ -1255,10 +2050,61 @@ im Salon.</textarea>
         e.preventDefault();
         const delta = e.deltaY < 0 ? 5 : -5;
         state.photoZoom = Math.max(65, Math.min(220, state.photoZoom + delta));
+        state.updatedAt = Date.now();
         syncUiFromState();
         renderStoryCanvas();
-        saveState();
+        saveState(false);
       }, { passive: false });
+    }
+
+    // ============================================================
+    // MOBILE FULLSCREEN & SLIDE-UP SHEET TABS
+    // ============================================================
+    function switchMobileTab(tabName, forceOpen = false) {
+      const pane = document.getElementById('controlsPane');
+      const isOpen = pane.classList.contains('sheet-open');
+
+      if (!forceOpen && isOpen && activeMobileTab === tabName) {
+        closeMobileSheet();
+        return;
+      }
+
+      activeMobileTab = tabName;
+      document.body.classList.remove('pure-fullscreen');
+      document.body.classList.add('mob-sheet-open');
+      pane.classList.add('sheet-open');
+
+      const titleEl = document.getElementById('mobileSheetTitle');
+      if (titleEl) titleEl.innerText = SHEET_TITLES[tabName] || 'Werkzeug';
+
+      document.querySelectorAll('.mob-tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tabName);
+      });
+      document.querySelectorAll('.section-card[data-mob-tab]').forEach(card => {
+        card.classList.toggle('mob-active', card.dataset.mobTab === tabName);
+      });
+    }
+
+    function closeMobileSheet() {
+      activeMobileTab = null;
+      const pane = document.getElementById('controlsPane');
+      if (pane) pane.classList.remove('sheet-open');
+      document.body.classList.remove('mob-sheet-open');
+      document.querySelectorAll('.mob-tab-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function togglePureFullscreen() {
+      const entering = !document.body.classList.contains('pure-fullscreen');
+      if (entering) closeMobileSheet();
+      document.body.classList.toggle('pure-fullscreen', entering);
+
+      try {
+        if (entering && !document.fullscreenElement && document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else if (!entering && document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } catch (e) {}
     }
 
     // ============================================================
@@ -1273,15 +2119,15 @@ im Salon.</textarea>
         ? profileHandles[profileKey]
         : cfg.defaultHandle;
 
-      // Falls der Kicker noch einem Standard-Kicker entspricht, sanft umschalten
       const curKicker = (state.kicker || '').trim().toUpperCase();
       if (!curKicker || curKicker === prevCfg.kicker || curKicker.endsWith('DOPPEL XP') || curKicker.startsWith('DOPPEL XP')) {
         state.kicker = cfg.kicker;
       }
 
+      state.updatedAt = Date.now();
       syncUiFromState();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
       showToast(`Profil: ${cfg.name} aktiv (${state.brandFooter || 'ohne Handle'})`);
     }
 
@@ -1289,20 +2135,12 @@ im Salon.</textarea>
       const val = document.getElementById('brandFooterInput').value;
       state.brandFooter = val;
       profileHandles[state.activeProfile] = val;
+      state.updatedAt = Date.now();
       try {
         localStorage.setItem(HANDLES_KEY, JSON.stringify(profileHandles));
       } catch (e) {}
       renderStoryCanvas();
-      saveState();
-    }
-
-    function switchMobileTab(tabName) {
-      document.querySelectorAll('.mob-tab-btn').forEach(b => {
-        b.classList.toggle('active', b.dataset.tab === tabName);
-      });
-      document.querySelectorAll('.section-card[data-mob-tab]').forEach(card => {
-        card.classList.toggle('mob-active', card.dataset.mobTab === tabName);
-      });
+      saveState(false);
     }
 
     function onControlChange() {
@@ -1316,17 +2154,19 @@ im Salon.</textarea>
       state.brandFooter = document.getElementById('brandFooterInput').value;
       state.fontSize = Number(document.getElementById('fontSizeInput').value) || 86;
       state.shadowStrength = Number(document.getElementById('shadowInput').value) || 0;
+      state.updatedAt = Date.now();
 
       updateLabels();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
     }
 
     function setPhotoFilter(filter) {
       state.photoFilter = filter;
+      state.updatedAt = Date.now();
       syncUiFromState();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
     }
 
     function setLayoutPreset(layout) {
@@ -1342,31 +2182,35 @@ im Salon.</textarea>
       } else {
         state.textOffsetY = 0;
       }
+      state.updatedAt = Date.now();
       syncUiFromState();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
     }
 
     function setTextZone(zone) {
       state.textZone = zone;
       state.textOffsetY = 0;
+      state.updatedAt = Date.now();
       syncUiFromState();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
     }
 
     function setTextAlign(align) {
       state.textAlign = align;
+      state.updatedAt = Date.now();
       syncUiFromState();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
     }
 
     function setAccentMode(mode) {
       state.accentMode = mode;
+      state.updatedAt = Date.now();
       syncUiFromState();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
     }
 
     function setDragMode(mode) {
@@ -1377,17 +2221,19 @@ im Salon.</textarea>
 
     function centerTextOffset() {
       state.textOffsetY = 0;
+      state.updatedAt = Date.now();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
     }
 
     function resetPhotoFraming() {
       state.photoZoom = 100;
       state.photoOffsetX = 0;
       state.photoOffsetY = 0;
+      state.updatedAt = Date.now();
       syncUiFromState();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
     }
 
     function updateGuides() {
@@ -1451,9 +2297,10 @@ im Salon.</textarea>
         state.accentMode = 'white';
       }
       state.textOffsetY = 0;
+      state.updatedAt = Date.now();
       syncUiFromState();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
     }
 
     async function applyPodcastLiveIdea() {
@@ -1487,9 +2334,10 @@ im Salon.</textarea>
         if (btn) btn.innerHTML = prevHtml;
       }
 
+      state.updatedAt = Date.now();
       syncUiFromState();
       renderStoryCanvas();
-      saveState();
+      saveState(false);
     }
 
     function syncUiFromState() {
@@ -1506,6 +2354,9 @@ im Salon.</textarea>
 
       document.querySelectorAll('#profileButtons .chip-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.profile === state.activeProfile);
+      });
+      document.querySelectorAll('#syncSlotButtons .chip-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.slot === activeSyncSlot);
       });
       document.querySelectorAll('#filterButtons .chip-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.filter === state.photoFilter);
@@ -1940,7 +2791,7 @@ im Salon.</textarea>
       const btn = document.getElementById('btnExportStory');
       const origHtml = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
       try {
         const { blob, mime, filename } = await buildStoryBlob();
@@ -1952,7 +2803,6 @@ im Salon.</textarea>
         a.click();
         document.body.removeChild(a);
 
-        // Auf Touch-/Schmalbildschirmen zusätzlich Bildvorschau öffnen (perfekt für iOS „In Fotos sichern“)
         if (window.matchMedia('(max-width: 920px)').matches) {
           const dataUrl = canvas.toDataURL(mime, mime === 'image/jpeg' ? 0.95 : 1.0);
           openSaveSheetWithUrl(dataUrl);
@@ -1966,7 +2816,8 @@ im Salon.</textarea>
           bytes: blob.size,
           mime,
           filename,
-          profile: state.activeProfile
+          profile: state.activeProfile,
+          syncSlot: activeSyncSlot
         };
         showToast(`Story bereit (${canvas.width}×${canvas.height} px • ${kb} KB)!`);
       } catch (err) {
@@ -2014,15 +2865,38 @@ im Salon.</textarea>
     }
 
     // ============================================================
-    // ENTWURF SPEICHERN & TOAST
+    // LOKAL & CLOUD SPEICHERN + TOAST
     // ============================================================
-    function saveState() {
+    function saveLocalStateOnly() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(STORAGE_KEY + '_' + activeSyncSlot, JSON.stringify(state));
       } catch (e) {}
     }
 
+    function loadSlotLocalDraft(slotKey) {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY + '_' + slotKey);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          Object.assign(state, parsed);
+          state.photoMode = 'dark_backdrop';
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    function saveState(includeImage = false) {
+      saveLocalStateOnly();
+      scheduleCloudPush(includeImage);
+    }
+
     function loadSavedState() {
+      try {
+        const savedSlot = localStorage.getItem(SYNC_SLOT_KEY);
+        if (savedSlot && CREATOR_PROFILES[savedSlot]) activeSyncSlot = savedSlot;
+      } catch (e) {}
       try {
         const rawHandles = localStorage.getItem(HANDLES_KEY);
         if (rawHandles) {
@@ -2030,15 +2904,7 @@ im Salon.</textarea>
           if (h && typeof h === 'object') Object.assign(profileHandles, h);
         }
       } catch (e) {}
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') {
-          Object.assign(state, parsed);
-          state.photoMode = 'dark_backdrop';
-        }
-      } catch (e) {}
+      loadSlotLocalDraft(activeSyncSlot);
     }
 
     function showToast(msg) {
@@ -2046,10 +2912,13 @@ im Salon.</textarea>
       if (prev) prev.remove();
       const div = document.createElement('div');
       div.id = 'storyToast';
-      div.style.cssText = 'position:fixed;bottom:18px;right:18px;background:#102214;color:#f0d57e;border:1px solid #c8a84b;padding:10px 15px;border-radius:7px;font-size:12px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.6);z-index:9999;max-width:90vw;';
+      const isMob = window.innerWidth <= 920;
+      div.style.cssText = isMob
+        ? 'position:fixed;top:calc(env(safe-area-inset-top, 0px) + 56px);left:50%;transform:translateX(-50%);background:rgba(12,26,16,0.94);color:#f0d57e;border:1px solid #c8a84b;padding:8px 14px;border-radius:999px;font-size:11.5px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.65);z-index:9999;max-width:92vw;text-align:center;'
+        : 'position:fixed;bottom:18px;right:18px;background:#102214;color:#f0d57e;border:1px solid #c8a84b;padding:10px 15px;border-radius:7px;font-size:12px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.6);z-index:9999;max-width:90vw;';
       div.innerText = msg;
       document.body.appendChild(div);
-      setTimeout(() => { if (div.parentNode) div.remove(); }, 3600);
+      setTimeout(() => { if (div.parentNode) div.remove(); }, 3400);
     }
   </script>
 </body>
