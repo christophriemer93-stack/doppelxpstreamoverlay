@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Doppel XP Story">
+  <meta name="theme-color" content="#071008">
+  <title>DOPPEL XP · Minimal Instagram Story Studio (1080×1920)</title>
+  <link rel="icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=EB+Garamond:ital,wght@0,500;0,700;1,400;1,600&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,500;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --bg: #050b06;
+      --panel: #09130b;
+      --panel-2: #0e1c11;
+      --line: rgba(200, 168, 75, 0.25);
+      --gold: #c8a84b;
+      --gold-hi: #f0d57e;
+      --cream: #f4edd9;
+      --dim: #a89f8b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      height: 100%;
+      background: radial-gradient(ellipse at 55% 0%, #112416 0%, #050b06 62%);
+      color: var(--cream);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    /* TOP BAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      padding: 9px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(6, 13, 8, 0.96);
+      backdrop-filter: blur(8px);
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-link {
+      color: var(--dim);
+      text-decoration: none;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.7px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: 0.16s ease;
+    }
+    .brand-link:hover {
+      color: var(--gold-hi);
+      border-color: var(--gold-hi);
+      background: rgba(200, 168, 75, 0.12);
+    }
+
+    .brand-title-wrap h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      letter-spacing: 1.8px;
+      color: var(--gold-hi);
+      line-height: 1.05;
+      white-space: nowrap;
+    }
+    .brand-sub {
+      font-size: 10px;
+      color: var(--dim);
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .toggle-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      color: var(--cream);
+      border-radius: 6px;
+      padding: 6px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      transition: 0.15s;
+    }
+    .toggle-pill input {
+      accent-color: var(--gold-hi);
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+    }
+    .toggle-pill:hover { border-color: var(--gold-hi); }
+
+    .btn {
+      background: linear-gradient(135deg, #132816, #0a150c);
+      border: 1px solid rgba(200, 168, 75, 0.5);
+      color: var(--cream);
+      border-radius: 7px;
+      padding: 7px 11px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 11.5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: 0.16s ease;
+    }
+    .btn:hover {
+      border-color: var(--gold-hi);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(200, 168, 75, 0.25);
+    }
+    .btn.gold {
+      background: linear-gradient(135deg, #f0d57e, #c8a84b);
+      color: #071008;
+      border-color: #f6e39b;
+      font-weight: 800;
+    }
+    .btn.gold:hover {
+      color: #000;
+      filter: brightness(1.07);
+    }
+    .btn.small {
+      padding: 5px 9px;
+      font-size: 11px;
+    }
+
+    select.top-select {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      color: var(--gold-hi);
+      border-radius: 7px;
+      padding: 6px 9px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* DESKTOP WORKSPACE */
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 398px minmax(0, 1fr);
+      min-height: 0;
+    }
+
+    .controls-pane {
+      background: rgba(8, 17, 10, 0.94);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* Mobile Tabs Bar (auf Desktop ausgeblendet, sodass alles offen sichtbar ist) */
+    .mobile-tabs {
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      padding: 6px 8px;
+      background: rgba(5, 11, 6, 0.96);
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+    .mob-tab-btn {
+      background: rgba(14, 28, 17, 0.72);
+      border: 1px solid rgba(200, 168, 75, 0.22);
+      color: var(--dim);
+      border-radius: 7px;
+      padding: 8px 4px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .mob-tab-btn.active {
+      color: var(--gold-hi);
+      border-color: var(--gold-hi);
+      background: linear-gradient(135deg, rgba(200, 168, 75, 0.24), rgba(14, 28, 17, 0.95));
+    }
+
+    .controls-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 13px 15px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .section-card {
+      background: rgba(14, 28, 17, 0.72);
+      border: 1px solid rgba(200, 168, 75, 0.2);
+      border-radius: 9px;
+      padding: 12px;
+    }
+
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 1.4px;
+      color: var(--gold-hi);
+      text-transform: uppercase;
+      margin-bottom: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .dropzone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border: 1.5px dashed rgba(200, 168, 75, 0.56);
+      border-radius: 8px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(200, 168, 75, 0.05);
+      transition: 0.16s ease;
+    }
+    .dropzone input { display: none; }
+    .dropzone strong { color: var(--gold-hi); font-size: 12.5px; }
+    .dropzone small { color: var(--dim); font-size: 10.5px; }
+    .dropzone:hover, .dropzone.dragover {
+      background: rgba(200, 168, 75, 0.15);
+      border-color: var(--gold-hi);
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-top: 8px;
+    }
+    .row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .row-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    .chip-btn {
+      background: var(--panel);
+      border: 1px solid rgba(200, 168, 75, 0.26);
+      color: var(--cream);
+      border-radius: 6px;
+      padding: 7px 8px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: 0.14s ease;
+    }
+    .chip-btn:hover {
+      border-color: var(--gold-hi);
+      color: var(--gold-hi);
+    }
+    .chip-btn.active {
+      background: linear-gradient(135deg, rgba(200, 168, 75, 0.28), rgba(14, 29, 16, 0.95));
+      border-color: var(--gold-hi);
+      color: var(--gold-hi);
+      box-shadow: 0 0 10px rgba(200, 168, 75, 0.2);
+    }
+
+    .field { margin-top: 9px; }
+    .field:first-child { margin-top: 0; }
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .field label span {
+      color: var(--cream);
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    input[type="text"], textarea, select.ctrl-select {
+      width: 100%;
+      background: #050b06;
+      border: 1px solid rgba(200, 168, 75, 0.35);
+      color: var(--cream);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 62px;
+      line-height: 1.4;
+    }
+    input[type="text"]:focus, textarea:focus, select.ctrl-select:focus {
+      outline: none;
+      border-color: var(--gold-hi);
+      box-shadow: 0 0 0 2px rgba(240, 213, 126, 0.14);
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--gold-hi);
+      cursor: pointer;
+    }
+
+    .preset-ideas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+    }
+    .idea-pill {
+      background: rgba(200, 168, 75, 0.08);
+      border: 1px solid rgba(200, 168, 75, 0.32);
+      color: var(--cream);
+      border-radius: 20px;
+      padding: 5px 10px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.14s;
+    }
+    .idea-pill:hover {
+      border-color: var(--gold-hi);
+      color: var(--gold-hi);
+      background: rgba(200, 168, 75, 0.18);
+    }
+
+    /* STAGE */
+    .stage-pane {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 18px;
+      gap: 9px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .stage-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .drag-switch {
+      display: inline-flex;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .drag-switch button {
+      background: transparent;
+      border: none;
+      color: var(--dim);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 9px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.14s;
+    }
+    .drag-switch button.active {
+      background: linear-gradient(135deg, rgba(200, 168, 75, 0.28), rgba(20, 34, 23, 0.95));
+      color: var(--gold-hi);
+    }
+
+    .phone-frame {
+      position: relative;
+      height: min(calc(100dvh - 165px), 800px);
+      aspect-ratio: 9 / 16;
+      background: #000;
+      border-radius: 24px;
+      padding: 7px;
+      border: 1.5px solid rgba(200, 168, 75, 0.42);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .phone-screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #060d07;
+    }
+
+    #storyCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+      touch-action: none;
+    }
+    #storyCanvas:active { cursor: grabbing; }
+
+    /* NUR PREVIEW: IG SAFE ZONES */
+    .safe-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      transition: opacity 0.16s ease;
+    }
+    .safe-overlay.hidden { opacity: 0; }
+
+    .safe-zone-top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 13.02%;
+      background: rgba(217, 83, 79, 0.13);
+      border-bottom: 1.5px dashed rgba(255, 130, 125, 0.75);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 4px;
+    }
+    .safe-zone-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 17.71%;
+      background: rgba(217, 83, 79, 0.13);
+      border-top: 1.5px dashed rgba(255, 130, 125, 0.75);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 5px;
+    }
+    .safe-zone-box {
+      position: absolute;
+      top: 13.02%;
+      bottom: 17.71%;
+      left: 6.3%;
+      right: 6.3%;
+      border-left: 1px dashed rgba(240, 213, 126, 0.45);
+      border-right: 1px dashed rgba(240, 213, 126, 0.45);
+    }
+    .safe-badge {
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: rgba(255, 215, 215, 0.9);
+      background: rgba(15, 5, 5, 0.65);
+      padding: 2px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .sticker-guide {
+      position: absolute;
+      bottom: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 62%;
+      padding: 7px 9px;
+      border: 1.5px dashed rgba(240, 213, 126, 0.78);
+      border-radius: 10px;
+      background: rgba(10, 20, 12, 0.55);
+      text-align: center;
+      color: var(--gold-hi);
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+    .sticker-guide.hidden { display: none; }
+
+    .stage-caption {
+      font-size: 11px;
+      color: var(--dim);
+      text-align: center;
+    }
+    .stage-caption strong { color: var(--gold-hi); }
+
+    /* MOBILE SAVE-SHEET MODAL */
+    .save-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 8, 4, 0.88);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9998;
+    }
+    .save-modal-backdrop.active { display: flex; }
+    .save-modal-card {
+      width: 100%;
+      max-width: 390px;
+      max-height: 92dvh;
+      background: #0b160d;
+      border: 1.5px solid var(--gold);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+    }
+    .save-modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      color: var(--gold-hi);
+      letter-spacing: 1.2px;
+    }
+    .save-modal-hint {
+      font-size: 11.5px;
+      color: var(--cream);
+      line-height: 1.4;
+      background: rgba(200, 168, 75, 0.1);
+      border: 1px solid rgba(200, 168, 75, 0.3);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .save-modal-img-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .save-modal-img-wrap img {
+      max-height: 55dvh;
+      max-width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      -webkit-touch-callout: default;
+    }
+
+    .mobile-only { display: none; }
+
+    /* ============================================================
+       HANDY-MODUS (STICKY PREVIEW + DAUMEN-TABS FÜR IPHONE & ANDROID)
+       ============================================================ */
+    @media (max-width: 920px) {
+      .desktop-only { display: none !important; }
+      .mobile-only { display: inline-flex; }
+
+      .topbar {
+        padding: 7px 10px;
+        gap: 6px;
+      }
+      .brand-title-wrap h1 {
+        font-size: 13px;
+        letter-spacing: 1px;
+      }
+      .brand-sub { display: none; }
+      .brand-link {
+        padding: 5px 8px;
+        font-size: 11px;
+      }
+      .top-actions {
+        gap: 5px;
+      }
+      .top-actions .btn {
+        padding: 7px 9px;
+        font-size: 11px;
+      }
+      .top-actions .toggle-pill {
+        padding: 5px 7px;
+        font-size: 10px;
+      }
+
+      .workspace {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .stage-pane {
+        order: 1;
+        flex: 0 0 auto;
+        padding: 7px 10px 6px;
+        gap: 6px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(4, 10, 5, 0.72);
+      }
+
+      .phone-frame {
+        height: clamp(195px, 34dvh, 320px);
+        padding: 4px;
+        border-radius: 16px;
+      }
+      .phone-screen {
+        border-radius: 12px;
+      }
+      .stage-toolbar {
+        gap: 5px;
+      }
+      .stage-toolbar .btn.small {
+        padding: 6px 8px;
+        font-size: 10.5px;
+      }
+      .drag-switch button {
+        padding: 5px 8px;
+        font-size: 10.5px;
+      }
+      .stage-caption { display: none; }
+
+      .controls-pane {
+        order: 2;
+        flex: 1;
+        min-height: 0;
+        border-right: none;
+      }
+
+      .mobile-tabs {
+        display: grid;
+      }
+
+      .controls-scroll {
+        padding: 10px 11px 28px;
+      }
+
+      /* Mobile Tabs blenden jeweils nur die gewählte Karte ein */
+      .section-card[data-mob-tab] {
+        display: none;
+      }
+      .section-card[data-mob-tab].mob-active {
+        display: block;
+      }
+
+      /* Verhindert automatischen iOS-Zoom beim Antippen von Textfeldern */
+      input[type="text"], textarea, select.ctrl-select {
+        font-size: 16px !important;
+        padding: 9px 11px;
+      }
+      .chip-btn {
+        padding: 9px 8px;
+        font-size: 11.5px;
+      }
+      .idea-pill {
+        padding: 7px 11px;
+        font-size: 11.5px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <a class="brand-link" href="gentlemen_master_dashboard.html" title="Zurück zum Salon Hub">
+        <i class="fa-solid fa-arrow-left"></i> <span class="desktop-only">Salon Hub</span>
+      </a>
+      <div class="brand-title-wrap">
+        <h1>DOPPEL XP &middot; STORY</h1>
+        <div class="brand-sub">Minimal Editorial Instagram Story &middot; 1080 &times; 1920 px</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <label class="toggle-pill" title="Instagram Safe-Zone nur in der Vorschau einblenden">
+        <input type="checkbox" id="toggleSafeZone" checked onchange="updateGuides()">
+        <span>Safe-Zone</span>
+      </label>
+      <label class="toggle-pill desktop-only" title="Platzhalter für Instagram Link-/Umfrage-Sticker einblenden">
+        <input type="checkbox" id="toggleStickerSpace" onchange="updateGuides()">
+        <span>IG-Sticker</span>
+      </label>
+      <select class="top-select desktop-only" id="exportFormatSelect" title="Export-Dateiformat">
+        <option value="png">PNG (Extra scharf)</option>
+        <option value="jpg">JPG (95%)</option>
+      </select>
+      <button class="btn desktop-only" id="btnCopyStory" onclick="copyStoryToClipboard()" title="Als PNG in Zwischenablage kopieren">
+        <i class="fa-regular fa-copy"></i> Kopieren
+      </button>
+      <button class="btn mobile-only" id="btnMobileShare" onclick="shareOrSaveMobile()" title="Direkt an Instagram / Fotos teilen">
+        <i class="fa-solid fa-share-nodes"></i> Teilen / IG
+      </button>
+      <button class="btn gold" id="btnExportStory" onclick="exportStoryImage()">
+        <i class="fa-solid fa-download"></i> <span class="desktop-only">1080&times;1920 Exportieren</span><span class="mobile-only">Sichern</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- STEUERUNG (DESKTOP: LISTE LINKS / HANDY: BOTTOM DOCK MIT TABS) -->
+    <aside class="controls-pane">
+      <div class="mobile-tabs" role="tablist" aria-label="Story Werkzeuge">
+        <button type="button" class="mob-tab-btn active" data-tab="text" onclick="switchMobileTab('text')">
+          <i class="fa-solid fa-font"></i> Text
+        </button>
+        <button type="button" class="mob-tab-btn" data-tab="photo" onclick="switchMobileTab('photo')">
+          <i class="fa-regular fa-image"></i> Foto
+        </button>
+        <button type="button" class="mob-tab-btn" data-tab="style" onclick="switchMobileTab('style')">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Stil
+        </button>
+        <button type="button" class="mob-tab-btn" data-tab="tune" onclick="switchMobileTab('tune')">
+          <i class="fa-solid fa-sliders"></i> Fein
+        </button>
+      </div>
+
+      <div class="controls-scroll">
+        <!-- KARTE A: BILD -->
+        <section class="section-card" data-mob-tab="photo">
+          <div class="section-title">
+            <span><i class="fa-regular fa-image"></i> Hintergrund-Foto</span>
+            <div style="display:flex; gap:5px;">
+              <button class="btn small" onclick="resetPhotoFraming()" title="Zoom & Position zurücksetzen">Reset</button>
+              <button class="btn small" onclick="clearPhotoToDark()" title="Foto entfernen (nur Manor Dark)">Ohne Foto</button>
+            </div>
+          </div>
+
+          <label class="dropzone" id="photoDropzone">
+            <input type="file" id="photoInput" accept="image/*">
+            <strong>Foto auswählen oder hierher ziehen</strong>
+            <small>Galerie / Dateien · Am PC auch direkt <code>Strg+V</code></small>
+          </label>
+
+          <div class="field">
+            <label>Bild-Zoom <span id="zoomValLabel">100%</span></label>
+            <input type="range" id="photoZoomInput" min="65" max="220" value="100" oninput="onControlChange()">
+          </div>
+
+          <div class="field">
+            <label>Editorial Look</label>
+            <div class="row-4" id="filterButtons">
+              <button class="chip-btn active" data-filter="natural" onclick="setPhotoFilter('natural')">Klar</button>
+              <button class="chip-btn" data-filter="manor" onclick="setPhotoFilter('manor')">Manor</button>
+              <button class="chip-btn" data-filter="noir" onclick="setPhotoFilter('noir')">Noir</button>
+              <button class="chip-btn" data-filter="mono" onclick="setPhotoFilter('mono')">S/W</button>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="field" style="margin-top:0;">
+              <label>Abdunklung <span id="scrimValLabel">34%</span></label>
+              <input type="range" id="scrimInput" min="0" max="85" value="34" oninput="onControlChange()">
+            </div>
+            <div class="field" style="margin-top:0;">
+              <label>Vignette <span id="vignetteValLabel">45%</span></label>
+              <input type="range" id="vignetteInput" min="0" max="90" value="45" oninput="onControlChange()">
+            </div>
+          </div>
+        </section>
+
+        <!-- KARTE B: MINIMAL STIL -->
+        <section class="section-card" data-mob-tab="style">
+          <div class="section-title">
+            <span><i class="fa-solid fa-wand-magic-sparkles"></i> Minimal-Stil &amp; Schrift</span>
+          </div>
+
+          <div class="row-2" id="layoutButtons" style="margin-top:0;">
+            <button class="chip-btn active" data-layout="clean" onclick="setLayoutPreset('clean')">01 &middot; Pure White</button>
+            <button class="chip-btn" data-layout="editorial" onclick="setLayoutPreset('editorial')">02 &middot; Hairline Frame</button>
+            <button class="chip-btn" data-layout="cinema" onclick="setLayoutPreset('cinema')">03 &middot; Lower Third</button>
+            <button class="chip-btn" data-layout="card" onclick="setLayoutPreset('card')">04 &middot; Galerie Card</button>
+          </div>
+
+          <div class="field">
+            <label>Schriftart (Eure Salon-Fonts)</label>
+            <select class="ctrl-select" id="fontMixSelect" onchange="onControlChange()">
+              <option value="playfair">Salon Editorial (Playfair Display)</option>
+              <option value="cinzel">Gazette Titel (Cinzel Caps)</option>
+              <option value="garamond">Poesie &amp; Zitat (EB Garamond)</option>
+              <option value="montserrat">Clean Modern (Montserrat)</option>
+            </select>
+          </div>
+
+          <div class="row-2">
+            <div class="row-2" style="margin-top:0;">
+              <button class="chip-btn active" id="alignCenterBtn" onclick="setTextAlign('center')">Zentriert</button>
+              <button class="chip-btn" id="alignLeftBtn" onclick="setTextAlign('left')">Links</button>
+            </div>
+            <div class="row-2" style="margin-top:0;">
+              <button class="chip-btn active" id="colorWhiteBtn" onclick="setAccentMode('white')">Reinweiß</button>
+              <button class="chip-btn" id="colorGoldBtn" onclick="setAccentMode('gold_kicker')">+ Gold</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- KARTE C: TEXT + CREATOR (CHRIS / MAX / DOPPEL XP) -->
+        <section class="section-card mob-active" data-mob-tab="text">
+          <div class="section-title">
+            <span><i class="fa-solid fa-user-check"></i> Creator &amp; Text (Safe Zone)</span>
+            <button class="btn small" id="btnFetchPodcast" style="white-space:nowrap;" onclick="applyPodcastLiveIdea()" title="Aktuelle Respawn-Radio Folge live aus RSS laden">
+              <i class="fa-solid fa-podcast"></i> Live Folge
+            </button>
+          </div>
+
+          <!-- Für Chris, Max oder gemeinsamen Kanal -->
+          <div class="field" style="margin-top:0;">
+            <label>Wer postet? <span>Speichert eigenes @Handle</span></label>
+            <div class="row-3" id="profileButtons" style="margin-top:0;">
+              <button class="chip-btn active" data-profile="salon" onclick="switchCreatorProfile('salon')">Doppel XP</button>
+              <button class="chip-btn" data-profile="chris" onclick="switchCreatorProfile('chris')">Chris</button>
+              <button class="chip-btn" data-profile="max" onclick="switchCreatorProfile('max')">Max</button>
+            </div>
+          </div>
+
+          <div class="preset-ideas">
+            <button class="idea-pill" onclick="applyIdeaPreset('live')">🔴 Live Teaser</button>
+            <button class="idea-pill" onclick="applyPodcastLiveIdea()">🎙️ Podcast</button>
+            <button class="idea-pill" onclick="applyIdeaPreset('youtube')">🎬 YouTube</button>
+            <button class="idea-pill" onclick="applyIdeaPreset('quote')">💬 Zitat</button>
+            <button class="idea-pill" onclick="applyIdeaPreset('clean_one')">✨ Nur 1 Satz</button>
+          </div>
+
+          <div class="field">
+            <label>Kleine Zeile drüber (optional)</label>
+            <input type="text" id="kickerInput" value="DOPPEL XP · HEUTE 19:30" oninput="onControlChange()" placeholder="Leer lassen für maximal clean">
+          </div>
+
+          <div class="field">
+            <label>Haupttext (Weiß)</label>
+            <textarea id="headlineInput" oninput="onControlChange()" placeholder="Kurzer, starker Satz...">Heute Abend
+im Salon.</textarea>
+          </div>
+
+          <div class="field">
+            <label>Unterzeile (optional)</label>
+            <input type="text" id="sublineInput" value="Gute Manieren, feines Gameplay & beste Gesellschaft." oninput="onControlChange()" placeholder="Optional 1 kurze Zeile">
+          </div>
+
+          <div class="field">
+            <label>@Handle unten (optional)</label>
+            <input type="text" id="brandFooterInput" value="@d0ppelxp" oninput="onProfileHandleEdit()" placeholder="z.B. @d0ppelxp, @chris oder leer">
+          </div>
+        </section>
+
+        <!-- KARTE D: FEINTUNING & POSITION -->
+        <section class="section-card" data-mob-tab="tune">
+          <div class="section-title">
+            <span><i class="fa-solid fa-sliders"></i> Position &amp; Feintuning</span>
+          </div>
+
+          <div class="row-3" style="margin-top:0;">
+            <button class="chip-btn" data-pos="top" onclick="setTextZone('top')">Oben Safe</button>
+            <button class="chip-btn" data-pos="middle" onclick="setTextZone('middle')">Mitte</button>
+            <button class="chip-btn active" data-pos="bottom" onclick="setTextZone('bottom')">Unten Safe</button>
+          </div>
+
+          <div class="row-2">
+            <div class="field" style="margin-top:0;">
+              <label>Schriftgröße <span id="fontSizeValLabel">86 px</span></label>
+              <input type="range" id="fontSizeInput" min="48" max="128" value="86" oninput="onControlChange()">
+            </div>
+            <div class="field" style="margin-top:0;">
+              <label>Text-Schatten <span id="shadowValLabel">60%</span></label>
+              <input type="range" id="shadowInput" min="0" max="100" value="60" oninput="onControlChange()">
+            </div>
+          </div>
+
+          <div class="row-2 mobile-only" style="width:100%; margin-top:10px;">
+            <label class="toggle-pill" style="justify-content:center;">
+              <input type="checkbox" id="toggleStickerSpaceMob" onchange="syncStickerCheckbox(this.checked)">
+              <span>IG-Sticker Platz</span>
+            </label>
+            <select class="ctrl-select" id="exportFormatSelectMob" onchange="syncExportFormat(this.value)">
+              <option value="png">PNG (Scharf)</option>
+              <option value="jpg">JPG (95%)</option>
+            </select>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <!-- LIVE 9:16 VORSCHAU -->
+    <section class="stage-pane">
+      <div class="stage-toolbar">
+        <button class="btn small gold" onclick="triggerPhotoPicker()" title="Foto von Handy-Galerie oder PC auswählen">
+          <i class="fa-solid fa-camera"></i> Foto wählen
+        </button>
+        <div class="drag-switch" role="group" aria-label="Zieh-Modus auf Vorschau">
+          <button id="modeDragPhoto" class="active" onclick="setDragMode('photo')">
+            <i class="fa-solid fa-up-down-left-right"></i> Bild
+          </button>
+          <button id="modeDragText" onclick="setDragMode('text')">
+            <i class="fa-solid fa-i-cursor"></i> Text
+          </button>
+        </div>
+        <button class="btn small" onclick="centerTextOffset()" title="Text wieder exakt auf Zone einmitten">
+          <i class="fa-solid fa-crosshairs"></i>
+        </button>
+      </div>
+
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <canvas id="storyCanvas" width="1080" height="1920"></canvas>
+
+          <!-- NUR PREVIEW: IG SAFE ZONES -->
+          <div class="safe-overlay" id="safeOverlay">
+            <div class="safe-zone-top">
+              <span class="safe-badge">IG Profil &amp; Balken</span>
+            </div>
+            <div class="safe-zone-box"></div>
+            <div class="safe-zone-bottom">
+              <span class="safe-badge">IG Antwortleiste</span>
+            </div>
+          </div>
+
+          <div class="sticker-guide hidden" id="stickerGuide">
+            Platz für IG Link / Umfrage-Sticker
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-caption">
+        <strong>1080 &times; 1920 px (9:16)</strong> &middot; Foto schieben &amp; zoomen &middot; <strong>Export ohne rote/goldene Hilfslinien</strong>
+      </div>
+    </section>
+  </main>
+
+  <!-- MOBILE SAVE / GALLERY SHEET -->
+  <div class="save-modal-backdrop" id="saveSheetModal" onclick="if(event.target===this) closeSaveSheet()">
+    <div class="save-modal-card">
+      <div class="save-modal-title">FERTIGE STORY (1080 &times; 1920 PX)</div>
+      <div class="save-modal-hint">
+        <strong>Auf dem Handy:</strong> Bild unten kurz gedr&uuml;ckt halten &rarr; <em>&bdquo;In Fotos speichern&ldquo;</em> oder <em>&bdquo;Bild herunterladen&ldquo;</em>, danach einfach in Instagram Story hochladen.
+      </div>
+      <div class="save-modal-img-wrap">
+        <img id="saveSheetPreviewImg" alt="Exportierte Instagram Story">
+      </div>
+      <div class="row-2" style="margin-top:2px;">
+        <button class="btn" onclick="closeSaveSheet()">Schlie&szlig;en</button>
+        <button class="btn gold" onclick="shareOrSaveMobile(true)"><i class="fa-solid fa-share-nodes"></i> Teilen</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORY_W = 1080;
+    const STORY_H = 1920;
+    const SAFE_TOP = 250;
+    const SAFE_BOTTOM = 1580; // 1920 - 340
+    const SAFE_SIDE = 82;
+    const DEFAULT_RSS_URL = 'https://anchor.fm/s/ffc0bf0c/podcast/rss';
+    const STORAGE_KEY = 'gentlemen_story_studio_v2';
+    const HANDLES_KEY = 'gentlemen_story_profile_handles_v1';
+
+    const CREATOR_PROFILES = {
+      salon: {
+        name: 'Doppel XP',
+        kicker: 'DOPPEL XP · HEUTE 19:30',
+        defaultHandle: '@d0ppelxp',
+        liveHeadline: 'Heute Abend\nim Salon.',
+        liveSubline: 'Gute Manieren, feines Gameplay & beste Gesellschaft.',
+        quoteHeadline: 'Gute Manieren\nkommen nie\naus der Mode.'
+      },
+      chris: {
+        name: 'Chris',
+        kicker: 'CHRIS · DOPPEL XP',
+        defaultHandle: '@d0ppelxp',
+        liveHeadline: 'Gleich live\nfür euch.',
+        liveSubline: 'Schaut auf ein Glas im Salon vorbei.',
+        quoteHeadline: 'Ein guter Abend\nfängt mit Ruhe an.'
+      },
+      max: {
+        name: 'Max',
+        kicker: 'MAX · DOPPEL XP',
+        defaultHandle: '@d0ppelxp',
+        liveHeadline: 'Wir sitzen\ngleich im Salon.',
+        liveSubline: 'Live auf Twitch · Doppel XP.',
+        quoteHeadline: 'Stil ist keine Frage\ndes Zufalls.'
+      }
+    };
+
+    const profileHandles = {
+      salon: CREATOR_PROFILES.salon.defaultHandle,
+      chris: CREATOR_PROFILES.chris.defaultHandle,
+      max: CREATOR_PROFILES.max.defaultHandle
+    };
+
+    const state = {
+      activeProfile: 'salon', // salon | chris | max
+      layout: 'clean',        // clean | editorial | cinema | card
+      fontMix: 'playfair',    // playfair | cinzel | garamond | montserrat
+      photoFilter: 'manor',   // natural | manor | noir | mono
+      kicker: 'DOPPEL XP · HEUTE 19:30',
+      headline: 'Heute Abend\nim Salon.',
+      subline: 'Gute Manieren, feines Gameplay & beste Gesellschaft.',
+      brandFooter: '@d0ppelxp',
+      fontSize: 86,
+      shadowStrength: 60,
+      scrim: 34,
+      vignette: 45,
+      textZone: 'bottom',     // top | middle | bottom
+      textAlign: 'center',    // center | left
+      accentMode: 'white',    // white | gold_kicker
+      photoMode: 'dark_backdrop', // image | dark_backdrop
+      photoZoom: 100,
+      photoOffsetX: 0,
+      photoOffsetY: 0,
+      textOffsetY: 0,
+      dragMode: 'photo'       // photo | text
+    };
+
+    let activeImage = null;
+    const activePointers = new Map();
+    let dragBaseline = null;
+    let pinchBaseline = null;
+
+    const canvas = document.getElementById('storyCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // ============================================================
+    // INIT & FONTS
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      loadSavedState();
+      syncUiFromState();
+      setupInteractions();
+
+      await ensureFontsLoaded();
+      renderStoryCanvas();
+    });
+
+    async function ensureFontsLoaded() {
+      const specs = [
+        '700 84px "Playfair Display"',
+        'italic 500 44px "EB Garamond"',
+        '700 42px "Cinzel"',
+        '700 42px "Montserrat"'
+      ];
+      try {
+        await Promise.all(specs.map(s => document.fonts.load(s)));
+        await document.fonts.ready;
+      } catch (e) {}
+    }
+
+    // ============================================================
+    // FOTO LADEN & MULTI-TOUCH (PAN + PINCH-TO-ZOOM)
+    // ============================================================
+    function triggerPhotoPicker() {
+      const inp = document.getElementById('photoInput');
+      if (inp) inp.click();
+    }
+
+    function clearPhotoToDark() {
+      activeImage = null;
+      state.photoMode = 'dark_backdrop';
+      state.photoZoom = 100;
+      state.photoOffsetX = 0;
+      state.photoOffsetY = 0;
+      const inp = document.getElementById('photoInput');
+      if (inp) inp.value = '';
+      syncUiFromState();
+      renderStoryCanvas();
+      saveState();
+      showToast('Foto entfernt – sauberer Manor Dark Hintergrund aktiv.');
+    }
+
+    function handleImageFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const im = new Image();
+        im.onload = () => {
+          activeImage = im;
+          state.photoMode = 'image';
+          state.photoZoom = 100;
+          state.photoOffsetX = 0;
+          state.photoOffsetY = 0;
+          syncUiFromState();
+          renderStoryCanvas();
+          saveState();
+          showToast('Foto geladen – einfach direkt ziehen & zoomen!');
+        };
+        im.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function getPointerDistance(p1, p2) {
+      return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    }
+
+    function setupInteractions() {
+      const dz = document.getElementById('photoDropzone');
+      const fileInp = document.getElementById('photoInput');
+
+      fileInp.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) handleImageFile(e.target.files[0]);
+      });
+
+      ['dragenter', 'dragover'].forEach(evt => {
+        dz.addEventListener(evt, (e) => { e.preventDefault(); dz.classList.add('dragover'); });
+      });
+      ['dragleave', 'drop'].forEach(evt => {
+        dz.addEventListener(evt, (e) => { e.preventDefault(); dz.classList.remove('dragover'); });
+      });
+      dz.addEventListener('drop', (e) => {
+        const f = e.dataTransfer?.files?.[0];
+        if (f) handleImageFile(f);
+      });
+
+      window.addEventListener('paste', (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (const item of items) {
+          if (item.type.startsWith('image/')) {
+            handleImageFile(item.getAsFile());
+            break;
+          }
+        }
+      });
+
+      // 1-Finger Drag (Foto oder Text) + 2-Finger Pinch-to-Zoom (auf Smartphone!)
+      canvas.addEventListener('pointerdown', (e) => {
+        try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+        activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (activePointers.size === 1) {
+          pinchBaseline = null;
+          dragBaseline = {
+            startX: e.clientX,
+            startY: e.clientY,
+            origPhotoX: state.photoOffsetX,
+            origPhotoY: state.photoOffsetY,
+            origTextY: state.textOffsetY
+          };
+        } else if (activePointers.size === 2) {
+          const pts = Array.from(activePointers.values());
+          pinchBaseline = {
+            dist: Math.max(10, getPointerDistance(pts[0], pts[1])),
+            origZoom: state.photoZoom
+          };
+          dragBaseline = null;
+        }
+      });
+
+      canvas.addEventListener('pointermove', (e) => {
+        if (!activePointers.has(e.pointerId)) return;
+        activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (activePointers.size === 2 && pinchBaseline) {
+          const pts = Array.from(activePointers.values());
+          const dist = getPointerDistance(pts[0], pts[1]);
+          const ratio = dist / pinchBaseline.dist;
+          state.photoZoom = Math.max(65, Math.min(220, Math.round(pinchBaseline.origZoom * ratio)));
+          syncUiFromState();
+          renderStoryCanvas();
+          return;
+        }
+
+        if (activePointers.size === 1 && dragBaseline) {
+          const rect = canvas.getBoundingClientRect();
+          const scale = STORY_W / Math.max(1, rect.width);
+          const dx = (e.clientX - dragBaseline.startX) * scale;
+          const dy = (e.clientY - dragBaseline.startY) * scale;
+
+          if (state.dragMode === 'text') {
+            state.textOffsetY = Math.max(-520, Math.min(520, Math.round(dragBaseline.origTextY + dy)));
+          } else {
+            state.photoOffsetX = Math.max(-900, Math.min(900, Math.round(dragBaseline.origPhotoX + dx)));
+            state.photoOffsetY = Math.max(-900, Math.min(900, Math.round(dragBaseline.origPhotoY + dy)));
+          }
+          renderStoryCanvas();
+        }
+      });
+
+      const endPointer = (e) => {
+        activePointers.delete(e.pointerId);
+        if (activePointers.size < 2) pinchBaseline = null;
+        if (activePointers.size === 0) {
+          dragBaseline = null;
+          saveState();
+        } else if (activePointers.size === 1) {
+          const remaining = Array.from(activePointers.values())[0];
+          dragBaseline = {
+            startX: remaining.x,
+            startY: remaining.y,
+            origPhotoX: state.photoOffsetX,
+            origPhotoY: state.photoOffsetY,
+            origTextY: state.textOffsetY
+          };
+        }
+      };
+      canvas.addEventListener('pointerup', endPointer);
+      canvas.addEventListener('pointercancel', endPointer);
+
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 5 : -5;
+        state.photoZoom = Math.max(65, Math.min(220, state.photoZoom + delta));
+        syncUiFromState();
+        renderStoryCanvas();
+        saveState();
+      }, { passive: false });
+    }
+
+    // ============================================================
+    // CREATOR-PROFIL (CHRIS / MAX / DOPPEL XP) & CONTROLS
+    // ============================================================
+    function switchCreatorProfile(profileKey) {
+      const cfg = CREATOR_PROFILES[profileKey] || CREATOR_PROFILES.salon;
+      const prevCfg = CREATOR_PROFILES[state.activeProfile] || CREATOR_PROFILES.salon;
+
+      state.activeProfile = profileKey;
+      state.brandFooter = profileHandles[profileKey] !== undefined
+        ? profileHandles[profileKey]
+        : cfg.defaultHandle;
+
+      // Falls der Kicker noch einem Standard-Kicker entspricht, sanft umschalten
+      const curKicker = (state.kicker || '').trim().toUpperCase();
+      if (!curKicker || curKicker === prevCfg.kicker || curKicker.endsWith('DOPPEL XP') || curKicker.startsWith('DOPPEL XP')) {
+        state.kicker = cfg.kicker;
+      }
+
+      syncUiFromState();
+      renderStoryCanvas();
+      saveState();
+      showToast(`Profil: ${cfg.name} aktiv (${state.brandFooter || 'ohne Handle'})`);
+    }
+
+    function onProfileHandleEdit() {
+      const val = document.getElementById('brandFooterInput').value;
+      state.brandFooter = val;
+      profileHandles[state.activeProfile] = val;
+      try {
+        localStorage.setItem(HANDLES_KEY, JSON.stringify(profileHandles));
+      } catch (e) {}
+      renderStoryCanvas();
+      saveState();
+    }
+
+    function switchMobileTab(tabName) {
+      document.querySelectorAll('.mob-tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tabName);
+      });
+      document.querySelectorAll('.section-card[data-mob-tab]').forEach(card => {
+        card.classList.toggle('mob-active', card.dataset.mobTab === tabName);
+      });
+    }
+
+    function onControlChange() {
+      state.photoZoom = Number(document.getElementById('photoZoomInput').value) || 100;
+      state.scrim = Number(document.getElementById('scrimInput').value) || 0;
+      state.vignette = Number(document.getElementById('vignetteInput').value) || 0;
+      state.fontMix = document.getElementById('fontMixSelect').value || 'playfair';
+      state.kicker = document.getElementById('kickerInput').value;
+      state.headline = document.getElementById('headlineInput').value;
+      state.subline = document.getElementById('sublineInput').value;
+      state.brandFooter = document.getElementById('brandFooterInput').value;
+      state.fontSize = Number(document.getElementById('fontSizeInput').value) || 86;
+      state.shadowStrength = Number(document.getElementById('shadowInput').value) || 0;
+
+      updateLabels();
+      renderStoryCanvas();
+      saveState();
+    }
+
+    function setPhotoFilter(filter) {
+      state.photoFilter = filter;
+      syncUiFromState();
+      renderStoryCanvas();
+      saveState();
+    }
+
+    function setLayoutPreset(layout) {
+      state.layout = layout;
+      if (layout === 'cinema') {
+        state.textZone = 'bottom';
+        state.textAlign = 'left';
+        state.textOffsetY = 0;
+      } else if (layout === 'card') {
+        state.textZone = 'bottom';
+        state.textAlign = 'center';
+        state.textOffsetY = 0;
+      } else {
+        state.textOffsetY = 0;
+      }
+      syncUiFromState();
+      renderStoryCanvas();
+      saveState();
+    }
+
+    function setTextZone(zone) {
+      state.textZone = zone;
+      state.textOffsetY = 0;
+      syncUiFromState();
+      renderStoryCanvas();
+      saveState();
+    }
+
+    function setTextAlign(align) {
+      state.textAlign = align;
+      syncUiFromState();
+      renderStoryCanvas();
+      saveState();
+    }
+
+    function setAccentMode(mode) {
+      state.accentMode = mode;
+      syncUiFromState();
+      renderStoryCanvas();
+      saveState();
+    }
+
+    function setDragMode(mode) {
+      state.dragMode = mode;
+      document.getElementById('modeDragPhoto').classList.toggle('active', mode === 'photo');
+      document.getElementById('modeDragText').classList.toggle('active', mode === 'text');
+    }
+
+    function centerTextOffset() {
+      state.textOffsetY = 0;
+      renderStoryCanvas();
+      saveState();
+    }
+
+    function resetPhotoFraming() {
+      state.photoZoom = 100;
+      state.photoOffsetX = 0;
+      state.photoOffsetY = 0;
+      syncUiFromState();
+      renderStoryCanvas();
+      saveState();
+    }
+
+    function updateGuides() {
+      const showSafe = document.getElementById('toggleSafeZone').checked;
+      const showStickerDesk = document.getElementById('toggleStickerSpace')?.checked;
+      const showStickerMob = document.getElementById('toggleStickerSpaceMob')?.checked;
+      const showSticker = Boolean(showStickerDesk || showStickerMob);
+      document.getElementById('safeOverlay').classList.toggle('hidden', !showSafe);
+      document.getElementById('stickerGuide').classList.toggle('hidden', !showSticker);
+    }
+
+    function syncStickerCheckbox(checked) {
+      const desk = document.getElementById('toggleStickerSpace');
+      const mob = document.getElementById('toggleStickerSpaceMob');
+      if (desk) desk.checked = checked;
+      if (mob) mob.checked = checked;
+      updateGuides();
+    }
+
+    function syncExportFormat(val) {
+      const desk = document.getElementById('exportFormatSelect');
+      const mob = document.getElementById('exportFormatSelectMob');
+      if (desk) desk.value = val;
+      if (mob) mob.value = val;
+    }
+
+    function applyIdeaPreset(key) {
+      const cfg = CREATOR_PROFILES[state.activeProfile] || CREATOR_PROFILES.salon;
+      const activeHandle = profileHandles[state.activeProfile] !== undefined
+        ? profileHandles[state.activeProfile]
+        : cfg.defaultHandle;
+
+      if (key === 'live') {
+        state.kicker = state.activeProfile === 'salon'
+          ? 'DOPPEL XP · LIVE ON TWITCH'
+          : `${cfg.name.toUpperCase()} · LIVE ON TWITCH`;
+        state.headline = cfg.liveHeadline;
+        state.subline = cfg.liveSubline;
+        state.brandFooter = activeHandle;
+      } else if (key === 'youtube') {
+        state.kicker = 'NEU AUF YOUTUBE';
+        state.headline = 'Das neue Kapitel\nist online.';
+        state.subline = 'Jetzt in Ruhe auf dem Kanal ansehen.';
+        state.brandFooter = activeHandle;
+      } else if (key === 'quote') {
+        state.layout = 'editorial';
+        state.fontMix = 'garamond';
+        state.kicker = state.activeProfile === 'salon'
+          ? 'AUS DEM SALON'
+          : `${cfg.name.toUpperCase()} · AUS DEM SALON`;
+        state.headline = cfg.quoteHeadline;
+        state.subline = '';
+        state.brandFooter = activeHandle;
+      } else if (key === 'clean_one') {
+        state.layout = 'clean';
+        state.fontMix = 'playfair';
+        state.kicker = '';
+        state.headline = 'Heute 20:00 Uhr.';
+        state.subline = '';
+        state.brandFooter = '';
+        state.accentMode = 'white';
+      }
+      state.textOffsetY = 0;
+      syncUiFromState();
+      renderStoryCanvas();
+      saveState();
+    }
+
+    async function applyPodcastLiveIdea() {
+      const cfg = CREATOR_PROFILES[state.activeProfile] || CREATOR_PROFILES.salon;
+      state.kicker = 'RESPAWN RADIO · NEUE FOLGE';
+      state.headline = 'Neue Sonntags-Folge\njetzt auf Spotify.';
+      state.subline = 'Ab 08:30 Uhr mit Chris & Max.';
+      state.brandFooter = profileHandles[state.activeProfile] || cfg.defaultHandle;
+      state.textOffsetY = 0;
+
+      const btn = document.getElementById('btnFetchPodcast');
+      const prevHtml = btn ? btn.innerHTML : '';
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Lade...';
+
+      try {
+        const res = await fetch(DEFAULT_RSS_URL, { mode: 'cors' });
+        if (res.ok) {
+          const xml = await res.text();
+          const doc = new DOMParser().parseFromString(xml, 'text/xml');
+          const item = doc.querySelector('item');
+          const title = item?.querySelector('title')?.textContent?.trim();
+          if (title) {
+            state.headline = title;
+            state.subline = 'Jetzt neu auf Spotify · Respawn Radio';
+            showToast('Aktuelle Folge geladen: ' + title);
+          }
+        }
+      } catch (e) {
+        showToast('Standard Podcast-Text gesetzt.');
+      } finally {
+        if (btn) btn.innerHTML = prevHtml;
+      }
+
+      syncUiFromState();
+      renderStoryCanvas();
+      saveState();
+    }
+
+    function syncUiFromState() {
+      document.getElementById('photoZoomInput').value = state.photoZoom;
+      document.getElementById('scrimInput').value = state.scrim;
+      document.getElementById('vignetteInput').value = state.vignette;
+      document.getElementById('fontMixSelect').value = state.fontMix;
+      document.getElementById('kickerInput').value = state.kicker;
+      document.getElementById('headlineInput').value = state.headline;
+      document.getElementById('sublineInput').value = state.subline;
+      document.getElementById('brandFooterInput').value = state.brandFooter;
+      document.getElementById('fontSizeInput').value = state.fontSize;
+      document.getElementById('shadowInput').value = state.shadowStrength;
+
+      document.querySelectorAll('#profileButtons .chip-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.profile === state.activeProfile);
+      });
+      document.querySelectorAll('#filterButtons .chip-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === state.photoFilter);
+      });
+      document.querySelectorAll('#layoutButtons .chip-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.layout === state.layout);
+      });
+      document.querySelectorAll('[data-pos]').forEach(b => {
+        b.classList.toggle('active', b.dataset.pos === state.textZone);
+      });
+      document.getElementById('alignCenterBtn').classList.toggle('active', state.textAlign === 'center');
+      document.getElementById('alignLeftBtn').classList.toggle('active', state.textAlign === 'left');
+      document.getElementById('colorWhiteBtn').classList.toggle('active', state.accentMode === 'white');
+      document.getElementById('colorGoldBtn').classList.toggle('active', state.accentMode === 'gold_kicker');
+      updateLabels();
+    }
+
+    function updateLabels() {
+      document.getElementById('zoomValLabel').innerText = state.photoZoom + '%';
+      document.getElementById('scrimValLabel').innerText = state.scrim + '%';
+      document.getElementById('vignetteValLabel').innerText = state.vignette + '%';
+      document.getElementById('fontSizeValLabel').innerText = state.fontSize + ' px';
+      document.getElementById('shadowValLabel').innerText = state.shadowStrength + '%';
+    }
+
+    // ============================================================
+    // CANVAS 2D ENGINE (1080 x 1920 PX)
+    // ============================================================
+    function getCanvasFilterString() {
+      switch (state.photoFilter) {
+        case 'manor': return 'contrast(1.06) saturate(0.86) brightness(0.96)';
+        case 'noir': return 'contrast(1.14) saturate(0.72) sepia(0.14) brightness(0.93)';
+        case 'mono': return 'grayscale(1) contrast(1.16) brightness(0.98)';
+        default: return 'none';
+      }
+    }
+
+    function drawCoverImage(img, targetX, targetY, targetW, targetH, zoomPct, offX, offY) {
+      const iw = img.naturalWidth || img.width || 1080;
+      const ih = img.naturalHeight || img.height || 1920;
+      const scaleCover = Math.max(targetW / iw, targetH / ih) * (zoomPct / 100);
+      const drawW = iw * scaleCover;
+      const drawH = ih * scaleCover;
+      const dx = targetX + (targetW - drawW) / 2 + offX;
+      const dy = targetY + (targetH - drawH) / 2 + offY;
+      ctx.drawImage(img, dx, dy, drawW, drawH);
+    }
+
+    function drawRoundedRectPath(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function wrapCanvasLines(text, maxWidth) {
+      const rawParagraphs = String(text || '').split(/\r?\n/);
+      const lines = [];
+      for (const para of rawParagraphs) {
+        const trimmed = para.trim();
+        if (!trimmed) {
+          lines.push('');
+          continue;
+        }
+        const words = trimmed.split(/\s+/);
+        let line = words[0];
+        for (let i = 1; i < words.length; i++) {
+          const candidate = line + ' ' + words[i];
+          if (ctx.measureText(candidate).width <= maxWidth) {
+            line = candidate;
+          } else {
+            lines.push(line);
+            line = words[i];
+          }
+        }
+        lines.push(line);
+      }
+      return lines;
+    }
+
+    function drawTrackedText(text, x, y, trackingPx, align) {
+      if (!text) return;
+      ctx.save();
+      if ('letterSpacing' in ctx) {
+        ctx.letterSpacing = trackingPx + 'px';
+        ctx.textAlign = align;
+        ctx.fillText(text, x, y);
+        ctx.restore();
+        return;
+      }
+      const chars = Array.from(text);
+      const widths = chars.map(c => ctx.measureText(c).width);
+      const totalW = widths.reduce((a, b) => a + b, 0) + Math.max(0, chars.length - 1) * trackingPx;
+      let cursor = align === 'center' ? x - totalW / 2 : (align === 'right' ? x - totalW : x);
+      ctx.textAlign = 'left';
+      for (let i = 0; i < chars.length; i++) {
+        ctx.fillText(chars[i], cursor, y);
+        cursor += widths[i] + trackingPx;
+      }
+      ctx.restore();
+    }
+
+    function getTypographyProfile() {
+      switch (state.fontMix) {
+        case 'cinzel':
+          return {
+            headlineFont: `800 ${state.fontSize}px "Cinzel", Georgia, serif`,
+            headlineTracking: Math.round(state.fontSize * 0.045),
+            headlineUpper: true,
+            kickerFont: '700 26px "Montserrat", sans-serif',
+            sublineFont: 'italic 600 36px "Playfair Display", Georgia, serif',
+            lineHeightMult: 1.18
+          };
+        case 'garamond':
+          return {
+            headlineFont: `italic 600 ${Math.round(state.fontSize * 1.06)}px "EB Garamond", Georgia, serif`,
+            headlineTracking: 0,
+            headlineUpper: false,
+            kickerFont: '700 27px "Cinzel", Georgia, serif',
+            sublineFont: '500 28px "Montserrat", sans-serif',
+            lineHeightMult: 1.16
+          };
+        case 'montserrat':
+          return {
+            headlineFont: `700 ${Math.round(state.fontSize * 0.92)}px "Montserrat", sans-serif`,
+            headlineTracking: -1,
+            headlineUpper: false,
+            kickerFont: '700 24px "Montserrat", sans-serif',
+            sublineFont: '400 30px "Montserrat", sans-serif',
+            lineHeightMult: 1.2
+          };
+        case 'playfair':
+        default:
+          return {
+            headlineFont: `700 ${state.fontSize}px "Playfair Display", Georgia, serif`,
+            headlineTracking: -0.5,
+            headlineUpper: false,
+            kickerFont: '700 27px "Cinzel", Georgia, serif',
+            sublineFont: 'italic 500 38px "EB Garamond", Georgia, serif',
+            lineHeightMult: 1.14
+          };
+      }
+    }
+
+    function renderStoryCanvas() {
+      ctx.save();
+      ctx.clearRect(0, 0, STORY_W, STORY_H);
+
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, STORY_H);
+      bgGrad.addColorStop(0, '#0d1c11');
+      bgGrad.addColorStop(0.55, '#070f09');
+      bgGrad.addColorStop(1, '#040805');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, STORY_W, STORY_H);
+
+      if (state.layout === 'card') {
+        renderGalerieCardBackground();
+      } else {
+        renderFullBleedBackground();
+      }
+
+      if (state.layout === 'editorial') {
+        renderEditorialFrame();
+      }
+
+      renderTypographyOverlay();
+      ctx.restore();
+    }
+
+    function renderFullBleedBackground() {
+      if (state.photoMode === 'image' && activeImage) {
+        ctx.save();
+        ctx.filter = getCanvasFilterString();
+        drawCoverImage(activeImage, 0, 0, STORY_W, STORY_H, state.photoZoom, state.photoOffsetX, state.photoOffsetY);
+        ctx.restore();
+
+        if (state.photoFilter === 'manor') {
+          ctx.fillStyle = 'rgba(13, 30, 17, 0.14)';
+          ctx.fillRect(0, 0, STORY_W, STORY_H);
+        }
+      } else {
+        const spot = ctx.createRadialGradient(STORY_W * 0.5, STORY_H * 0.42, 40, STORY_W * 0.5, STORY_H * 0.42, 860);
+        spot.addColorStop(0, 'rgba(34, 62, 40, 0.48)');
+        spot.addColorStop(1, 'rgba(5, 10, 6, 0.0)');
+        ctx.fillStyle = spot;
+        ctx.fillRect(0, 0, STORY_W, STORY_H);
+      }
+
+      const scrimAlpha = Math.max(0, Math.min(0.88, state.scrim / 100));
+      if (scrimAlpha > 0) {
+        ctx.fillStyle = `rgba(6, 10, 7, ${scrimAlpha})`;
+        ctx.fillRect(0, 0, STORY_W, STORY_H);
+      }
+
+      const vigAlpha = Math.max(0, Math.min(0.92, state.vignette / 100));
+      if (vigAlpha > 0) {
+        const vig = ctx.createRadialGradient(
+          STORY_W / 2, STORY_H * 0.46, STORY_W * 0.22,
+          STORY_W / 2, STORY_H * 0.46, STORY_W * 0.98
+        );
+        vig.addColorStop(0, 'rgba(0,0,0,0)');
+        vig.addColorStop(1, `rgba(0,0,0,${vigAlpha})`);
+        ctx.fillStyle = vig;
+        ctx.fillRect(0, 0, STORY_W, STORY_H);
+      }
+
+      if (state.layout === 'cinema' || state.textZone === 'bottom') {
+        const bGrad = ctx.createLinearGradient(0, STORY_H * 0.48, 0, STORY_H);
+        bGrad.addColorStop(0, 'rgba(4, 8, 5, 0)');
+        bGrad.addColorStop(0.55, 'rgba(4, 8, 5, 0.46)');
+        bGrad.addColorStop(1, 'rgba(4, 8, 5, 0.82)');
+        ctx.fillStyle = bGrad;
+        ctx.fillRect(0, 0, STORY_W, STORY_H);
+      } else if (state.textZone === 'top') {
+        const tGrad = ctx.createLinearGradient(0, 0, 0, STORY_H * 0.56);
+        tGrad.addColorStop(0, 'rgba(4, 8, 5, 0.72)');
+        tGrad.addColorStop(0.7, 'rgba(4, 8, 5, 0.28)');
+        tGrad.addColorStop(1, 'rgba(4, 8, 5, 0)');
+        ctx.fillStyle = tGrad;
+        ctx.fillRect(0, 0, STORY_W, STORY_H);
+      }
+    }
+
+    function renderGalerieCardBackground() {
+      const glow = ctx.createRadialGradient(STORY_W / 2, 720, 60, STORY_W / 2, 720, 820);
+      glow.addColorStop(0, 'rgba(30, 56, 36, 0.35)');
+      glow.addColorStop(1, 'rgba(4, 8, 5, 0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, STORY_W, STORY_H);
+
+      const cardX = 96;
+      const cardY = 278;
+      const cardW = STORY_W - 192;
+      const cardH = 950;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+      ctx.shadowBlur = 45;
+      ctx.shadowOffsetY = 18;
+      drawRoundedRectPath(cardX, cardY, cardW, cardH, 16);
+      ctx.fillStyle = '#0d190f';
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      drawRoundedRectPath(cardX, cardY, cardW, cardH, 16);
+      ctx.clip();
+      if (state.photoMode === 'image' && activeImage) {
+        ctx.filter = getCanvasFilterString();
+        drawCoverImage(activeImage, cardX, cardY, cardW, cardH, state.photoZoom, state.photoOffsetX, state.photoOffsetY);
+        ctx.filter = 'none';
+      } else {
+        const innerSpot = ctx.createRadialGradient(STORY_W / 2, cardY + cardH * 0.45, 30, STORY_W / 2, cardY + cardH * 0.45, 580);
+        innerSpot.addColorStop(0, 'rgba(38, 72, 46, 0.55)');
+        innerSpot.addColorStop(1, 'rgba(9, 19, 11, 0.95)');
+        ctx.fillStyle = innerSpot;
+        ctx.fillRect(cardX, cardY, cardW, cardH);
+      }
+      const scrimAlpha = Math.max(0, Math.min(0.65, state.scrim / 130));
+      if (scrimAlpha > 0) {
+        ctx.fillStyle = `rgba(6, 10, 7, ${scrimAlpha})`;
+        ctx.fillRect(cardX, cardY, cardW, cardH);
+      }
+      ctx.restore();
+
+      ctx.save();
+      drawRoundedRectPath(cardX, cardY, cardW, cardH, 16);
+      ctx.strokeStyle = state.accentMode === 'gold_kicker'
+        ? 'rgba(240, 213, 126, 0.55)'
+        : 'rgba(255, 255, 255, 0.22)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function renderEditorialFrame() {
+      const x = 66;
+      const y = 266;
+      const w = STORY_W - 132;
+      const h = SAFE_BOTTOM - y - 10;
+      ctx.save();
+      ctx.strokeStyle = state.accentMode === 'gold_kicker'
+        ? 'rgba(240, 213, 126, 0.48)'
+        : 'rgba(255, 255, 255, 0.30)';
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(x, y, w, h);
+      ctx.restore();
+    }
+
+    function renderTypographyOverlay() {
+      const profile = getTypographyProfile();
+      const kickerText = (state.kicker || '').trim().toUpperCase();
+      const subText = (state.subline || '').trim();
+      const footerText = (state.brandFooter || '').trim();
+      const align = state.textAlign;
+      const isLeft = align === 'left';
+      const innerPad = state.layout === 'editorial' ? 112 : SAFE_SIDE;
+      const maxWidth = STORY_W - innerPad * 2;
+      const anchorX = isLeft ? innerPad : STORY_W / 2;
+
+      const rawHeadline = profile.headlineUpper
+        ? (state.headline || '').trim().toUpperCase()
+        : (state.headline || '').trim();
+
+      ctx.font = profile.headlineFont;
+      const headlineLines = rawHeadline ? wrapCanvasLines(rawHeadline, maxWidth) : [];
+      const headlineLineH = Math.round(state.fontSize * profile.lineHeightMult);
+
+      ctx.font = profile.sublineFont;
+      const subLines = subText ? wrapCanvasLines(subText, maxWidth * 0.94) : [];
+      const subLineH = 44;
+
+      let blockH = 0;
+      if (kickerText) blockH += 34 + 22;
+      if (state.accentMode === 'gold_kicker' && (kickerText || headlineLines.length)) blockH += 22;
+      if (headlineLines.length) blockH += headlineLines.length * headlineLineH;
+      if (subLines.length) blockH += 22 + subLines.length * subLineH;
+
+      const safeContentTop = state.layout === 'card' ? 1275 : (SAFE_TOP + 62);
+      const safeContentBottom = footerText ? (SAFE_BOTTOM - 86) : (SAFE_BOTTOM - 46);
+
+      let baseCenterY;
+      if (state.layout === 'card') {
+        baseCenterY = 1385;
+      } else if (state.textZone === 'top') {
+        baseCenterY = safeContentTop + blockH / 2 + 28;
+      } else if (state.textZone === 'middle') {
+        baseCenterY = (safeContentTop + safeContentBottom) / 2;
+      } else {
+        baseCenterY = safeContentBottom - blockH / 2 - 20;
+      }
+
+      let topY = Math.round(baseCenterY - blockH / 2 + state.textOffsetY);
+      topY = Math.max(safeContentTop, Math.min(safeContentBottom - blockH, topY));
+
+      ctx.save();
+      ctx.textBaseline = 'top';
+
+      const shadowAlpha = Math.max(0, Math.min(0.9, (state.shadowStrength / 100) * 0.85));
+      if (shadowAlpha > 0) {
+        ctx.shadowColor = `rgba(0, 0, 0, ${shadowAlpha})`;
+        ctx.shadowBlur = 24;
+        ctx.shadowOffsetY = 5;
+      }
+
+      let curY = topY;
+
+      if (kickerText) {
+        ctx.font = profile.kickerFont;
+        ctx.fillStyle = state.accentMode === 'gold_kicker' ? '#f0d57e' : 'rgba(255, 255, 255, 0.88)';
+        drawTrackedText(kickerText, anchorX, curY, 4.5, align);
+        curY += 34 + 22;
+      }
+
+      if (state.accentMode === 'gold_kicker' && (kickerText || headlineLines.length)) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(240, 213, 126, 0.78)';
+        const lineW = 104;
+        const lineX = isLeft ? anchorX : (anchorX - lineW / 2);
+        ctx.fillRect(lineX, curY - 4, lineW, 2);
+        ctx.restore();
+        curY += 22;
+      }
+
+      if (headlineLines.length) {
+        ctx.font = profile.headlineFont;
+        ctx.fillStyle = '#ffffff';
+        for (const line of headlineLines) {
+          drawTrackedText(line, anchorX, curY, profile.headlineTracking, align);
+          curY += headlineLineH;
+        }
+      }
+
+      if (subLines.length) {
+        curY += 20;
+        ctx.font = profile.sublineFont;
+        ctx.fillStyle = 'rgba(248, 245, 238, 0.88)';
+        for (const sLine of subLines) {
+          drawTrackedText(sLine, anchorX, curY, 0.3, align);
+          curY += subLineH;
+        }
+      }
+
+      if (footerText) {
+        const footY = SAFE_BOTTOM - 48;
+        ctx.font = '700 22px "Montserrat", sans-serif';
+        ctx.fillStyle = state.accentMode === 'gold_kicker'
+          ? 'rgba(240, 213, 126, 0.84)'
+          : 'rgba(255, 255, 255, 0.68)';
+        const footX = state.layout === 'editorial' ? (STORY_W / 2) : anchorX;
+        const footAlign = state.layout === 'editorial' ? 'center' : align;
+        drawTrackedText(footerText.toUpperCase(), footX, footY, 3.2, footAlign);
+      }
+
+      ctx.restore();
+    }
+
+    // ============================================================
+    // EXPORT, TEILEN (HANDY) & FOTOS-SHEET
+    // ============================================================
+    async function buildStoryBlob(fmtOverride) {
+      await ensureFontsLoaded();
+      renderStoryCanvas();
+      const fmt = fmtOverride || document.getElementById('exportFormatSelect').value || 'png';
+      const isJpg = fmt === 'jpg';
+      const mime = isJpg ? 'image/jpeg' : 'image/png';
+      const quality = isJpg ? 0.95 : 1.0;
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error('Canvas Export fehlgeschlagen')), mime, quality);
+      });
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const filename = `DoppelXP_IG_Story_${dateStr}.${isJpg ? 'jpg' : 'png'}`;
+      return { blob, mime, filename };
+    }
+
+    function openSaveSheetWithUrl(dataOrBlobUrl) {
+      const modal = document.getElementById('saveSheetModal');
+      const img = document.getElementById('saveSheetPreviewImg');
+      if (img) img.src = dataOrBlobUrl;
+      if (modal) modal.classList.add('active');
+    }
+
+    function closeSaveSheet() {
+      const modal = document.getElementById('saveSheetModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    async function exportStoryImage() {
+      const btn = document.getElementById('btnExportStory');
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
+
+      try {
+        const { blob, mime, filename } = await buildStoryBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Auf Touch-/Schmalbildschirmen zusätzlich Bildvorschau öffnen (perfekt für iOS „In Fotos sichern“)
+        if (window.matchMedia('(max-width: 920px)').matches) {
+          const dataUrl = canvas.toDataURL(mime, mime === 'image/jpeg' ? 0.95 : 1.0);
+          openSaveSheetWithUrl(dataUrl);
+        }
+
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        const kb = Math.round(blob.size / 1024);
+        window.__lastStoryExport = {
+          width: canvas.width,
+          height: canvas.height,
+          bytes: blob.size,
+          mime,
+          filename,
+          profile: state.activeProfile
+        };
+        showToast(`Story bereit (${canvas.width}×${canvas.height} px • ${kb} KB)!`);
+      } catch (err) {
+        console.error('Story Export Fehler:', err);
+        showToast('Export fehlgeschlagen – Details in der Konsole.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+      }
+    }
+
+    async function shareOrSaveMobile(fromSheet = false) {
+      try {
+        const { blob, mime, filename } = await buildStoryBlob();
+        const file = new File([blob], filename, { type: mime });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Doppel XP Instagram Story'
+          });
+          showToast('Story geteilt!');
+          return;
+        }
+        if (!fromSheet) {
+          const dataUrl = canvas.toDataURL(mime, mime === 'image/jpeg' ? 0.95 : 1.0);
+          openSaveSheetWithUrl(dataUrl);
+        } else {
+          await exportStoryImage();
+        }
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        openSaveSheetWithUrl(dataUrl);
+      }
+    }
+
+    async function copyStoryToClipboard() {
+      try {
+        const { blob } = await buildStoryBlob('png');
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        showToast('1080×1920 Story kopiert – einfach mit Strg+V einfügen!');
+      } catch (err) {
+        showToast('Zwischenablage blockiert – nutze „Exportieren“ als Datei.');
+      }
+    }
+
+    // ============================================================
+    // ENTWURF SPEICHERN & TOAST
+    // ============================================================
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function loadSavedState() {
+      try {
+        const rawHandles = localStorage.getItem(HANDLES_KEY);
+        if (rawHandles) {
+          const h = JSON.parse(rawHandles);
+          if (h && typeof h === 'object') Object.assign(profileHandles, h);
+        }
+      } catch (e) {}
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          Object.assign(state, parsed);
+          state.photoMode = 'dark_backdrop';
+        }
+      } catch (e) {}
+    }
+
+    function showToast(msg) {
+      const prev = document.getElementById('storyToast');
+      if (prev) prev.remove();
+      const div = document.createElement('div');
+      div.id = 'storyToast';
+      div.style.cssText = 'position:fixed;bottom:18px;right:18px;background:#102214;color:#f0d57e;border:1px solid #c8a84b;padding:10px 15px;border-radius:7px;font-size:12px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.6);z-index:9999;max-width:90vw;';
+      div.innerText = msg;
+      document.body.appendChild(div);
+      setTimeout(() => { if (div.parentNode) div.remove(); }, 3600);
+    }
+  </script>
+</body>
+</html>
